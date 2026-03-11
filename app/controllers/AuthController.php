@@ -1,0 +1,70 @@
+<?php
+
+namespace app\controllers;
+
+use Phalcon\Mvc\Controller;
+use app\Storage\UserStorage;
+use app\Validator\LoginValidator;
+
+class AuthController extends Controller
+{
+    /*
+     * User login action
+     */
+    public function loginAction(): void
+    {
+        $this->view->setRenderLevel(\Phalcon\Mvc\View::LEVEL_ACTION_VIEW);
+
+        $response = $this->response;
+        $request = $this->request;
+        $view = $this->view;
+        $session = $this->session;
+        
+        if ($session->has('user_id')) {
+            $response->redirect('/dashboard');
+            return;
+        }
+        
+        if (!$request->isPost()) {
+            return;
+        }
+        
+        $email = $request->getPost('email', 'email');
+        $password = $request->getPost('password', 'string');
+
+        $error = (new LoginValidator())->validate($email, $password);
+        
+        if ($error) {
+            $view->setVar('error', $error);
+            $view->setVar('email', $email);
+            
+            return;
+        }
+        
+        $user = (new UserStorage())->getUserByEmail($email);
+        
+        if (!$user || !$user->isActive || !password_verify($password, $user->passwordHash)) {
+            $view->setVar('error', 'Invalid email or password');
+            $view->setVar('email', $email);
+            
+            return;
+        }
+        
+        $session->set('userId', $user->userId);
+        $session->set('userRole', $user->role);
+        $session->set('userName', $user->name);
+        
+        $response->redirect('/dashboard');
+    }
+    
+    /**
+     * User logout action
+     * 
+     * @return void
+     */
+    public function logoutAction(): void
+    {
+        $this->session->destroy();
+        $this->response->redirect('/auth/login');
+    }
+}

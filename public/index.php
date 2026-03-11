@@ -3,6 +3,7 @@
 use Phalcon\Di\FactoryDefault;
 use Phalcon\Mvc\Application;
 
+define('BASE_PATH', dirname(__DIR__));
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $container = new FactoryDefault();

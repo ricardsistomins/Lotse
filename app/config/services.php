@@ -7,7 +7,7 @@ use Phalcon\Db\Adapter\Pdo\Mysql;
 /** @var \Phalcon\Di\FactoryDefault $container */
 $container->setShared('dispatcher', function (): Dispatcher {
     $dispatcher = new Dispatcher();
-    $dispatcher->setDefaultNamespace('App\\controllers');
+    $dispatcher->setDefaultNamespace('app\\controllers');
 
     return $dispatcher;
 });

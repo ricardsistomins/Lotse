@@ -8,6 +8,7 @@ use Phalcon\Session\Manager as SessionManager;
 use Phalcon\Session\Adapter\Redis as SessionAdapterRedis;
 use Phalcon\Storage\AdapterFactory;
 use Phalcon\Storage\SerializerFactory;
+use Phalcon\Autoload\Loader; 
 
 /**
  * Class Bootstrap
@@ -29,10 +30,11 @@ class Bootstrap
     /**
      * Runs the application performing all initializations
      *
-     * @return mixed
+     * @return DiInterface
      */
-    public function bootstrap()
+    public function bootstrap(): DiInterface
     {
+        $this->initLoader();
         $this->initSession();
         $this->initDispatcher();
         $this->initView();
@@ -48,7 +50,7 @@ class Bootstrap
     {
         $this->_di->setShared('dispatcher', function (): Dispatcher {
             $dispatcher = new Dispatcher();
-            $dispatcher->setDefaultNamespace('App\\controllers');
+            $dispatcher->setDefaultNamespace('app\\controllers');
             
             return $dispatcher;
         });
@@ -61,7 +63,7 @@ class Bootstrap
     {
         $this->_di->setShared('view', function (): View {
             $view = new View();
-            $view->setViewsDir(dirname(__DIR__) . '/views/');
+            $view->setViewsDir(__DIR__ . '/views/');
             
             return $view;
         });
@@ -120,5 +122,20 @@ class Bootstrap
 
             return $session;
         });
+    }
+    
+    /**
+     * Init loader
+     */
+    protected function initLoader(): void
+    {
+        $loader = new Loader();
+        $loader->setDirectories([
+            BASE_PATH . '/app/library/Storage/',
+            BASE_PATH . '/app/library/Model/',
+            BASE_PATH . '/app/library/Validator/'
+        ])->register();
+
+        $this->_di->setShared('loader', $loader);
     }
 }
