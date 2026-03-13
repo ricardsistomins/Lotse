@@ -6,7 +6,9 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'app\\Validator\\' => array($baseDir . '/app/library/Validator'),
     'app\\Storage\\' => array($baseDir . '/app/library/Storage'),
+    'app\\Plugin\\' => array($baseDir . '/app/library/Plugin'),
     'app\\Model\\' => array($baseDir . '/app/library/Model'),
     'app\\' => array($baseDir . '/app'),
 );

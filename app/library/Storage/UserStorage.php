@@ -63,4 +63,23 @@ class UserStorage extends AbstractStorage
         
         return $sth->fetchObject(UserModel::class) ?: false;
     }
+    
+    /**
+     * Update last login field
+     * 
+     * @param int $userId
+     */
+    public function updateLastLoginField(int $userId) 
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'UPDATE users
+                SET last_login_at = NOW()
+                WHERE user_id = :userId';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':userId' => $userId
+        ]);
+    }
 }

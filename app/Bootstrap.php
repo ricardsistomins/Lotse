@@ -1,7 +1,8 @@
 <?php
 
 use Phalcon\Di\DiInterface;
-use Phalcon\Mvc\Dispatcher;                                                              
+use Phalcon\Mvc\Dispatcher;
+use Phalcon\Events\Manager as EventsManager;                                                              
 use Phalcon\Mvc\View;
 use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Session\Manager as SessionManager;
@@ -9,6 +10,7 @@ use Phalcon\Session\Adapter\Redis as SessionAdapterRedis;
 use Phalcon\Storage\AdapterFactory;
 use Phalcon\Storage\SerializerFactory;
 use Phalcon\Autoload\Loader; 
+use app\Plugin\AuthGuard;
 
 /**
  * Class Bootstrap
@@ -49,9 +51,19 @@ class Bootstrap
     protected function initDispatcher(): void
     {
         $this->_di->setShared('dispatcher', function (): Dispatcher {
+            $eventsManager = new EventsManager();
+
+            $eventsManager->attach('dispatch', new AuthGuard());
+            
+            $eventsManager->attach('dispatch:beforeException', function ($event, $dispatcher, $exception) {
+                $dispatcher->forward(['controller' => 'error', 'action' => 'notFound']);
+                return false;
+            });
+
             $dispatcher = new Dispatcher();
             $dispatcher->setDefaultNamespace('app\\controllers');
-            
+            $dispatcher->setEventsManager($eventsManager);
+
             return $dispatcher;
         });
     }
@@ -64,6 +76,9 @@ class Bootstrap
         $this->_di->setShared('view', function (): View {
             $view = new View();
             $view->setViewsDir(__DIR__ . '/views/');
+            
+            // Base layout by default - dashboard.phtml
+            $view->setLayout('dashboard');
             
             return $view;
         });
@@ -99,7 +114,7 @@ class Bootstrap
     {
         $this->_di->setShared('session', function() {
             session_set_cookie_params([
-                'secure'   => true,
+                'secure'   => false,//true
                 'samesite' => 'Lax'
             ]);
             
@@ -133,7 +148,8 @@ class Bootstrap
         $loader->setDirectories([
             BASE_PATH . '/app/library/Storage/',
             BASE_PATH . '/app/library/Model/',
-            BASE_PATH . '/app/library/Validator/'
+            BASE_PATH . '/app/library/Validator/',
+            BASE_PATH . '/app/library/Plugin/'
         ])->register();
 
         $this->_di->setShared('loader', $loader);

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>LOTSE</title>
+        
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/assets/css/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="/assets/css/dashboard.css">
+    </head>
+    
+    <body class="bg-light">
+        <div class="d-flex min-vh-100">
+            <!-- Sidebar -->
+            <div class="sidebar-navigation d-flex flex-column flex-shrink-0 bg-dark text-white p-3 rounded-end-5">
+                <a href="/dashboard" class="text-white text-decoration-none mb-2">
+                    <span class="fs-5 fw-bold">LOTSE</span>
+                    <hr>
+                </a>
+
+                <h6 class="text-uppercase fw-semibold mb-3"> General </h6>
+
+                <ul class="nav nav-pills flex-column mb-auto ms-3">
+                    <li class="nav-item d-flex align-items-center selected">
+                        <i class="bi bi-speedometer2"></i>
+                        <a href="/dashboard" class="nav-link text-white">Dashboard</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <i class="bi bi-cpu"></i>
+                        <a href="#" class="nav-link text-white">Runs</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <i class="bi bi-file-text"></i>
+                        <a href="#" class="nav-link text-white">Reports</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <i class="bi bi-person-raised-hand"></i>
+                        <a href="#" class="nav-link text-white">QA Queue</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <i class="bi bi-person-walking"></i>
+                        <a href="#" class="nav-link text-white">Customers</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <i class="bi bi-gear"></i>
+                        <a href="#" class="nav-link text-white">Settings</a>
+                    </li>
+                </ul>
+
+                <a href="/auth/logout" class="btn btn-sm btn-outline-secondary rounded-pill">Logout</a>
+            </div>
+
+            <!-- Main area -->
+            <div class="d-flex flex-column flex-grow-1">
+                <!-- Topbar -->
+                <div class="d-flex justify-content-end align-items-center bg-white border-bottom px-4 py-2">
+                    <span class="me-3 text-muted">
+                        <?= htmlspecialchars($this->session->get('userName') ?? '') ?>
+                        <i class="bi bi-person-circle"></i>
+                    </span>
+                    <span class="badge bg-secondary me-3">
+                        <?= htmlspecialchars($this->session->get('userRole') ?? '') ?>
+                    </span>
+                    
+                    <i class="bi bi-gear"></i>
+                </div>
+
+                <!-- Page content -->
+                <div class="p-4">
+                    <?= $this->getContent() ?>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -13,6 +13,7 @@ class AuthController extends Controller
      */
     public function loginAction(): void
     {
+        // This disables the layout for login page only. All other pages will use dashboard.phtml automatically.
         $this->view->setRenderLevel(\Phalcon\Mvc\View::LEVEL_ACTION_VIEW);
 
         $response = $this->response;
@@ -20,8 +21,10 @@ class AuthController extends Controller
         $view = $this->view;
         $session = $this->session;
         
-        if ($session->has('user_id')) {
+        if ($session->has('userId')) {
             $response->redirect('/dashboard');
+            $response->send();
+
             return;
         }
         
@@ -41,7 +44,8 @@ class AuthController extends Controller
             return;
         }
         
-        $user = (new UserStorage())->getUserByEmail($email);
+        $userStorage = new UserStorage();
+        $user = $userStorage->getUserByEmail($email);
         
         if (!$user || !$user->isActive || !password_verify($password, $user->passwordHash)) {
             $view->setVar('error', 'Invalid email or password');
@@ -50,11 +54,16 @@ class AuthController extends Controller
             return;
         }
         
+        $userStorage->updateLastLoginField($user->userId);
+        
         $session->set('userId', $user->userId);
         $session->set('userRole', $user->role);
         $session->set('userName', $user->name);
         
         $response->redirect('/dashboard');
+        $response->send();
+        
+        return;
     }
     
     /**
@@ -66,5 +75,8 @@ class AuthController extends Controller
     {
         $this->session->destroy();
         $this->response->redirect('/auth/login');
+        $this->response->send();
+        
+        return;
     }
 }

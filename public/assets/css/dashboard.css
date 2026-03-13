@@ -1,0 +1,20 @@
+body {
+    font-family: "system-ui", sans-serif !important;
+}
+
+.sidebar-navigation {
+    width: 240px; 
+    background-color: #006666 !important;
+}
+
+.selected, .nav-item:hover {
+    background-color: #338585;
+    padding-left: 15px;
+    border-radius: 12px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.nav-item:hover { 
+    margin-top: 5px;
+}

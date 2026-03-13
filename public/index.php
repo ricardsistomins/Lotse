@@ -17,5 +17,13 @@ $bootstrap->bootstrap();
 
 require dirname(__DIR__) . '/app/config/routes.php';
 
-echo $application->handle($_SERVER['REQUEST_URI'] ?? '/')->getContent();
-
+try {
+    echo $application->handle($_SERVER['REQUEST_URI'] ?? '/')->getContent();
+} catch (\Phalcon\Mvc\Dispatcher\Exception $e) {
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    
+    http_response_code(404);
+    require dirname(__DIR__) . '/app/views/error/notfound.phtml';
+}
