@@ -41,6 +41,7 @@ class Bootstrap
         $this->initDispatcher();
         $this->initView();
         $this->initDb();
+        $this->initAuditService();
   
         return $this->_di;
     }
@@ -149,9 +150,22 @@ class Bootstrap
             BASE_PATH . '/app/library/Storage/',
             BASE_PATH . '/app/library/Model/',
             BASE_PATH . '/app/library/Validator/',
-            BASE_PATH . '/app/library/Plugin/'
+            BASE_PATH . '/app/library/Plugin/',
+            BASE_PATH . '/app/library/Service/'
         ])->register();
 
         $this->_di->setShared('loader', $loader);
+    }
+    
+    /**
+     * Init audit service
+     */
+    protected function initAuditService(): void
+    {
+        $di = $this->_di;
+        
+        $this->_di->setShared('auditService', function () use ($di) {
+            return new \app\Service\AuditService($di->get('db'));
+        });
     }
 }

@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'app\\Validator\\' => array($baseDir . '/app/library/Validator'),
     'app\\Storage\\' => array($baseDir . '/app/library/Storage'),
+    'app\\Service\\' => array($baseDir . '/app/library/Service'),
     'app\\Plugin\\' => array($baseDir . '/app/library/Plugin'),
     'app\\Model\\' => array($baseDir . '/app/library/Model'),
     'app\\' => array($baseDir . '/app'),

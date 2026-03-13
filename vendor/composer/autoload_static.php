@@ -11,6 +11,7 @@ class ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd
         array (
             'app\\Validator\\' => 14,
             'app\\Storage\\' => 12,
+            'app\\Service\\' => 12,
             'app\\Plugin\\' => 11,
             'app\\Model\\' => 10,
             'app\\' => 4,
@@ -25,6 +26,10 @@ class ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd
         'app\\Storage\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app/library/Storage',
+        ),
+        'app\\Service\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/app/library/Service',
         ),
         'app\\Plugin\\' => 
         array (

@@ -10,7 +10,8 @@
             "app\\Storage\\": "app/library/Storage/",
             "app\\Model\\": "app/library/Model/",
             "app\\Validator\\": "app/library/Validator/",
-            "app\\Plugin\\": "app/library/Plugin/"
+            "app\\Plugin\\": "app/library/Plugin/",
+            "app\\Service\\": "app/library/Service/"
         }
     }
 }
