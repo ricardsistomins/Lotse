@@ -151,7 +151,11 @@ class Bootstrap
             BASE_PATH . '/app/library/Model/',
             BASE_PATH . '/app/library/Validator/',
             BASE_PATH . '/app/library/Plugin/',
-            BASE_PATH . '/app/library/Service/'
+            BASE_PATH . '/app/library/Service/',
+            BASE_PATH . '/app/library/Provider/',
+            BASE_PATH . '/app/library/Provider/Response/',
+            BASE_PATH . '/app/library/Provider/LLM/',
+            BASE_PATH . '/app/library/Provider/Search/'
         ])->register();
 
         $this->_di->setShared('loader', $loader);

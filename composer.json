@@ -2,7 +2,11 @@
     "name": "lotse/app",
     "type": "project",
     "require": {
-        "php": "^8.3"
+        "php": "^8.3",
+        "openai-php/client": "^0.19.0",
+        "symfony/http-client": "^7.4",
+        "nyholm/psr7": "^1.8",
+        "guzzlehttp/guzzle": "^7.10"
     },
     "autoload": {
         "psr-4": {
@@ -11,7 +15,16 @@
             "app\\Model\\": "app/library/Model/",
             "app\\Validator\\": "app/library/Validator/",
             "app\\Plugin\\": "app/library/Plugin/",
-            "app\\Service\\": "app/library/Service/"
+            "app\\Service\\": "app/library/Service/",
+            "app\\Provider\\": "app/library/Provider/",                                              
+            "app\\Provider\\Response\\": "app/library/Provider/Response/",
+            "app\\Provider\\LLM\\": "app/library/Provider/LLM/",
+            "app\\Provider\\Search\\": "app/library/Provider/Search/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
         }
     }
 }
