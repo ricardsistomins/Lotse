@@ -42,6 +42,7 @@ class Bootstrap
         $this->initView();
         $this->initDb();
         $this->initAuditService();
+        $this->initOrchestrator();
   
         return $this->_di;
     }
@@ -155,7 +156,8 @@ class Bootstrap
             BASE_PATH . '/app/library/Provider/',
             BASE_PATH . '/app/library/Provider/Response/',
             BASE_PATH . '/app/library/Provider/LLM/',
-            BASE_PATH . '/app/library/Provider/Search/'
+            BASE_PATH . '/app/library/Provider/Search/',
+            BASE_PATH . '/tasks/'
         ])->register();
 
         $this->_di->setShared('loader', $loader);
@@ -170,6 +172,18 @@ class Bootstrap
         
         $this->_di->setShared('auditService', function () use ($di) {
             return new \app\Service\AuditService($di->get('db'));
+        });
+    }
+    
+    /**
+     * Init orchestrator
+     */
+    protected function initOrchestrator(): void
+    {
+        $di = $this->_di;
+
+        $this->_di->setShared('orchestrator', function () use ($di) {
+            return new \app\Service\ResearchRunOrchestrator($di->get('db'));
         });
     }
 }

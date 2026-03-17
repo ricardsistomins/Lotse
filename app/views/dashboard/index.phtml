@@ -1,1 +1,26 @@
-<h1>Dashboard index</h1>
+<?php $runId = $this->request->getQuery('runId', 'int'); ?>
+
+<?php if ($runId) { ?>
+    <div class="alert alert-success">
+        Run #<?= $runId ?> started successfully.
+    </div>
+<?php } ?>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Trigger Research Run</h5>
+        
+        <form method="POST" action="/dashboard/trigger">
+            <div class="mb-3">
+                <label for="query" class="form-label">Search query</label>
+                <input type="text" id="query" name="query" class="form-control" placeholder="e.g. AI funding Germany 2025" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Run</button>
+        </form>
+    </div>
+</div>
+
+<script async src="https://cse.google.com/cse.js?cx=e385ba76792e945bc">
+</script>
+<div class="gcse-search"></div>

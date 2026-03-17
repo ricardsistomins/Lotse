@@ -48,4 +48,9 @@ $router->add('/dashboard', array(
     'action'     => 'index'
 ));
 
+$router->add('/dashboard/trigger', array(
+    'controller' => 'dashboard',
+    'action'     => 'trigger',
+));
+
 $container->setShared('router', $router);

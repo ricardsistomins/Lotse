@@ -19,7 +19,8 @@
             "app\\Provider\\": "app/library/Provider/",                                              
             "app\\Provider\\Response\\": "app/library/Provider/Response/",
             "app\\Provider\\LLM\\": "app/library/Provider/LLM/",
-            "app\\Provider\\Search\\": "app/library/Provider/Search/"
+            "app\\Provider\\Search\\": "app/library/Provider/Search/",
+            "app\\tasks\\": "tasks/"
         }
     },
     "config": {
