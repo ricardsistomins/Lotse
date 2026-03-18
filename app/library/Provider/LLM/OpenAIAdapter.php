@@ -16,6 +16,11 @@ class OpenAIAdapter implements LLMProviderAdapter
 {
     private \OpenAI\Client $client;
 
+    const STATUS_SUCCESS  = 'succeeded';
+    const STATUS_FAILED   = 'failed';
+    const PROVIDER_OPENAI = 'openai';
+    const PROVIDER_KIND   = 'llm';
+    
     /**
      * Constructor
      * 
@@ -50,10 +55,10 @@ class OpenAIAdapter implements LLMProviderAdapter
             $latencyMs = (int) ((microtime(true) - $start) * 1000);
 
             $this->callStorage->log(
-                providerKind:   'llm',
-                providerName:   'openai',
+                providerKind:   self::PROVIDER_KIND,
+                providerName:   self::PROVIDER_OPENAI,
                 requestPurpose: $context['purpose'] ?? 'completion',
-                status:         'succeeded',
+                status:         self::STATUS_SUCCESS,
                 latencyMs:      $latencyMs,
                 inputTokens:    $response->usage->promptTokens,
                 outputTokens:   $response->usage->completionTokens
@@ -71,10 +76,10 @@ class OpenAIAdapter implements LLMProviderAdapter
             $latencyMs = (int) ((microtime(true) - $start) * 1000);
 
             $this->callStorage->log(
-                providerKind:   'llm',
-                providerName:   'openai',
+                providerKind:   self::PROVIDER_KIND,
+                providerName:   self::PROVIDER_OPENAI,
                 requestPurpose: $context['purpose'] ?? 'completion',
-                status:         'failed',
+                status:         self::STATUS_FAILED,
                 latencyMs:      $latencyMs,
                 inputTokens:    0,
                 outputTokens:   0

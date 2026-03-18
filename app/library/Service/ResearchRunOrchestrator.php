@@ -10,6 +10,7 @@ use app\Storage\ResearchSourceStorage;
 use app\Storage\ResearchFindingStorage;
 use app\Storage\SystemSettingsStorage;
 use Phalcon\Db\Adapter\Pdo\Mysql;
+use app\Service\GuardrailEvaluator;
 
 /**
 * Orchestrates the full research pipeline for a single run.
@@ -26,11 +27,15 @@ use Phalcon\Db\Adapter\Pdo\Mysql;
 */
 class ResearchRunOrchestrator
 {
+    const PROVIDER_NAME_GOOGLE = 'google';
+    const PROVIDER_NAME_OPENAI = 'openai';
+    
     private ResearchRunStorage     $runStorage;
     private ResearchSourceStorage  $sourceStorage;
     private ResearchFindingStorage $findingStorage;
     private ProviderCallStorage    $callStorage;
     private AuditService           $auditService;
+    private GuardrailEvaluator     $guardrailEvaluator;
 
     public function __construct(private readonly Mysql $db)
     {
@@ -39,6 +44,7 @@ class ResearchRunOrchestrator
         $this->findingStorage = new ResearchFindingStorage();
         $this->callStorage    = new ProviderCallStorage();
         $this->auditService   = new AuditService($db);
+        $this->guardrailEvaluator = new GuardrailEvaluator();
     }
 
     /**
@@ -63,8 +69,8 @@ class ResearchRunOrchestrator
             idempotencyKey:       $idempotencyKey,
             canonicalScopeKey:    $canonicalScopeKey,
             providerProfileName:  'default',
-            llmProviderName:      'openai',
-            searchProviderName:   'google',
+            llmProviderName:      self::PROVIDER_NAME_OPENAI,
+            searchProviderName:   self::PROVIDER_NAME_GOOGLE,
             createdByUserId:      $userId
         );
 
@@ -87,7 +93,7 @@ class ResearchRunOrchestrator
                     sourceType:      'search_result',
                     retrievedAt:     $result->retrievedAt ?? date('Y-m-d H:i:s'),
                     sourceTitle:     $result->title,
-                    providerName:    'google',
+                    providerName:    self::PROVIDER_NAME_GOOGLE,
                     capturedExcerpt: $result->snippet
                 );
             }
@@ -127,18 +133,22 @@ class ResearchRunOrchestrator
                 }
             }
 
-            // Step 6 — finalize run
-            $this->runStorage->finish($runId, 'completed');
+            // Step 6 - evaluate guardrails
+            $findings = isset($findings) ? $findings : [];
+            $guardrailStatus = $this->guardrailEvaluator->evaluate($findings, count($searchResults));
+            
+            // Step 7 — finalize run
+            $this->runStorage->finish($runId, 'completed', guardrailStatus: $guardrailStatus);
 
-            // Step 7 — log audit
+            // Step 8 — log audit
             $this->auditService->log(
                 actorType:   $userId ? 'user' : 'system',
                 actorUserId: $userId,
                 action:      'run.completed',
                 entityType:  'research_run',
-                entityId:    $runId
+                entityId:    $runId,
+                metadata:    ['guardrail_status' => $guardrailStatus]
             );
-
         } catch (\Throwable $e) {
             $this->runStorage->finish($runId, 'failed', $e->getMessage());
 

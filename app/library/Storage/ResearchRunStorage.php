@@ -102,23 +102,25 @@ class ResearchRunStorage extends AbstractStorage
      * @param int $runId
      * @param string $status
      * @param string|null $errorSummary
+     * @param string $guardrailStatus
      * @return void
      */
-    public function finish(int $runId, string $status, ?string $errorSummary = null): void
+    public function finish(int $runId, string $status, ?string $errorSummary = null, string $guardrailStatus = 'pending'): void
     {
         $pdo = $this->getPdo();
 
         $sql = 'UPDATE research_runs
-                SET status = :status, error_summary = :error_summary, finished_at = :finished_at
+                SET status = :status, guardrail_status = :guardrailStatus, error_summary = :errorSummary, finished_at = :finishedAt
                 WHERE id = :id';
         
         $sth = $pdo->prepare($sql);
 
         $sth->execute([
-            ':status'        => $status,
-            ':error_summary' => $errorSummary,
-            ':finished_at'   => date('Y-m-d H:i:s'),
-            ':id'            => $runId,
+            ':status'          => $status,
+            ':guardrailStatus' => $guardrailStatus,
+            ':errorSummary'    => $errorSummary,
+            ':finishedAt'      => date('Y-m-d H:i:s'),
+            ':id'              => $runId,
         ]);
     }
 }
