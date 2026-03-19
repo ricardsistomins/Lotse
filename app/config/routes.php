@@ -53,4 +53,30 @@ $router->add('/dashboard/trigger', array(
     'action'     => 'trigger',
 ));
 
+
+/******************************
+ * 
+ * Report
+ * 
+ *****************************/
+$router->add('/reports', array(
+    'controller' => 'report', 
+    'action'     => 'index'
+));  
+
+$router->add('/report/{id:[0-9]+}', array(
+    'controller' => 'report', 
+    'action'     =>'view'
+));
+
+$router->add('/report/{id:[0-9]+}/save', array(
+    'controller' => 'report', 
+    'action'     => 'save'
+));
+
+$router->add('/report/{id:[0-9]+}/status', array(
+    'controller' => 'report', 
+    'action'     => 'updateStatus'
+));   
+  
 $container->setShared('router', $router);

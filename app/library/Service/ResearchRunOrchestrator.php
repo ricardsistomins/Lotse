@@ -3,14 +3,19 @@
 namespace app\Service;
 
 use app\Provider\LLM\OpenAIAdapter;
-use app\Provider\Search\GoogleSearchAdapter;
-use app\Storage\ProviderCallStorage;
-use app\Storage\ResearchRunStorage;
-use app\Storage\ResearchSourceStorage;
-use app\Storage\ResearchFindingStorage;
-use app\Storage\SystemSettingsStorage;
+use app\Provider\Search\SerpApiAdapter;
 use Phalcon\Db\Adapter\Pdo\Mysql;
 use app\Service\GuardrailEvaluator;
+
+use app\Storage\ {
+    ProviderCallStorage,
+    ResearchRunStorage,
+    ResearchSourceStorage,
+    ResearchFindingStorage,
+    SystemSettingsStorage,
+    ReportStorage,
+    ReportRevisionStorage
+};
 
 /**
 * Orchestrates the full research pipeline for a single run.
@@ -22,13 +27,15 @@ use app\Service\GuardrailEvaluator;
 * 3. Save sources to research_sources
 * 4. Call LLM to extract findings from sources
 * 5. Save findings to research_findings
-* 6. Finalize run status
-* 7. Write audit trail
+* 6. Evaluate guardrails
+* 7. Generate report via LLM (if pass or review)
+* 8. Finalize run status
+* 9. Write audit trail
 */
 class ResearchRunOrchestrator
 {
-    const PROVIDER_NAME_GOOGLE = 'google';
-    const PROVIDER_NAME_OPENAI = 'openai';
+    const PROVIDER_NAME_SERPAPI = 'serpapi';
+    const PROVIDER_NAME_OPENAI  = 'openai';
     
     private ResearchRunStorage     $runStorage;
     private ResearchSourceStorage  $sourceStorage;
@@ -36,6 +43,8 @@ class ResearchRunOrchestrator
     private ProviderCallStorage    $callStorage;
     private AuditService           $auditService;
     private GuardrailEvaluator     $guardrailEvaluator;
+    private ReportStorage          $reportStorage;
+    private ReportRevisionStorage  $revisionStorage;
 
     public function __construct(private readonly Mysql $db)
     {
@@ -45,6 +54,8 @@ class ResearchRunOrchestrator
         $this->callStorage    = new ProviderCallStorage();
         $this->auditService   = new AuditService($db);
         $this->guardrailEvaluator = new GuardrailEvaluator();
+        $this->reportStorage   = new ReportStorage();
+        $this->revisionStorage = new ReportRevisionStorage();
     }
 
     /**
@@ -70,15 +81,14 @@ class ResearchRunOrchestrator
             canonicalScopeKey:    $canonicalScopeKey,
             providerProfileName:  'default',
             llmProviderName:      self::PROVIDER_NAME_OPENAI,
-            searchProviderName:   self::PROVIDER_NAME_GOOGLE,
+            searchProviderName:   self::PROVIDER_NAME_SERPAPI,
             createdByUserId:      $userId
         );
 
         try {
             // Step 2 — collect sources via search
-            $searchAdapter = new GoogleSearchAdapter(
+            $searchAdapter = new SerpApiAdapter(
                 $profile['search']['api_key'],
-                $profile['search']['search_engine_id'],
                 $this->callStorage
             );
 
@@ -93,7 +103,7 @@ class ResearchRunOrchestrator
                     sourceType:      'search_result',
                     retrievedAt:     $result->retrievedAt ?? date('Y-m-d H:i:s'),
                     sourceTitle:     $result->title,
-                    providerName:    self::PROVIDER_NAME_GOOGLE,
+                    providerName:    self::PROVIDER_NAME_SERPAPI,
                     capturedExcerpt: $result->snippet
                 );
             }
@@ -133,14 +143,35 @@ class ResearchRunOrchestrator
                 }
             }
 
-            // Step 6 - evaluate guardrails
+            // Step 6 — evaluate guardrails
             $findings = isset($findings) ? $findings : [];
             $guardrailStatus = $this->guardrailEvaluator->evaluate($findings, count($searchResults));
-            
-            // Step 7 — finalize run
+
+            // Step 7 — generate report if guardrail allows
+            if (in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
+                $reportPrompt   = $this->buildReportPrompt($findings);
+                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation']);
+
+                if ($reportResponse->success) {
+                    $reportId   = $this->reportStorage->create($runId, $userId);
+                    $revisionId = $this->revisionStorage->save($reportId, $reportResponse->content, $userId);
+                    $this->reportStorage->setCurrentRevision($reportId, $revisionId);
+
+                    $this->auditService->log(
+                        actorType:   $userId ? 'user' : 'system',
+                        actorUserId: $userId,
+                        action:      'report.created',
+                        entityType:  'report',
+                        entityId:    $reportId,
+                        metadata:    ['run_id' => $runId, 'guardrail_status' => $guardrailStatus]
+                    );
+                }
+            }
+
+            // Step 8 — finalize run
             $this->runStorage->finish($runId, 'completed', guardrailStatus: $guardrailStatus);
 
-            // Step 8 — log audit
+            // Step 9 — log audit
             $this->auditService->log(
                 actorType:   $userId ? 'user' : 'system',
                 actorUserId: $userId,
@@ -208,6 +239,24 @@ PROMPT;
         
         return trim($text, '-');
     }
-}
+    
+    /**
+    * Build the report generation prompt from extracted findings.
+    */
+    private function buildReportPrompt(array $findings): string
+    {
+        $findingsText = implode("\n\n", array_map(fn($f) => "Title: {$f['title']}\nFunding body: {$f['funding_body']}\nEligibility: {$f['eligibility']}\nDescription: {$f['description']}", $findings));
 
+        return <<<PROMPT
+You are a funding research assistant for German companies.
+Based on the following extracted funding programs, write a clear and structured research
+report in plain text.
+Include a short introduction, then cover each program with its key details.
+Write in a professional tone. Use plain text only, no markdown.
+
+Findings:
+{$findingsText}
+PROMPT;
+    }
+}
 

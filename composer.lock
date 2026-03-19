@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f0b8385d9a178b4bbd71c27d0e64fe08",
+    "content-hash": "6402830a7ed52d5c21208ccce2b5f28c",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -942,6 +942,68 @@
                 "source": "https://github.com/ralouphie/getallheaders/tree/develop"
             },
             "time": "2019-03-08T08:55:37+00:00"
+        },
+        {
+            "name": "serpapi/google-search-results-php",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/serpapi/google-search-results-php.git",
+                "reference": "aacd3312832bf152bc4578a2deab62b4a1e54fe8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/serpapi/google-search-results-php/zipball/aacd3312832bf152bc4578a2deab62b4a1e54fe8",
+                "reference": "aacd3312832bf152bc4578a2deab62b4a1e54fe8",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "php": ">=5.5.7",
+                "phpunit/phpunit": "^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "restclient.php",
+                    "google-search-results.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Victor Benarbia",
+                    "email": "victor@serpapi.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Google search result via Serp API",
+            "homepage": "http://github.com/serpapi/google-search-results-php",
+            "keywords": [
+                "SERP",
+                "api",
+                "client",
+                "curl",
+                "google",
+                "json",
+                "localisation",
+                "rest",
+                "result",
+                "search",
+                "xml"
+            ],
+            "support": {
+                "issues": "http://github.com/serpapi/google-search-results-php/issues",
+                "source": "https://github.com/serpapi/google-search-results-php/tree/1.2.0"
+            },
+            "time": "2019-03-31T04:12:00+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",

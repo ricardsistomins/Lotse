@@ -12,6 +12,8 @@ class ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '61ba3e92ef91a7a0f1cc260ebd9290e4' => __DIR__ . '/..' . '/openai-php/client/src/OpenAI.php',
+        'ab8f0bbff02e94698ed590a8728c10e1' => __DIR__ . '/..' . '/serpapi/google-search-results-php/restclient.php',
+        '610684bbf2d5251724d6cc5e51bfb242' => __DIR__ . '/..' . '/serpapi/google-search-results-php/google-search-results.php',
     );
 
     public static $prefixLengthsPsr4 = array (

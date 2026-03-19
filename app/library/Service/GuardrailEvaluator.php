@@ -20,6 +20,17 @@ class GuardrailEvaluator
    /**
     * Evaluate a set of findings and return the guardrail status.
     *
+    * what it checks:                                                                                                                         
+    * 1. Source presence — no sources collected at all -> blocked                    
+    * 2. Findings presence — LLM returned no findings -> blocked
+    * 3. Extraction completeness — any finding missing title or finding_type -> blocked                                                                       
+    * 4. Confidence score — any finding with confidence_score < 0.5 - review        
+    * 5. High-impact fields — any finding missing funding_body or eligibility -> review                                                                        
+    * 6. Risk flags — any finding with non-empty risk_flags -> review                
+    * 7. Duplicate detection — any two findings share the same dedupe_hash -> review 
+    *                                                                                
+    * If none of the review or block rules trigger → pass.  
+    * 
     * @param  array  $findings  Raw findings array decoded from LLM response
     * @param  int    $sourceCount  Number of sources collected during the run
     * @return string  'pass', 'review', or 'blocked'
@@ -62,6 +73,13 @@ class GuardrailEvaluator
             if (!empty($finding['risk_flags'])) {
                 $needsReview = true;
             }
+            
+            // Rule 7 — duplicate findings flagged as review 
+            $dedupeHashes = array_column($findings, 'dedupe_hash');   
+            
+            if (count($dedupeHashes) !== count(array_unique($dedupeHashes))) {            
+                $needsReview = true;                                                      
+            }      
         }
 
         return $needsReview ? self::STATUS_REVIEW : self::STATUS_PASSED;

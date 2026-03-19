@@ -1,10 +1,19 @@
-<?php $runId = $this->request->getQuery('runId', 'int'); ?>
+<?php 
+    $runId = $this->request->getQuery('runId', 'int'); 
+    $reportId = $this->request->getQuery('reportId', 'int'); 
+?>
 
-<?php if ($runId) { ?>
-    <div class="alert alert-success">
-        Run #<?= $runId ?> started successfully.
-    </div>
-<?php } ?>
+ <?php if ($runId) { ?>                                                                       
+      <div class="alert alert-success d-flex justify-content-between align-items-center">
+          <span>Run #<?= $runId ?> completed successfully.</span>          
+          
+          <?php if ($reportId) { ?>                                                            
+              <a href="/report/<?= $reportId ?>" class="btn btn-sm btn-outline-success">View report</a>                                                                                   
+          <?php } else { ?>
+              <span class="text-muted small">No report generated (guardrail blocked)</span>    
+          <?php } ?>                                                                           
+      </div>
+<?php } ?>   
 
 <div class="card mb-4">
     <div class="card-body">

@@ -1,0 +1,43 @@
+<div class="card">                                                                           
+    <div class="card-body">                                                                  
+        <h5 class="card-title mb-4">Reports</h5>                                             
+
+        <?php if (empty($this->reports)) { ?>                                                
+            <p class="text-muted">No reports yet. Trigger a research run from the dashboard.</p>                                                                               
+        <?php } else { ?>
+            <table class="table table-hover">                                                
+                <thead>
+                    <tr>                                                                     
+                        <th> # </th>                                                           
+                        <th> Run </th>                                                         
+                        <th> Trigger </th>                                                     
+                        <th> Started </th>                                                     
+                        <th> Status </th>                                                      
+                        <th></th>                                                            
+                    </tr>                                                                    
+                </thead>          
+                
+                <tbody>                                                                      
+                    <?php foreach ($this->reports as $report) { ?>                           
+                        <tr>
+                            <td> <?= $report['id'] ?> </td>
+                            <td> #<?= $report['run_id'] ?> </td>                                   
+                            <td> <?= htmlspecialchars($report['trigger_source']) ?> </td>
+                            <td> <?= $report['started_at'] ?> </td>                                
+                            <td>                                                                 
+                                <span class="badge bg-<?= match($report['status']) {             
+                                    'approved' => 'success',                                     
+                                    'rejected' => 'danger',                                      
+                                    default    => 'secondary'                                    
+                                } ?>"><?= ucfirst($report['status']) ?></span>                   
+                            </td>                                                                
+                            <td>
+                                <a href="/report/<?= $report['id'] ?>" class="btn btn-sm btn-outline-primary">Open</a>                                                                
+                            </td>                                                                
+                        </tr>                                                                    
+                    <?php } ?>                                                               
+                </tbody>                                                                     
+            </table>                                                                         
+        <?php } ?>                                                                           
+    </div>
+</div>                                      

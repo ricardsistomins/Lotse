@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Phalcon\Mvc\Controller;
+use app\Storage\ReportStorage;
 
 class DashboardController extends Controller
 {
@@ -36,8 +37,17 @@ class DashboardController extends Controller
         };
         
         $runId = $this->orchestrator->run($triggerSource, $query, $userId);
+                       
+        $report = (new ReportStorage())->getByRunId($runId);                            
+        $reportId = $report ? $report['id'] : null;                                                  
+
+        $url = '/dashboard?runId=' . $runId;                                                         
         
-        $response->redirect('/dashboard?runId=' . $runId);
+        if ($reportId) {                                                                             
+            $url .= '&reportId=' . $reportId;                                                        
+        }  
+        
+        $response->redirect($url);
         $response->send();
     }
 }
