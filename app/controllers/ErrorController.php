@@ -8,9 +8,11 @@ class ErrorController extends Controller
 {
     public function notFoundAction(): void
     {
+        $response = $this->response;
+        
         $this->view->disable();
-        $this->response->setStatusCode(404, 'Not Found');
-        $this->response->setContent(file_get_contents(__DIR__ . '/../views/error/notfound.phtml'));
-        $this->response->send();
+        $response->setStatusCode(404, 'Not Found');
+        $response->setContent(file_get_contents(__DIR__ . '/../views/error/notfound.phtml'));
+        $response->send();
     }
 }

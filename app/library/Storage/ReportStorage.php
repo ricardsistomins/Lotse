@@ -141,7 +141,10 @@ class ReportStorage extends AbstractStorage
     {                                                                                            
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT * FROM reports WHERE run_id = :run_id LIMIT 1';
+        $sql = 'SELECT *
+                FROM reports 
+                WHERE run_id = :run_id 
+                LIMIT 1';
         
         $sth = $pdo->prepare($sql);            
         $sth->execute([

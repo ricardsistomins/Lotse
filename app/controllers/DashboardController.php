@@ -7,8 +7,6 @@ use app\Storage\ReportStorage;
 
 class DashboardController extends Controller
 {
-    public function indexAction() {}
-    
     /**
      * Handle manual research run trigger from the dashboard.
      */

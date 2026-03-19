@@ -54,8 +54,8 @@ class GuardrailEvaluator
             }
         }
 
-        $needsReview = false;
-
+        $needsReview = false; 
+        
         foreach ($findings as $finding) {
             // Rule 4 — low confidence score flags as review
             $confidence = (float)($finding['confidence_score'] ?? 0.0);
@@ -72,16 +72,16 @@ class GuardrailEvaluator
             // Rule 6 — risk flags present flags as review
             if (!empty($finding['risk_flags'])) {
                 $needsReview = true;
-            }
-            
-            // Rule 7 — duplicate findings flagged as review 
-            $dedupeHashes = array_column($findings, 'dedupe_hash');   
-            
-            if (count($dedupeHashes) !== count(array_unique($dedupeHashes))) {            
-                $needsReview = true;                                                      
-            }      
+            }         
         }
 
+        // Rule 7 — duplicate findings flagged as review      
+        $dedupeHashes = array_column($findings, 'dedupe_hash');  
+        
+        if (count($dedupeHashes) !== count(array_unique($dedupeHashes))) {            
+            $needsReview = true;                                                      
+        }  
+        
         return $needsReview ? self::STATUS_REVIEW : self::STATUS_PASSED;
     }
 }

@@ -123,4 +123,26 @@ class ResearchRunStorage extends AbstractStorage
             ':id'              => $runId,
         ]);
     }
+    
+    /**
+     * Get run by id
+     * 
+     * @param int $runId
+     * @return array|null
+     */
+    public function getById(int $runId): ?array 
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT *
+                FROM research_runs 
+                WHERE id = :id';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':id' => $runId
+        ]);         
+        
+        return $sth->fetch($pdo::FETCH_ASSOC) ?: null;
+    }
 }

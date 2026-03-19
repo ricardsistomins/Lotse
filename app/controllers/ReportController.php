@@ -3,29 +3,23 @@
 namespace app\controllers;
 
 use Phalcon\Mvc\Controller;                                                                  
-use app\Storage\ReportStorage;
-use app\Storage\ReportRevisionStorage;                                                       
+use app\Storage\ {
+    ReportStorage,
+    ReportRevisionStorage,
+    ResearchRunStorage,
+    ResearchSourceStorage,
+    ResearchFindingStorage
+};                                           
 use app\Service\AuditService;
 
 class ReportController extends Controller                                                    
-{                                                                                            
-    private ReportStorage         $reportStorage;                                            
-    private ReportRevisionStorage $revisionStorage;                                          
-    private AuditService          $auditService;
-
-    public function onConstruct(): void
-    {                                                                                        
-        $this->reportStorage   = new ReportStorage();
-        $this->revisionStorage = new ReportRevisionStorage();                                
-        $this->auditService    = new AuditService($this->db);                                
-    }                                                                                        
-
+{                                                                                    
     /**
      * List all reports
      */
     public function indexAction() 
     {
-        $this->view->reports = $this->reportStorage->getAll();
+        $this->view->setVar('reports', (new ReportStorage())->getAll());
     }
     
     /**         
@@ -37,23 +31,35 @@ class ReportController extends Controller
         $view = $this->view;
         $session = $this->session;
         
-        $report = $this->reportStorage->getById($id);
+        $report = (new ReportStorage())->getById($id);
 
         if (!$report) {
-            $response->redirect('/dashboard');                                         
-            $response->send();                                                         
-            return;
-        }                                                                                    
+            $response->redirect('/dashboard');
+            $response->send();
 
-        $content   = $this->revisionStorage->getLatestContent($id);                          
-        $revisions = $this->revisionStorage->getAllByReportId($id);
+            return;
+        }
+
+        $run          = (new ResearchRunStorage())->getById($report['run_id']);
+        $sourceCount  = (new ResearchSourceStorage())->countByRunId($report['run_id']);
+        $findingCount = (new ResearchFindingStorage())->countByRunId($report['run_id']);
+
+        $revisionStorage = new ReportRevisionStorage();
+        $content   = $revisionStorage->getLatestContent($id);                          
+        $revisions = $revisionStorage->getAllByReportId($id);
+        
         $role      = $session->get('userRole', 'string');                              
         $canAct    = in_array($role, ['admin', 'qa']);
         
-        $view->report    = $report;                                                    
-        $view->content   = $content;                                                   
-        $view->revisions = $revisions;                                                 
-        $view->canAct    = $canAct;
+        $view->setVars([
+            'report'       => $report,
+            'revisions'    => $revisions,
+            'canAct'       => $canAct,
+            'run'          => $run,
+            'sourceCount'  => $sourceCount,
+            'findingCount' => $findingCount,
+            'content'      => $content
+        ]);
     }
 
     /**
@@ -67,23 +73,24 @@ class ReportController extends Controller
         
         if (!$request->isPost()) {
             $response->redirect('/report/' . $id);                                     
-            $response->send();                                                         
+            $response->send();        
+            
             return;                                                                          
         }                                                                                    
 
         $content = $request->getPost('content', 'string');                             
         $userId  = $session->get('userId', 'int');                                     
 
-        $revisionId = $this->revisionStorage->save($id, $content, $userId);                  
-        $this->reportStorage->setCurrentRevision($id, $revisionId);                          
+        $revisionId = (new ReportRevisionStorage())->save($id, $content, $userId);
+        (new ReportStorage())->setCurrentRevision($id, $revisionId);                          
 
-        $this->auditService->log(                                                            
-            actorType:   'user',                                                             
-            actorUserId: $userId,                                                            
-            action:      'report.saved',                                                     
-            entityType:  'report',                                                           
-            entityId:    $id,                                                                
-            metadata:    ['revision_id' => $revisionId]                                      
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: $userId,
+            action:      'report.saved',
+            entityType:  'report',
+            entityId:    $id,
+            metadata:    ['revision_id' => $revisionId]
         );                                                                                   
 
         $response->redirect('/report/' . $id);                                         
@@ -125,17 +132,17 @@ class ReportController extends Controller
             return;                                                                          
         }
 
-        $this->reportStorage->updateStatus($id, $status, $userId);
+        (new ReportStorage())->updateStatus($id, $status, $userId);
 
         $action = $status === 'approved' ? 'report.approved' : 'report.rejected';            
 
-        $this->auditService->log(                                                            
+        (new AuditService($this->db))->log(
             actorType:   'user',
             actorUserId: $userId,
-            action:      $action,                                                            
+            action:      $action,
             entityType:  'report',
-            entityId:    $id,                                                                
-            metadata:    ['status' => $status]                                               
+            entityId:    $id,
+            metadata:    ['status' => $status]
         );                                                                                   
 
         $response->redirect('/report/' . $id);

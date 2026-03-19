@@ -86,4 +86,26 @@ class ResearchSourceStorage extends AbstractStorage
 
         return (int)$pdo->lastInsertId();
     }
+    
+    /**
+     * Count all research sources
+     * 
+     * @param int $runId
+     * @return int
+     */
+    public function countByRunId(int $runId): int 
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT COUNT(*)
+                FROM research_sources 
+                WHERE run_id = :run_id';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':run_id' => $runId
+        ]);
+
+        return (int)$sth->fetchColumn();
+    }
 }
