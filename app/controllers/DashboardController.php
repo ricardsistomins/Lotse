@@ -7,6 +7,8 @@ use app\Storage\ReportStorage;
 
 class DashboardController extends Controller
 {
+    public function indexAction() {}
+    
     /**
      * Handle manual research run trigger from the dashboard.
      */
@@ -34,7 +36,7 @@ class DashboardController extends Controller
             default => 'dashboard_admin'
         };
         
-        $runId = $this->orchestrator->run($triggerSource, $query, $userId);
+        $runId = $this->orchestrator->run($triggerSource, $query, $userId, $this->db);
                        
         $report = (new ReportStorage())->getByRunId($runId);                            
         $reportId = $report ? $report['id'] : null;                                                  

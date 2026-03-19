@@ -72,25 +72,25 @@ class ResearchRunStorage extends AbstractStorage
                     customer_id, created_by_user_id, status, started_at
                 )
                 VALUES (
-                    :run_type, :trigger_source, :idempotency_key, :canonical_scope_key,
-                    :provider_profile_name, :llm_provider_name, :search_provider_name,
-                    :customer_id, :created_by_user_id, :status, :started_at
+                    :runType, :triggerSource, :idempotencyKey, :canonicalScopeKey,
+                    :providerProfileName, :llmProviderName, :searchProviderName,
+                    :customerId, :createdByUserId, :status, :startedAt
                 )';
-        
+
         $sth = $pdo->prepare($sql);
 
         $sth->execute([
-            ':run_type'              => $runType,
-            ':trigger_source'        => $triggerSource,
-            ':idempotency_key'       => $idempotencyKey,
-            ':canonical_scope_key'   => $canonicalScopeKey,
-            ':provider_profile_name' => $providerProfileName,
-            ':llm_provider_name'     => $llmProviderName,
-            ':search_provider_name'  => $searchProviderName,
-            ':customer_id'           => $customerId,
-            ':created_by_user_id'    => $createdByUserId,
-            ':status'                => 'running',
-            ':started_at'            => date('Y-m-d H:i:s'),
+            ':runType'             => $runType,
+            ':triggerSource'       => $triggerSource,
+            ':idempotencyKey'      => $idempotencyKey,
+            ':canonicalScopeKey'   => $canonicalScopeKey,
+            ':providerProfileName' => $providerProfileName,
+            ':llmProviderName'     => $llmProviderName,
+            ':searchProviderName'  => $searchProviderName,
+            ':customerId'          => $customerId,
+            ':createdByUserId'     => $createdByUserId,
+            ':status'              => 'running',
+            ':startedAt'           => date('Y-m-d H:i:s'),
         ]);
 
         return (int)$pdo->lastInsertId();

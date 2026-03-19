@@ -5,7 +5,6 @@ namespace app\Service;
 use app\Provider\LLM\OpenAIAdapter;
 use app\Provider\Search\SerpApiAdapter;
 use Phalcon\Db\Adapter\Pdo\Mysql;
-use app\Service\GuardrailEvaluator;
 
 use app\Storage\ {
     ProviderCallStorage,
@@ -36,36 +35,16 @@ class ResearchRunOrchestrator
 {
     const PROVIDER_NAME_SERPAPI = 'serpapi';
     const PROVIDER_NAME_OPENAI  = 'openai';
-    
-    private ResearchRunStorage     $runStorage;
-    private ResearchSourceStorage  $sourceStorage;
-    private ResearchFindingStorage $findingStorage;
-    private ProviderCallStorage    $callStorage;
-    private AuditService           $auditService;
-    private GuardrailEvaluator     $guardrailEvaluator;
-    private ReportStorage          $reportStorage;
-    private ReportRevisionStorage  $revisionStorage;
-
-    public function __construct(private readonly Mysql $db)
-    {
-        $this->runStorage     = new ResearchRunStorage();
-        $this->sourceStorage  = new ResearchSourceStorage();
-        $this->findingStorage = new ResearchFindingStorage();
-        $this->callStorage    = new ProviderCallStorage();
-        $this->auditService   = new AuditService($db);
-        $this->guardrailEvaluator = new GuardrailEvaluator();
-        $this->reportStorage   = new ReportStorage();
-        $this->revisionStorage = new ReportRevisionStorage();
-    }
 
     /**
      * Run the full research pipeline.
      *
-     * @param string   $triggerSource  Who triggered the run: 'dashboard_admin', 'cron', etc.
-     * @param string   $query          Search query to use for source collection
-     * @param int|null $userId         ID of the user who triggered, null for cron
+     * @param string        $triggerSource  Who triggered the run: 'dashboard_admin', 'cron', etc.
+     * @param string        $query          Search query to use for source collection
+     * @param int|null      $userId         ID of the user who triggered, null for cron
+     * @param Mysql|null    $db             DB connection, required for audit logging
      */
-    public function run(string $triggerSource, string $query, ?int $userId = null): int 
+    public function run(string $triggerSource, string $query, ?int $userId = null, ?Mysql $db = null): int
     {
         $settings = new SystemSettingsStorage();
         $profile  = $settings->get('provider_profiles')['default'];
@@ -74,7 +53,7 @@ class ResearchRunOrchestrator
         $canonicalScopeKey  = md5($query);
 
         // Step 1 — create run row
-        $runId = $this->runStorage->create(
+        $runId = (new ResearchRunStorage())->create(
             runType:              'source_sync',
             triggerSource:        $triggerSource,
             idempotencyKey:       $idempotencyKey,
@@ -87,16 +66,19 @@ class ResearchRunOrchestrator
 
         try {
             // Step 2 — collect sources via search
+            $callStorage   = new ProviderCallStorage();
             $searchAdapter = new SerpApiAdapter(
                 $profile['search']['api_key'],
-                $this->callStorage
+                $callStorage
             );
 
             $searchResults = $searchAdapter->search($query);
 
             // Step 3 — save sources
+            $sourceStorage = new ResearchSourceStorage();
+            
             foreach ($searchResults as $result) {
-                $this->sourceStorage->save(
+                $sourceStorage->save(
                     runId:           $runId,
                     sourceUrl:       $result->url,
                     sourceDomain:    parse_url($result->url, PHP_URL_HOST) ?? '',
@@ -119,17 +101,19 @@ class ResearchRunOrchestrator
             $llmAdapter = new OpenAIAdapter(
                 $profile['llm']['api_key'],
                 $profile['llm']['model'],
-                $this->callStorage,
+                $callStorage,
             );
 
             $llmResponse = $llmAdapter->complete($prompt, ['purpose' => 'findings_extraction']);
 
             // Step 5 — parse and save findings
+            $findingStorage = new ResearchFindingStorage();
+
             if ($llmResponse->success) {
                 $findings = json_decode($llmResponse->content, true) ?? [];
-
+                
                 foreach ($findings as $finding) {
-                    $this->findingStorage->save(
+                    $findingStorage->save(
                         runId:             $runId,
                         findingKey:        $this->slugify($finding['title'] ?? 'unknown'),
                         findingType:       $finding['finding_type'] ?? 'program',
@@ -145,7 +129,7 @@ class ResearchRunOrchestrator
 
             // Step 6 — evaluate guardrails
             $findings = isset($findings) ? $findings : [];
-            $guardrailStatus = $this->guardrailEvaluator->evaluate($findings, count($searchResults));
+            $guardrailStatus = (new GuardrailEvaluator())->evaluate($findings, count($searchResults));
 
             // Step 7 — generate report if guardrail allows
             if (in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
@@ -153,26 +137,41 @@ class ResearchRunOrchestrator
                 $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation']);
 
                 if ($reportResponse->success) {
-                    $reportId   = $this->reportStorage->create($runId, $userId);
-                    $revisionId = $this->revisionStorage->save($reportId, $reportResponse->content, $userId);
-                    $this->reportStorage->setCurrentRevision($reportId, $revisionId);
+                    $savedFindings     = $findingStorage->getAllByRunId($runId);
+                    $structuredPayload = array_map(fn($f) => [
+                        'title'        => $f['title'],
+                        'finding_type' => $f['finding_type'],
+                        'finding_key'  => $f['finding_key'],
+                        'confidence'   => $f['confidence_score'],
+                        'normalized'   => json_decode($f['normalized_payload'], true),
+                    ], $savedFindings);
 
-                    $this->auditService->log(
+                    $reportStorage = new ReportStorage();
+                    $report        = $reportStorage->getByCanonicalScopeKey($canonicalScopeKey);
+                    $reportId      = $report ? $report['id'] : $reportStorage->create($runId, $canonicalScopeKey, $userId);
+
+                    $revisionId = (new ReportRevisionStorage())->save($reportId, $structuredPayload, $reportResponse->content, $userId);
+                    $reportStorage->setCurrentRevision($reportId, $revisionId);
+
+                    (new AuditService($db))->log(
                         actorType:   $userId ? 'user' : 'system',
                         actorUserId: $userId,
                         action:      'report.created',
                         entityType:  'report',
                         entityId:    $reportId,
-                        metadata:    ['run_id' => $runId, 'guardrail_status' => $guardrailStatus]
+                        metadata:    [
+                            'run_id' => $runId, 
+                            'guardrail_status' => $guardrailStatus
+                        ]
                     );
                 }
             }
 
             // Step 8 — finalize run
-            $this->runStorage->finish($runId, 'completed', guardrailStatus: $guardrailStatus);
+            (new ResearchRunStorage())->finish($runId, 'completed', guardrailStatus: $guardrailStatus);
 
             // Step 9 — log audit
-            $this->auditService->log(
+            (new AuditService($db))->log(
                 actorType:   $userId ? 'user' : 'system',
                 actorUserId: $userId,
                 action:      'run.completed',
@@ -181,9 +180,9 @@ class ResearchRunOrchestrator
                 metadata:    ['guardrail_status' => $guardrailStatus]
             );
         } catch (\Throwable $e) {
-            $this->runStorage->finish($runId, 'failed', $e->getMessage());
+            (new ResearchRunStorage())->finish($runId, 'failed', $e->getMessage());
 
-            $this->auditService->log(
+            (new AuditService($db))->log(
                 actorType:   $userId ? 'user' : 'system',
                 actorUserId: $userId,
                 action:      'run.failed',

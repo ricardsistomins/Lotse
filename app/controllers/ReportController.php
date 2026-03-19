@@ -40,13 +40,17 @@ class ReportController extends Controller
             return;
         }
 
-        $run          = (new ResearchRunStorage())->getById($report['run_id']);
-        $sourceCount  = (new ResearchSourceStorage())->countByRunId($report['run_id']);
+        $run = (new ResearchRunStorage())->getById($report['run_id']);
+        $sourceCount = (new ResearchSourceStorage())->countByRunId($report['run_id']);
         $findingCount = (new ResearchFindingStorage())->countByRunId($report['run_id']);
 
         $revisionStorage = new ReportRevisionStorage();
-        $content   = $revisionStorage->getLatestContent($id);                          
-        $revisions = $revisionStorage->getAllByReportId($id);
+        $latestRevision  = $revisionStorage->getById($report['current_revision_id'] ?? 0);
+        $finalMarkdown   = $latestRevision['final_markdown'] ?? '';
+        $structuredPayload = json_decode($latestRevision['structured_payload'] ?? '[]', true);
+        
+        $renderedHtml    = (new \Parsedown())->text($finalMarkdown);
+        $revisions       = $revisionStorage->getAllByReportId($id);
         
         $role      = $session->get('userRole', 'string');                              
         $canAct    = in_array($role, ['admin', 'qa']);
@@ -58,7 +62,9 @@ class ReportController extends Controller
             'run'          => $run,
             'sourceCount'  => $sourceCount,
             'findingCount' => $findingCount,
-            'content'      => $content
+            'finalMarkdown'     => $finalMarkdown,
+            'structuredPayload' => $structuredPayload,
+            'renderedHtml'      => $renderedHtml
         ]);
     }
 
@@ -78,10 +84,10 @@ class ReportController extends Controller
             return;                                                                          
         }                                                                                    
 
-        $content = $request->getPost('content', 'string');                             
+        $finalMarkdown = $request->getPost('final_markdown', 'string');                           
         $userId  = $session->get('userId', 'int');                                     
 
-        $revisionId = (new ReportRevisionStorage())->save($id, $content, $userId);
+        $revisionId = (new ReportRevisionStorage())->save($id, [], $finalMarkdown, $userId);
         (new ReportStorage())->setCurrentRevision($id, $revisionId);                          
 
         (new AuditService($this->db))->log(
@@ -132,9 +138,29 @@ class ReportController extends Controller
             return;                                                                          
         }
 
+        // Block approval if run guardrail is blocked
+        if ($status === 'approved') {
+            $report = (new ReportStorage())->getById($id);
+            $run    = (new ResearchRunStorage())->getById($report['run_id']);
+
+            if (($run['guardrail_status'] ?? '') === 'blocked') {
+                $response->redirect('/report/' . $id);
+                $response->send();
+
+                return;
+            }
+        }
+        
         (new ReportStorage())->updateStatus($id, $status, $userId);
 
-        $action = $status === 'approved' ? 'report.approved' : 'report.rejected';            
+        $report     = $report ?? (new ReportStorage())->getById($id);
+        $revisionId = $report['current_revision_id'] ?? null;
+
+        if ($status === 'approved' && $revisionId) {
+            (new ReportStorage())->setApprovedRevision($id, $revisionId);
+        }
+
+        $action = $status === 'approved' ? 'report.approved' : 'report.rejected';
 
         (new AuditService($this->db))->log(
             actorType:   'user',
@@ -142,9 +168,12 @@ class ReportController extends Controller
             action:      $action,
             entityType:  'report',
             entityId:    $id,
-            metadata:    ['status' => $status]
-        );                                                                                   
-
+            metadata:    [
+                'status' => $status, 
+                'revision_id' => $revisionId
+            ]
+        );
+                                                                           
         $response->redirect('/report/' . $id);
         $response->send();
     }

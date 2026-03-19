@@ -67,25 +67,25 @@ class ResearchFindingStorage extends AbstractStorage
                     risk_flags, dedupe_hash, status
                 )
                 VALUES (
-                    :run_id, :finding_key, :finding_type, :title, :normalized_payload,
-                    :source_count, :official_source_present, :confidence_score,
-                    :risk_flags, :dedupe_hash, :status
+                    :runId, :findingKey, :findingType, :title, :normalizedPayload,
+                    :sourceCount, :officialSourcePresent, :confidenceScore,
+                    :riskFlags, :dedupeHash, :status
                 )';
-        
+
         $sth = $pdo->prepare($sql);
 
         $sth->execute([
-            ':run_id'                  => $runId,
-            ':finding_key'             => $findingKey,
-            ':finding_type'            => $findingType,
-            ':title'                   => $title,
-            ':normalized_payload'      => json_encode($normalizedPayload),
-            ':source_count'            => $sourceCount,
-            ':official_source_present' => (int)$officialSourcePresent,
-            ':confidence_score'        => $confidenceScore,
-            ':risk_flags'              => $riskFlags !== null ? json_encode($riskFlags) : null,
-            ':dedupe_hash'             => $dedupeHash,
-            ':status'                  => 'extracted',
+            ':runId'                  => $runId,
+            ':findingKey'             => $findingKey,
+            ':findingType'            => $findingType,
+            ':title'                  => $title,
+            ':normalizedPayload'      => json_encode($normalizedPayload),
+            ':sourceCount'            => $sourceCount,
+            ':officialSourcePresent'  => (int)$officialSourcePresent,
+            ':confidenceScore'        => $confidenceScore,
+            ':riskFlags'              => $riskFlags !== null ? json_encode($riskFlags) : null,
+            ':dedupeHash'             => $dedupeHash,
+            ':status'                 => 'extracted',
         ]);
 
         return (int)$pdo->lastInsertId();
@@ -102,14 +102,37 @@ class ResearchFindingStorage extends AbstractStorage
         $pdo = $this->getPdo();
 
         $sql = 'SELECT COUNT(*)
-                FROM research_findings 
-                WHERE run_id = :run_id';   
+                FROM research_findings
+                WHERE run_id = :runId';
 
-        $sth = $pdo->prepare($sql);                                               
+        $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':run_id' => $runId                                                   
+            ':runId' => $runId
         ]);         
 
         return (int)$sth->fetchColumn();                                         
     }
+    
+    /**
+     * Fetch all findings for a run
+     *
+     * @param int $runId
+     * @return array
+     */
+    public function getAllByRunId(int $runId): array
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT *
+                FROM research_findings
+                WHERE run_id = :runId';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':runId' => $runId,
+        ]);
+
+        return $sth->fetchAll($pdo::FETCH_ASSOC);
+    }
+
 }

@@ -41,22 +41,24 @@ class ReportStorage extends AbstractStorage
      * Create a new draft report for a run and return its ID
      * 
      * @param int $runId
+     * @param string $canonicalScopeKey
      * @param int|null $createdByUserId
      * @return int
      */
-    public function create(int $runId, ?int $createdByUserId = null): int
+    public function create(int $runId, string $canonicalScopeKey, ?int $createdByUserId = null): int
     {                                                                                        
         $pdo = $this->getPdo();
 
-        $sql = 'INSERT INTO reports (run_id, status, created_by_user_id)
-                VALUES (:run_id, :status, :created_by_user_id)';
-        
-        $sth = $pdo->prepare($sql);     
+        $sql = 'INSERT INTO reports (run_id, canonical_scope_key, status, created_by_user_id)
+                VALUES (:runId, :canonicalScopeKey, :status, :createdByUserId)';
 
-        $sth->execute([                                                                      
-            ':run_id'              => $runId,
-            ':status'              => 'draft',                                               
-            ':created_by_user_id'  => $createdByUserId,
+        $sth = $pdo->prepare($sql);
+
+        $sth->execute([
+            ':runId'             => $runId,
+            ':canonicalScopeKey' => $canonicalScopeKey,
+            ':status'            => 'draft',
+            ':createdByUserId'   => $createdByUserId,
         ]);                                                                                  
 
         return (int)$pdo->lastInsertId();                                                    
@@ -73,13 +75,14 @@ class ReportStorage extends AbstractStorage
     {                                                                                        
         $pdo = $this->getPdo();                                                              
 
-        $sth = $pdo->prepare('                                                               
-            UPDATE reports SET current_revision_id = :revision_id WHERE id = :id
-        ');
+        $sql = 'UPDATE reports
+                SET current_revision_id = :revisionId 
+                WHERE id = :id';
 
-        $sth->execute([                                                                      
-            ':revision_id' => $revisionId,
-            ':id'          => $reportId,                                                     
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':revisionId' => $revisionId,
+            ':id'         => $reportId,
         ]);                                                                                  
     }
     
@@ -96,16 +99,16 @@ class ReportStorage extends AbstractStorage
         $pdo = $this->getPdo();
 
         $sql = 'UPDATE reports
-                SET status = :status, approved_by_user_id = :approved_by, approved_at = :approved_at    
+                SET status = :status, approved_by_user_id = :approvedBy, approved_at = :approvedAt
                 WHERE id = :id';
-        
+
         $sth = $pdo->prepare($sql);
 
-        $sth->execute([                                                                      
-            ':status'      => $status,
-            ':approved_by' => $approvedByUserId,                                             
-            ':approved_at' => $approvedByUserId ? date('Y-m-d H:i:s') : null,
-            ':id'          => $reportId,                                                     
+        $sth->execute([
+            ':status'     => $status,
+            ':approvedBy' => $approvedByUserId,
+            ':approvedAt' => $approvedByUserId ? date('Y-m-d H:i:s') : null,
+            ':id'         => $reportId,
         ]);                                                                                  
     }      
     
@@ -123,7 +126,7 @@ class ReportStorage extends AbstractStorage
                 FROM reports 
                 WHERE id = :id';
         
-        $sth = $pdo->prepare($sql);                        
+        $sth = $pdo->prepare($sql);
         $sth->execute([':id' => $reportId]);
 
         $row = $sth->fetch($pdo::FETCH_ASSOC);                                               
@@ -142,13 +145,13 @@ class ReportStorage extends AbstractStorage
         $pdo = $this->getPdo();
 
         $sql = 'SELECT *
-                FROM reports 
-                WHERE run_id = :run_id 
+                FROM reports
+                WHERE run_id = :runId
                 LIMIT 1';
-        
-        $sth = $pdo->prepare($sql);            
+
+        $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':run_id' => $runId
+            ':runId' => $runId
         ]);
 
         $row = $sth->fetch($pdo::FETCH_ASSOC);                                                   
@@ -172,5 +175,50 @@ class ReportStorage extends AbstractStorage
         $sth->execute();                                                                         
 
         return $sth->fetchAll($pdo::FETCH_ASSOC);
+    }
+    
+    /**
+    * Set the approved revision for a report
+    *
+    * @param int $reportId
+    * @param int $revisionId
+    * @return void
+    */
+    public function setApprovedRevision(int $reportId, int $revisionId): void
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'UPDATE reports
+                SET approved_revision_id = :revisionId
+                WHERE id = :id';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':revisionId' => $revisionId,
+            ':id'         => $reportId,
+        ]);
+    }
+
+    /**
+     * Fetch a report by its canonical scope key
+     *
+     * @param string $scopeKey
+     * @return array|null
+     */
+    public function getByCanonicalScopeKey(string $scopeKey): ?array
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT *
+                FROM reports
+                WHERE canonical_scope_key = :scopeKey
+                LIMIT 1';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':scopeKey' => $scopeKey,
+        ]);
+
+        return $sth->fetch($pdo::FETCH_ASSOC) ?: null;
     }
 }

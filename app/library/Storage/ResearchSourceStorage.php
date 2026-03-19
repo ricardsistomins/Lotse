@@ -66,22 +66,22 @@ class ResearchSourceStorage extends AbstractStorage
                     provider_name, captured_excerpt, is_official, retrieved_at
                 )
                 VALUES (
-                    :run_id, :source_url, :source_domain, :source_title, :source_type,
-                    :provider_name, :captured_excerpt, :is_official, :retrieved_at
+                    :runId, :sourceUrl, :sourceDomain, :sourceTitle, :sourceType,
+                    :providerName, :capturedExcerpt, :isOfficial, :retrievedAt
                 )';
-        
+
         $sth = $pdo->prepare($sql);
 
         $sth->execute([
-            ':run_id'           => $runId,
-            ':source_url'       => $sourceUrl,
-            ':source_domain'    => $sourceDomain,
-            ':source_title'     => $sourceTitle,
-            ':source_type'      => $sourceType,
-            ':provider_name'    => $providerName,
-            ':captured_excerpt' => $capturedExcerpt,
-            ':is_official'      => (int) $isOfficial,
-            ':retrieved_at'     => $retrievedAt,
+            ':runId'           => $runId,
+            ':sourceUrl'       => $sourceUrl,
+            ':sourceDomain'    => $sourceDomain,
+            ':sourceTitle'     => $sourceTitle,
+            ':sourceType'      => $sourceType,
+            ':providerName'    => $providerName,
+            ':capturedExcerpt' => $capturedExcerpt,
+            ':isOfficial'      => (int) $isOfficial,
+            ':retrievedAt'     => $retrievedAt,
         ]);
 
         return (int)$pdo->lastInsertId();
@@ -98,12 +98,12 @@ class ResearchSourceStorage extends AbstractStorage
         $pdo = $this->getPdo();
 
         $sql = 'SELECT COUNT(*)
-                FROM research_sources 
-                WHERE run_id = :run_id';
+                FROM research_sources
+                WHERE run_id = :runId';
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':run_id' => $runId
+            ':runId' => $runId
         ]);
 
         return (int)$sth->fetchColumn();

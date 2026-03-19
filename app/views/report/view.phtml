@@ -1,88 +1,124 @@
-<div class="card mb-4">                                                       
-    <div class="card-body">                                                   
-        <div class="d-flex justify-content-between align-items-center mb-3">  
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="card-title mb-0">Report #<?= $this->report['id'] ?></h5>
 
-            <span class="badge bg-<?= match($this->report['status']) {        
-                'approved' => 'success',                                      
-                'rejected' => 'danger',                                       
-                default    => 'secondary'                                     
-            } ?>"><?= ucfirst($this->report['status']) ?></span>              
-        </div>                                                                
+            <span class="badge bg-<?= match($this->report['status']) {
+                'approved' => 'success',
+                'rejected' => 'danger',
+                default    => 'secondary'
+            } ?>"><?= ucfirst($this->report['status']) ?></span>
+        </div>
 
-        <table class="table table-sm mb-0">                                   
-            <tr>                                                              
-                <td class="text-muted">Guardrail</td>                         
-                <td><?= htmlspecialchars($this->run['guardrail_status'] ?? '—') ?></td>                                                                  
-            </tr>                                                             
-            <tr>                                                              
-                <td class="text-muted">Sources</td>                           
-                <td><?= (int)$this->sourceCount ?></td>                       
-            </tr>                                                             
-            <tr>                                                              
-                <td class="text-muted">Findings</td>                          
-                <td><?= (int)$this->findingCount ?></td>                      
-            </tr>                                                             
-        </table>                                                              
-    </div>                                                                    
-</div>          
+        <table class="table table-sm mb-0">
+            <tr>
+                <td class="text-muted">Guardrail</td>
+                <td><?= htmlspecialchars($this->run['guardrail_status'] ?? '—') ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Sources</td>
+                <td><?= (int)$this->sourceCount ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Findings</td>
+                <td><?= (int)$this->findingCount ?></td>
+            </tr>
+        </table>
+    </div>
+</div>
 
-<div class="card mb-4">                                                       
-    <div class="card-body">                                                   
-        <form method="POST" action="/report/<?= $this->report['id'] ?>/save"> 
-            <div class="mb-3">                                                
-                <textarea name="content" class="form-control" rows="20"><?= htmlspecialchars($this->content) ?></textarea>                                
-            </div>         
+<?php if (($this->run['guardrail_status'] ?? '') === 'blocked') { ?>
+    <div class="alert alert-danger mb-4">
+        <strong>Blocked:</strong> This revision cannot be approved. The run was blocked by the guardrail evaluator.
+    </div>
+<?php } ?>
+
+<?php if (!empty($this->structuredPayload)) { ?>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h6 class="card-title">Structured fields</h6>
             
-            <button type="submit" class="btn btn-primary">Save revision</button>                                                             
-        </form>
-    </div>                                                                    
-</div>          
+            <table class="table table-sm mb-0">
+                <?php foreach ($this->structuredPayload as $finding) { ?>
+                    <tr>
+                        <td class="text-muted"><?= htmlspecialchars($finding['title'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($finding['finding_type'] ?? '') ?></td>
+                        <td><?= htmlspecialchars((string)($finding['confidence'] ?? '')) ?></td>
+                    </tr>
+                <?php } ?>
+            </table>
+        </div>
+    </div>
+<?php } ?>
 
-<?php if ($this->canAct && $this->report['status'] === 'draft') { ?>          
-    <div class="card mb-4">                                                   
-        <div class="card-body">                                               
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">Report text</h6>
+        
+        <form method="POST" action="/report/<?= $this->report['id'] ?>/save">
+            <div class="mb-3">
+                <textarea name="final_markdown" class="form-control" rows="20"><?= htmlspecialchars($this->finalMarkdown) ?></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save revision</button>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">Preview</h6>
+        
+        <div class="border rounded p-3 bg-light">
+            <?= $this->renderedHtml ?>
+        </div>
+    </div>
+</div>
+
+<?php if ($this->canAct && $this->report['status'] !== 'approved' && ($this->run['guardrail_status'] ?? '') !== 'blocked') { ?>
+    <div class="card mb-4">
+        <div class="card-body">
             <h6 class="card-title">Actions</h6>
             
-            <form method="POST" action="/report/<?= $this->report['id'] ?>/status" class="d-inline">                                                  
-                <input type="hidden" name="status" value="approved">          
-                <button type="submit" class="btn btn-success me-2">Approve</button>                                                        
+            <form method="POST" action="/report/<?= $this->report['id'] ?>/status" class="d-inline">
+                <input type="hidden" name="status" value="approved">
+                <button type="submit" class="btn btn-success me-2">Approve</button>
             </form>
             
-            <form method="POST" action="/report/<?= $this->report['id'] ?>/status" class="d-inline">                                                  
+            <form method="POST" action="/report/<?= $this->report['id'] ?>/status" class="d-inline">
                 <input type="hidden" name="status" value="rejected">
-                <button type="submit" class="btn btn-danger">Reject</button>  
-            </form>                                                           
-        </div>                                                                
-    </div>                                                                    
-<?php } ?>                                                                    
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </div>
+    </div>
+<?php } ?>
 
 <div class="card">
     <div class="card-body">
-        <h6 class="card-title">Revision history</h6> 
+        <h6 class="card-title">Revision history</h6>
         
-        <?php if (empty($this->revisions)) { ?>                               
-            <p class="text-muted">No revisions yet.</p>                       
-        <?php } else { ?>                                                     
-            <table class="table table-sm">                                    
-                <thead>                                                       
-                    <tr>                                                      
-                        <th> # </th>                                            
+        <?php if (empty($this->revisions)) { ?>
+            <p class="text-muted">No revisions yet.</p>
+        <?php } else { ?>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th> # </th>
                         <th> Saved by </th>
                         <th> Date </th>
-                    </tr>                                                     
+                    </tr>
                 </thead>
                 
-                <tbody>                                                       
+                <tbody>
                     <?php foreach ($this->revisions as $rev) { ?>
                         <tr>
                             <td><?= $rev['id'] ?></td>
                             <td><?= htmlspecialchars($rev['username'] ?? 'system') ?></td>
-                            <td><?= $rev['created_at'] ?></td>                
-                        </tr>                                                 
+                            <td><?= $rev['created_at'] ?></td>
+                        </tr>
                     <?php } ?>
-                </tbody>                                                      
+                </tbody>
             </table>
-        <?php } ?>                                                            
-    </div>      
+        <?php } ?>
+    </div>
 </div>

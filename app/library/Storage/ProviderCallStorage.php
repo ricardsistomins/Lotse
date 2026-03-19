@@ -69,25 +69,25 @@ class ProviderCallStorage extends AbstractStorage
                     latency_ms, input_tokens, output_tokens, error_code, error_message,
                     fallback_used, finished_at)
                 VALUES
-                    (:run_id, :provider_kind, :provider_name, :request_purpose, :status,
-                    :latency_ms, :input_tokens, :output_tokens, :error_code, :error_message,
-                    :fallback_used, :finished_at)';
+                    (:runId, :providerKind, :providerName, :requestPurpose, :status,
+                    :latencyMs, :inputTokens, :outputTokens, :errorCode, :errorMessage,
+                    :fallbackUsed, :finishedAt)';
 
         $sth = $pdo->prepare($sql);
 
         $sth->execute([
-            ':run_id'          => $runId,
-            ':provider_kind'   => $providerKind,
-            ':provider_name'   => $providerName,
-            ':request_purpose' => $requestPurpose,
-            ':status'          => $status,
-            ':latency_ms'      => $latencyMs,
-            ':input_tokens'    => $inputTokens,
-            ':output_tokens'   => $outputTokens,
-            ':error_code'      => $errorCode,
-            ':error_message'   => $errorMessage,
-            ':fallback_used'   => (int)$fallbackUsed ?? 0,
-            ':finished_at'     => date('Y-m-d H:i:s'),
+            ':runId'          => $runId,
+            ':providerKind'   => $providerKind,
+            ':providerName'   => $providerName,
+            ':requestPurpose' => $requestPurpose,
+            ':status'         => $status,
+            ':latencyMs'      => $latencyMs,
+            ':inputTokens'    => $inputTokens,
+            ':outputTokens'   => $outputTokens,
+            ':errorCode'      => $errorCode,
+            ':errorMessage'   => $errorMessage,
+            ':fallbackUsed'   => (int)$fallbackUsed ?? 0,
+            ':finishedAt'     => date('Y-m-d H:i:s'),
         ]);    
     }
 }
