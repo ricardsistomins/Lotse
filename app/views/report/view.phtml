@@ -1,49 +1,59 @@
 <div class="card mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title mb-0">Report #<?= $this->report['id'] ?></h5>
+            <div>
+                <h5 class="card-title mb-0">Report #<?= $report->id ?></h5>
+                <a href="/run/<?= $run->id ?>" class="text-muted small link-fixed"><- Run #<?= $run->id ?></a>
+            </div>
 
-            <span class="badge bg-<?= match($this->report['status']) {
+            <span class="badge bg-<?= match($report->status) {
                 'approved' => 'success',
                 'rejected' => 'danger',
                 default    => 'secondary'
-            } ?>"><?= ucfirst($this->report['status']) ?></span>
+            } ?>"><?= ucfirst($report->status) ?></span>
         </div>
 
         <table class="table table-sm mb-0">
             <tr>
                 <td class="text-muted">Guardrail</td>
-                <td><?= htmlspecialchars($this->run['guardrail_status'] ?? '—') ?></td>
+                <td>
+                    <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
+                        'pass'    => 'success',
+                        'review'  => 'warning',
+                        'blocked' => 'danger',
+                        default   => 'secondary'
+                    } ?>"><?= ucfirst($run->guardrailStatus ?? '—') ?></span>
+                </td>
             </tr>
             <tr>
                 <td class="text-muted">Sources</td>
-                <td><?= (int)$this->sourceCount ?></td>
+                <td><?= (int)$sourceCount ?></td>
             </tr>
             <tr>
                 <td class="text-muted">Findings</td>
-                <td><?= (int)$this->findingCount ?></td>
+                <td><?= (int)$findingCount ?></td>
             </tr>
         </table>
     </div>
 </div>
 
-<?php if (($this->run['guardrail_status'] ?? '') === 'blocked') { ?>
+<?php if (($run->guardrailStatus ?? '') === 'blocked') { ?>
     <div class="alert alert-danger mb-4">
         <strong>Blocked:</strong> This revision cannot be approved. The run was blocked by the guardrail evaluator.
     </div>
 <?php } ?>
 
-<?php if (!empty($this->structuredPayload)) { ?>
+<?php if (!empty($structuredPayload)) { ?>
     <div class="card mb-4">
         <div class="card-body">
-            <h6 class="card-title">Structured fields</h6>
-            
+            <h6 class="card-title mb-3">Structured fields</h6>
+
             <table class="table table-sm mb-0">
-                <?php foreach ($this->structuredPayload as $finding) { ?>
+                <?php foreach ($structuredPayload as $finding) { ?>
                     <tr>
                         <td class="text-muted"><?= htmlspecialchars($finding['title'] ?? '') ?></td>
                         <td><?= htmlspecialchars($finding['finding_type'] ?? '') ?></td>
-                        <td><?= htmlspecialchars((string)($finding['confidence'] ?? '')) ?></td>
+                        <td><?= htmlspecialchars((string)(number_format($finding['confidence'], 2) ?? '')) ?></td>
                     </tr>
                 <?php } ?>
             </table>
@@ -53,13 +63,13 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title">Report text</h6>
-        
-        <form method="POST" action="/report/<?= $this->report['id'] ?>/save">
+        <h6 class="card-title mb-3">Report text</h6>
+
+        <form method="POST" action="/report/<?= $report->id ?>/save">
             <div class="mb-3">
-                <textarea name="final_markdown" class="form-control" rows="20"><?= htmlspecialchars($this->finalMarkdown) ?></textarea>
+                <textarea name="final_markdown" class="form-control" rows="20"><?= htmlspecialchars($finalMarkdown) ?></textarea>
             </div>
-            
+
             <button type="submit" class="btn btn-primary">Save revision</button>
         </form>
     </div>
@@ -67,25 +77,25 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title">Preview</h6>
-        
+        <h6 class="card-title mb-3">Preview</h6>
+
         <div class="border rounded p-3 bg-light">
-            <?= $this->renderedHtml ?>
+            <?= $renderedHtml ?>
         </div>
     </div>
 </div>
 
-<?php if ($this->canAct && $this->report['status'] !== 'approved' && ($this->run['guardrail_status'] ?? '') !== 'blocked') { ?>
+<?php if ($canAct && $report->status !== 'approved' && ($run->guardrailStatus ?? '') !== 'blocked') { ?>
     <div class="card mb-4">
         <div class="card-body">
-            <h6 class="card-title">Actions</h6>
-            
-            <form method="POST" action="/report/<?= $this->report['id'] ?>/status" class="d-inline">
+            <h6 class="card-title mb-3">Actions</h6>
+
+            <form method="POST" action="/report/<?= $report->id ?>/status" class="d-inline">
                 <input type="hidden" name="status" value="approved">
                 <button type="submit" class="btn btn-success me-2">Approve</button>
             </form>
-            
-            <form method="POST" action="/report/<?= $this->report['id'] ?>/status" class="d-inline">
+
+            <form method="POST" action="/report/<?= $report->id ?>/status" class="d-inline">
                 <input type="hidden" name="status" value="rejected">
                 <button type="submit" class="btn btn-danger">Reject</button>
             </form>
@@ -95,9 +105,9 @@
 
 <div class="card">
     <div class="card-body">
-        <h6 class="card-title">Revision history</h6>
-        
-        <?php if (empty($this->revisions)) { ?>
+        <h6 class="card-title mb-3">Revision history</h6>
+
+        <?php if (empty($revisions)) { ?>
             <p class="text-muted">No revisions yet.</p>
         <?php } else { ?>
             <table class="table table-sm">
@@ -106,16 +116,39 @@
                         <th> # </th>
                         <th> Saved by </th>
                         <th> Date </th>
+                        <th> QA Decision </th>
+                        <th> Decided by </th>
+                        <th> Decided at </th>
                     </tr>
                 </thead>
-                
                 <tbody>
-                    <?php foreach ($this->revisions as $rev) { ?>
+                    <?php foreach ($revisions as $rev) { ?>
                         <tr>
-                            <td><?= $rev['id'] ?></td>
-                            <td><?= htmlspecialchars($rev['username'] ?? 'system') ?></td>
-                            <td><?= $rev['created_at'] ?></td>
+                            <td><?= $rev->id ?></td>
+                            <td><?= htmlspecialchars($rev->username ?? 'system') ?></td>
+                            <td><?= $rev->createdAt ?></td>
+                            <td><span class="text-muted">—</span></td>
+                            <td>—</td>
+                            <td>—</td>
                         </tr>
+
+                        <?php if (!empty($rev->decisionStatus)) { ?>
+                            <tr>
+                                <td><?= $rev->id ?></td>
+                                <td><?= htmlspecialchars($rev->username ?? 'system') ?></td>
+                                <td><?= $rev->createdAt ?></td>
+                                <td>
+                                    <span class="badge bg-<?= match($rev->decisionStatus) {
+                                        'approved'          => 'success',
+                                        'rejected'          => 'danger',
+                                        'changes_requested' => 'warning',
+                                        default             => 'secondary'
+                                    } ?>"><?= ucfirst($rev->decisionStatus) ?></span>
+                                </td>
+                                <td><?= htmlspecialchars($rev->reviewedByUsername ?? '—') ?></td>
+                                <td><?= $rev->decidedAt ?? '—' ?></td>
+                            </tr>
+                        <?php } ?>
                     <?php } ?>
                 </tbody>
             </table>

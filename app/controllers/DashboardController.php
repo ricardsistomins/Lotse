@@ -38,8 +38,8 @@ class DashboardController extends Controller
         
         $runId = $this->orchestrator->run($triggerSource, $query, $userId, $this->db);
                        
-        $report = (new ReportStorage())->getByRunId($runId);                            
-        $reportId = $report ? $report['id'] : null;                                                  
+        $report = (new ReportStorage())->getByRunId($runId);
+        $reportId = $report ? $report->id : null;                                                  
 
         $url = '/dashboard?runId=' . $runId;                                                         
         

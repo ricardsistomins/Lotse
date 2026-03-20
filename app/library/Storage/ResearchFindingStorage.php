@@ -2,6 +2,8 @@
 
 namespace app\Storage;
 
+use app\Model\ResearchFindingModel;
+
 class ResearchFindingStorage extends AbstractStorage
 {
     /**
@@ -114,25 +116,25 @@ class ResearchFindingStorage extends AbstractStorage
     }
     
     /**
-     * Fetch all findings for a run
+     * Fetch all findings for a run.
      *
      * @param int $runId
-     * @return array
+     * @return ResearchFindingModel[]
      */
     public function getAllByRunId(int $runId): array
     {
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT *
+        $sql = 'SELECT ' . $this->mapFields() . '
                 FROM research_findings
                 WHERE run_id = :runId';
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':runId' => $runId,
+            ':runId' => $runId
         ]);
 
-        return $sth->fetchAll($pdo::FETCH_ASSOC);
+        return $sth->fetchAll($pdo::FETCH_CLASS, ResearchFindingModel::class);
     }
 
 }

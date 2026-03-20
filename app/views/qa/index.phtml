@@ -1,0 +1,61 @@
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title mb-4">QA Queue</h5>
+
+        <?php if (empty($queue)) { ?>
+            <p class="text-muted">No reports awaiting QA review.</p>
+        <?php } else { ?>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th> # </th>
+                        <th> Scope key </th>
+                        <th> Guardrail </th>
+                        <th> Status </th>
+                        <th> Requested </th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php foreach ($queue as $item) { ?>
+                        <tr>
+                            <td><?= $item->id ?></td>
+                            <td><code><?= htmlspecialchars($item->canonicalScopeKey) ?></code></td>
+                            <td>
+                                <span class="badge bg-<?= match($item->runGuardrailStatus ?? 'pending') {
+                                    'pass'    => 'success',
+                                    'review'  => 'warning',
+                                    'blocked' => 'danger',
+                                    default   => 'secondary'
+                                } ?>"><?= ucfirst($item->runGuardrailStatus ?? 'pending') ?></span>
+                            </td>
+                            <td>
+                                <span class="badge bg-<?= match($item->status) {
+                                    'needs_qa'  => 'info',
+                                    'approved'  => 'success',
+                                    'rejected'  => 'danger',
+                                    default     => 'secondary'
+                                } ?>"><?= ucfirst(str_replace('_', ' ', $item->status)) ?></span>
+                            </td>
+                            <td><?= $item->startedAt ?></td>
+                            <td class="d-flex gap-2">
+                                <a href="/report/<?= $item->id ?>" class="btn btn-sm btn-outline-primary">Inspect</a>
+
+                                <?php if ($item->runGuardrailStatus !== 'blocked' && in_array($this->session->get('userRole'), ['admin', 'qa'])) { ?>
+                                    <form method="POST" action="/qa/<?= $item->currentRevisionId ?>/approve">
+                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                    </form>
+
+                                    <form method="POST" action="/qa/<?= $item->currentRevisionId ?>/reject">
+                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                    </form>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+    </div>
+</div>

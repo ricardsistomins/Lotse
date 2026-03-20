@@ -174,6 +174,16 @@ class ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd
         ),
     );
 
+    public static $prefixesPsr0 = array (
+        'P' => 
+        array (
+            'Parsedown' => 
+            array (
+                0 => __DIR__ . '/..' . '/erusev/parsedown',
+            ),
+        ),
+    );
+
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'DateError' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
@@ -194,6 +204,7 @@ class ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd::$prefixesPsr0;
             $loader->classMap = ComposerStaticInitb8f177603d4a71e2612bc1928fb9a3cd::$classMap;
 
         }, null, ClassLoader::class);

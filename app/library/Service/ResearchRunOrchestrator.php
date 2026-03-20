@@ -13,7 +13,8 @@ use app\Storage\ {
     ResearchFindingStorage,
     SystemSettingsStorage,
     ReportStorage,
-    ReportRevisionStorage
+    ReportRevisionStorage,
+    QaReviewStorage
 };
 
 /**
@@ -69,7 +70,8 @@ class ResearchRunOrchestrator
             $callStorage   = new ProviderCallStorage();
             $searchAdapter = new SerpApiAdapter(
                 $profile['search']['api_key'],
-                $callStorage
+                $callStorage,
+                $runId
             );
 
             $searchResults = $searchAdapter->search($query);
@@ -104,14 +106,16 @@ class ResearchRunOrchestrator
                 $callStorage,
             );
 
-            $llmResponse = $llmAdapter->complete($prompt, ['purpose' => 'findings_extraction']);
+            $llmResponse = $llmAdapter->complete($prompt, ['purpose' => 'findings_extraction', 'run_id' => $runId]);
 
             // Step 5 — parse and save findings
             $findingStorage = new ResearchFindingStorage();
 
             if ($llmResponse->success) {
-                $findings = json_decode($llmResponse->content, true) ?? [];
-                
+                $raw = preg_replace('/^```(?:json)?\s*/m', '', $llmResponse->content);   
+                $raw = preg_replace('/```\s*$/m', '', $raw);                             
+                $findings = json_decode(trim($raw), true) ?? [];   
+
                 foreach ($findings as $finding) {
                     $findingStorage->save(
                         runId:             $runId,
@@ -134,25 +138,28 @@ class ResearchRunOrchestrator
             // Step 7 — generate report if guardrail allows
             if (in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
                 $reportPrompt   = $this->buildReportPrompt($findings);
-                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation']);
+                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation', 'run_id' => $runId]);
 
                 if ($reportResponse->success) {
                     $savedFindings     = $findingStorage->getAllByRunId($runId);
                     $structuredPayload = array_map(fn($f) => [
-                        'title'        => $f['title'],
-                        'finding_type' => $f['finding_type'],
-                        'finding_key'  => $f['finding_key'],
-                        'confidence'   => $f['confidence_score'],
-                        'normalized'   => json_decode($f['normalized_payload'], true),
+                        'title'        => $f->title,
+                        'finding_type' => $f->findingType,
+                        'finding_key'  => $f->findingKey,
+                        'confidence'   => $f->confidenceScore,
+                        'normalized'   => json_decode($f->normalizedPayload, true),
                     ], $savedFindings);
 
                     $reportStorage = new ReportStorage();
                     $report        = $reportStorage->getByCanonicalScopeKey($canonicalScopeKey);
-                    $reportId      = $report ? $report['id'] : $reportStorage->create($runId, $canonicalScopeKey, $userId);
+                    $reportId      = $report ? $report->id : $reportStorage->create($runId, $canonicalScopeKey, $userId);
 
                     $revisionId = (new ReportRevisionStorage())->save($reportId, $structuredPayload, $reportResponse->content, $userId);
                     $reportStorage->setCurrentRevision($reportId, $revisionId);
-
+                    $reportStorage->updateStatus($reportId, 'needs_qa'); 
+                    
+                    (new QaReviewStorage())->create($revisionId);
+                    
                     (new AuditService($db))->log(
                         actorType:   $userId ? 'user' : 'system',
                         actorUserId: $userId,

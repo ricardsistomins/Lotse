@@ -95,4 +95,24 @@ $router->add('/run/{id:[0-9]+}', array(
     'action'     => 'view'
 ));
 
+/******************************                                               
+*                                                                             
+* QA
+*                                                                             
+******************************/                           
+$router->add('/qa', [
+    'controller' => 'qa',                                                     
+    'action'     => 'index'
+]);                                                                           
+
+$router->add('/qa/{revisionId:[0-9]+}/approve', [                             
+    'controller' => 'qa',
+    'action'     => 'approve'                                                 
+]);                                                                           
+
+$router->add('/qa/{revisionId:[0-9]+}/reject', [                              
+    'controller' => 'qa',                                 
+    'action'     => 'reject'                                                  
+]);  
+
 $container->setShared('router', $router);

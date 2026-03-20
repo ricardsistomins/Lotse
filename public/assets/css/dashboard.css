@@ -14,3 +14,15 @@ body {
     padding-top: 1px;
     padding-bottom: 1px;
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.link-fixed {
+    text-decoration: none !important;
+}
+
+.link-fixed:hover {
+    text-decoration: underline !important;
+}

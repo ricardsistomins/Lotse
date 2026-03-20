@@ -2,6 +2,8 @@
 
 namespace app\Storage;
 
+use app\Model\ReportRevisionModel;
+
 class ReportRevisionStorage extends AbstractStorage
 {
     /**
@@ -26,15 +28,17 @@ class ReportRevisionStorage extends AbstractStorage
      * @var array
      */
     protected array $fieldMap = array(
-        'id'        => 'id',
-        'report_id' => 'reportId',
-        'content'   => 'content',
+        'id'                 => 'id',
+        'report_id'          => 'reportId',
+        'structured_payload' => 'structuredPayload',
+        'final_markdown'     => 'finalMarkdown',
         'created_by_user_id' => 'createdByUserId',
-        'created_at' => 'createdAt'
+        'created_at'         => 'createdAt',
+        'updated_at'         => 'updatedAt',
     );
- 
+
     /**
-     * Save a new revision and return its ID
+     * Save a new revision and return its ID.
      *
      * @param int $reportId
      * @param array $structuredPayload
@@ -61,40 +65,43 @@ class ReportRevisionStorage extends AbstractStorage
 
         return (int)$pdo->lastInsertId();
     }
-         
+
     /**
-     * Fetch all revisions for a report, newest first
-     * 
+     * Fetch all revisions for a report with QA decisions, newest first.
+     *
      * @param int $reportId
-     * @return array
+     * @return ReportRevisionModel[]
      */
     public function getAllByReportId(int $reportId): array
-    {                                                                                        
+    {
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT rr.*, u.username
-                FROM report_revisions rr                                                         
-                LEFT JOIN users u ON u.id = rr.created_by_user_id
-                WHERE rr.report_id = :reportId
-                ORDER BY rr.id DESC';
-        
-        $sth = $pdo->prepare($sql);                                                                                  
+        $sql = 'SELECT ' . $this->mapFields() . ',
+                       u.username,
+                       qr.decision_status AS decisionStatus,
+                       qr.decided_at AS decidedAt,
+                       qu.username AS reviewedByUsername
+                FROM report_revisions
+                LEFT JOIN users u ON u.user_id = report_revisions.created_by_user_id
+                LEFT JOIN qa_reviews qr ON qr.report_revision_id = report_revisions.id
+                LEFT JOIN users qu ON qu.user_id = qr.reviewed_by_user_id
+                WHERE report_revisions.report_id = :reportId
+                ORDER BY report_revisions.id DESC';
 
-        $sth->execute([
-            ':reportId' => $reportId
-        ]);
+        $sth = $pdo->prepare($sql);
+        $sth->execute([':reportId' => $reportId]);
 
-        return $sth->fetchAll($pdo::FETCH_ASSOC);                                            
+        return $sth->fetchAll($pdo::FETCH_CLASS, ReportRevisionModel::class);
     }
 
     /**
-     * Fetch the latest revision content for a report
-     * 
+     * Fetch the latest revision markdown for a report.
+     *
      * @param int $reportId
      * @return string
      */
     public function getLatestContent(int $reportId): string
-    {                                                                                        
+    {
         $pdo = $this->getPdo();
 
         $sql = 'SELECT final_markdown
@@ -104,33 +111,32 @@ class ReportRevisionStorage extends AbstractStorage
                 LIMIT 1';
 
         $sth = $pdo->prepare($sql);
-
         $sth->execute([
             ':reportId' => $reportId
-        ]);                                          
+        ]);
 
-        return (string)$sth->fetchColumn();                                                  
-    }   
-    
+        return (string)$sth->fetchColumn();
+    }
+
     /**
-     * Fetch a single revision by ID
+     * Fetch a single revision by ID.
      *
      * @param int $revisionId
-     * @return array|null
+     * @return ReportRevisionModel|null
      */
-    public function getById(int $revisionId): ?array
+    public function getById(int $revisionId): ?ReportRevisionModel
     {
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT *
-                FROM report_revisions 
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM report_revisions
                 WHERE id = :id';
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':id' => $revisionId,
+            ':id' => $revisionId
         ]);
 
-        return $sth->fetch($pdo::FETCH_ASSOC) ?: null;
+        return $sth->fetchObject(ReportRevisionModel::class) ?: null;
     }
 }

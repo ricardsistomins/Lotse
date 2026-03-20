@@ -2,6 +2,8 @@
 
 namespace app\Storage;
 
+use app\Model\ResearchRunModel;
+
 class ResearchRunStorage extends AbstractStorage
 {
     /**
@@ -47,10 +49,10 @@ class ResearchRunStorage extends AbstractStorage
         'created_at'            => 'createdAt',
         'updated_at'            => 'updatedAt'
     );
- 
+
     /**
      * Create a new research run row and return its ID.
-     * 
+     *
      * @param string $runType
      * @param string $triggerSource
      * @param string $idempotencyKey
@@ -62,7 +64,7 @@ class ResearchRunStorage extends AbstractStorage
      * @param int|null $createdByUserId
      * @return int
      */
-    public function create(string $runType, string $triggerSource, string $idempotencyKey, string $canonicalScopeKey, string $providerProfileName, string $llmProviderName, ?string $searchProviderName = null, ?int $customerId = null, ?int $createdByUserId = null): int 
+    public function create(string $runType, string $triggerSource, string $idempotencyKey, string $canonicalScopeKey, string $providerProfileName, string $llmProviderName, ?string $searchProviderName = null, ?int $customerId = null, ?int $createdByUserId = null): int
     {
         $pdo = $this->getPdo();
 
@@ -94,11 +96,11 @@ class ResearchRunStorage extends AbstractStorage
         ]);
 
         return (int)$pdo->lastInsertId();
-   }
+    }
 
     /**
      * Update run status and finished timestamp.
-     * 
+     *
      * @param int $runId
      * @param string $status
      * @param string|null $errorSummary
@@ -112,7 +114,7 @@ class ResearchRunStorage extends AbstractStorage
         $sql = 'UPDATE research_runs
                 SET status = :status, guardrail_status = :guardrailStatus, error_summary = :errorSummary, finished_at = :finishedAt
                 WHERE id = :id';
-        
+
         $sth = $pdo->prepare($sql);
 
         $sth->execute([
@@ -123,46 +125,44 @@ class ResearchRunStorage extends AbstractStorage
             ':id'              => $runId,
         ]);
     }
-    
+
     /**
-     * Get run by id
-     * 
+     * Fetch a single run by ID.
+     *
      * @param int $runId
-     * @return array|null
+     * @return ResearchRunModel|null
      */
-    public function getById(int $runId): ?array 
+    public function getById(int $runId): ?ResearchRunModel
     {
         $pdo = $this->getPdo();
-        
-        $sql = 'SELECT *
-                FROM research_runs 
+
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM research_runs
                 WHERE id = :id';
-        
+
         $sth = $pdo->prepare($sql);
-        $sth->execute([
-            ':id' => $runId
-        ]);         
-        
-        return $sth->fetch($pdo::FETCH_ASSOC) ?: null;
+        $sth->execute([':id' => $runId]);
+
+        return $sth->fetchObject(ResearchRunModel::class) ?: null;
     }
-     
-    /**                                                                           
-     * Fetch all runs, newest first                                            
-     *                                                                            
-     * @return array
-     */                                                                           
-    public function getAll(): array                                            
-    {                                                                             
-        $pdo = $this->getPdo();                                                
 
-        $sql = 'SELECT *
-                FROM research_runs 
-                ORDER BY id DESC';                 
+    /**
+     * Fetch all runs, newest first.
+     *
+     * @return ResearchRunModel[]
+     */
+    public function getAll(): array
+    {
+        $pdo = $this->getPdo();
 
-        $sth = $pdo->prepare($sql);                                               
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM research_runs
+                ORDER BY id DESC
+                LIMIT 100';
+
+        $sth = $pdo->prepare($sql);
         $sth->execute();
 
-        return $sth->fetchAll($pdo::FETCH_ASSOC);                                 
+        return $sth->fetchAll($pdo::FETCH_CLASS, ResearchRunModel::class);
     }
-
 }

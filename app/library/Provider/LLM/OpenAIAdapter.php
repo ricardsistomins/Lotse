@@ -61,7 +61,8 @@ class OpenAIAdapter implements LLMProviderAdapter
                 status:         self::STATUS_SUCCESS,
                 latencyMs:      $latencyMs,
                 inputTokens:    $response->usage->promptTokens,
-                outputTokens:   $response->usage->completionTokens
+                outputTokens:   $response->usage->completionTokens,
+                runId:          $context['run_id'] ?? null
             );
             
             return new LLMResponse(
@@ -82,7 +83,8 @@ class OpenAIAdapter implements LLMProviderAdapter
                 status:         self::STATUS_FAILED,
                 latencyMs:      $latencyMs,
                 inputTokens:    0,
-                outputTokens:   0
+                outputTokens:   0,
+                runId:          $context['run_id'] ?? null
             );
             
             return new LLMResponse(

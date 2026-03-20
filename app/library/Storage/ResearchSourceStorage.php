@@ -2,6 +2,8 @@
 
 namespace app\Storage;
 
+use app\Model\ResearchSourceModel;
+
 class ResearchSourceStorage extends AbstractStorage
 {
     /**
@@ -109,26 +111,26 @@ class ResearchSourceStorage extends AbstractStorage
         return (int)$sth->fetchColumn();
     }
     
-    /**                                                                           
-     * Fetch all sources for a run                                             
+    /**
+     * Fetch all sources for a run.
      *
      * @param int $runId
-     * @return array
+     * @return ResearchSourceModel[]
      */
     public function getAllByRunId(int $runId): array
-    {                                                                             
+    {
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT * 
-                FROM research_sources 
-                WHERE run_id = :runId 
-                ORDER BY id ASC';                                                                         
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM research_sources
+                WHERE run_id = :runId
+                ORDER BY id ASC';
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':runId' => $runId                                                    
-        ]);                                                                       
+            ':runId' => $runId
+        ]);
 
-        return $sth->fetchAll($pdo::FETCH_ASSOC);                                 
+        return $sth->fetchAll($pdo::FETCH_CLASS, ResearchSourceModel::class);
     }                 
 }

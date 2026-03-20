@@ -19,7 +19,7 @@ class SerpApiAdapter implements SearchProviderAdapter
      * @param string $apiKey
      * @param ProviderCallStorage $callStorage
      */
-    public function __construct(private readonly string $apiKey, private readonly ProviderCallStorage $callStorage) {}
+    public function __construct(private readonly string $apiKey, private readonly ProviderCallStorage $callStorage, private readonly ?int $runId = null) {}
 
     /**
      * Search query via SerpApi and return results.
@@ -59,7 +59,8 @@ class SerpApiAdapter implements SearchProviderAdapter
                 providerName:   'serpapi',
                 requestPurpose: 'search',
                 status:         'succeeded',
-                latencyMs:      $latencyMs
+                latencyMs:      $latencyMs,
+                runId:          $this->runId
             );
 
             return $results;
@@ -72,7 +73,8 @@ class SerpApiAdapter implements SearchProviderAdapter
                 requestPurpose: 'search',
                 status:         'failed',
                 latencyMs:      $latencyMs,
-                errorMessage:   $e->getMessage()
+                errorMessage:   $e->getMessage(),
+                runId:          $this->runId
             );
 
             return [];

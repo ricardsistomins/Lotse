@@ -4,7 +4,7 @@ namespace app\Service;
 
 /**
 * Evaluates the quality of findings produced by a research run.
-* !! Must be called after findings are saved, before report creation !!
+* Must be called after findings are saved, before report creation.
 *
 * Returns one of three outcomes:
 *   pass    — findings are solid, run may proceed to report creation

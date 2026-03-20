@@ -1,57 +1,57 @@
 <div class="card mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title mb-0">Run #<?= $run['id'] ?></h5>
+            <h5 class="card-title mb-0">Run #<?= $run->id ?></h5>
 
-            <span class="badge bg-<?= match($run['status']) {
+            <span class="badge bg-<?= match($run->status) {
                 'completed' => 'success',
                 'failed'    => 'danger',
                 'blocked'   => 'warning',
                 'running'   => 'info',
                 default     => 'secondary'
-            } ?>"><?= ucfirst($run['status']) ?></span>
+            } ?>"><?= ucfirst($run->status) ?></span>
         </div>
 
         <table class="table table-sm mb-0">
             <tr>
                 <td class="text-muted">Type</td>
-                <td><?= htmlspecialchars($run['run_type']) ?></td>
+                <td><?= htmlspecialchars($run->runType) ?></td>
             </tr>
             <tr>
                 <td class="text-muted">Trigger</td>
-                <td><?= htmlspecialchars($run['trigger_source']) ?></td>
+                <td><?= htmlspecialchars($run->triggerSource) ?></td>
             </tr>
             <tr>
                 <td class="text-muted">Guardrail</td>
                 <td>
-                    <span class="badge bg-<?= match($run['guardrail_status'] ?? 'pending') {
+                    <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
                         'pass'    => 'success',
                         'review'  => 'warning',
                         'blocked' => 'danger',
                         default   => 'secondary'
-                    } ?>"><?= ucfirst($run['guardrail_status'] ?? 'pending') ?></span>
+                    } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
                 </td>
             </tr>
             <tr>
                 <td class="text-muted">LLM provider</td>
-                <td><?= htmlspecialchars($run['llm_provider_name']) ?></td>
+                <td><?= htmlspecialchars($run->llmProviderName) ?></td>
             </tr>
             <tr>
                 <td class="text-muted">Search provider</td>
-                <td><?= htmlspecialchars($run['search_provider_name'] ?? '—') ?></td>
+                <td><?= htmlspecialchars($run->searchProviderName ?? '—') ?></td>
             </tr>
             <tr>
                 <td class="text-muted">Started</td>
-                <td><?= $run['started_at'] ?></td>
+                <td><?= $run->startedAt ?></td>
             </tr>
             <tr>
                 <td class="text-muted">Finished</td>
-                <td><?= $run['finished_at'] ?? '—' ?></td>
+                <td><?= $run->finishedAt ?? '—' ?></td>
             </tr>
-            <?php if (!empty($run['error_summary'])) { ?>
+            <?php if (!empty($run->errorSummary)) { ?>
                 <tr>
                     <td class="text-muted">Error</td>
-                    <td class="text-danger"><?= htmlspecialchars($run['error_summary']) ?></td>
+                    <td class="text-danger"><?= htmlspecialchars($run->errorSummary) ?></td>
                 </tr>
             <?php } ?>
         </table>
@@ -60,13 +60,13 @@
 
 <?php if ($report) { ?>
     <div class="alert alert-success mb-4">
-        Report generated — <a href="/report/<?= $report['id'] ?>">View report #<?= $report['id'] ?></a>
+        Report generated — <a class="link-fixed" href="/report/<?= $report->id ?>">View report #<?= $report->id ?></a>
     </div>
 <?php } ?>
 
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title">Provider calls</h6>
+        <h6 class="card-title mb-3">Provider calls</h6>
 
         <?php if (empty($providerCalls)) { ?>
             <p class="text-muted">No provider calls recorded.</p>
@@ -79,7 +79,21 @@
                         <th> Purpose </th>
                         <th> Status </th>
                         <th> Latency </th>
-                        <th> Tokens </th>
+                        <th>
+                            Tokens
+                            
+                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                data-bs-title="
+                                    <div class='text-start'>
+                                        <strong>LLM token usage</strong><br>
+                                        <ul>
+                                            <li><b>in</b> — tokens sent to the LLM (the prompt)</li>
+                                            <li><b>out</b> — tokens returned by the LLM (the response)</li>
+                                        </ul>
+                                    </div>
+                                    <small class='text-warning'>Very low out tokens may mean the LLM returned empty or minimal content.</small> ">
+                            </i>
+                        </th>
                         <th> Error </th>
                     </tr>
                 </thead>
@@ -87,20 +101,20 @@
                 <tbody>
                     <?php foreach ($providerCalls as $call) { ?>
                         <tr>
-                            <td><?= htmlspecialchars($call['provider_kind']) ?></td>
-                            <td><?= htmlspecialchars($call['provider_name']) ?></td>
-                            <td><?= htmlspecialchars($call['request_purpose']) ?></td>
+                            <td><?= htmlspecialchars($call->providerKind) ?></td>
+                            <td><?= htmlspecialchars($call->providerName) ?></td>
+                            <td><?= htmlspecialchars($call->requestPurpose) ?></td>
                             <td>
-                                <span class="badge bg-<?= match($call['status']) {
+                                <span class="badge bg-<?= match($call->status) {
                                     'succeeded'          => 'success',
                                     'fallback_succeeded' => 'warning',
                                     'failed'             => 'danger',
                                     default              => 'secondary'
-                                } ?>"><?= ucfirst($call['status']) ?></span>
+                                } ?>"><?= ucfirst($call->status) ?></span>
                             </td>
-                            <td><?= $call['latency_ms'] ? $call['latency_ms'] . 'ms' : '—' ?></td>
-                            <td><?= $call['input_tokens'] ? $call['input_tokens'] . ' / ' . $call['output_tokens'] : '—' ?></td>
-                            <td class="text-danger"><?= htmlspecialchars($call['error_message'] ?? '') ?></td>
+                            <td><?= $call->latencyMs ? number_format($call->latencyMs / 1000, 2) . 's' : '—' ?></td>
+                            <td><?= $call->inputTokens ? 'in: ' . $call->inputTokens . ' / out: ' . $call->outputTokens : '—' ?></td>
+                            <td class="text-danger"><?= htmlspecialchars($call->errorMessage ?? '') ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -111,7 +125,7 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title">Sources <span class="text-muted small">(<?= count($sources) ?>)</span></h6>
+        <h6 class="card-title mb-3">Sources <span class="text-muted small">(<?= count($sources) ?>)</span></h6>
 
         <?php if (empty($sources)) { ?>
             <p class="text-muted">No sources collected.</p>
@@ -127,9 +141,9 @@
                 <tbody>
                     <?php foreach ($sources as $source) { ?>
                         <tr>
-                            <td><a href="<?= htmlspecialchars($source['source_url']) ?>" target="_blank"><?= htmlspecialchars($source['source_title'] ?? $source['source_url']) ?></a></td>
-                            <td><?= htmlspecialchars($source['source_domain']) ?></td>
-                            <td><?= htmlspecialchars($source['source_type']) ?></td>
+                            <td><a href="<?= htmlspecialchars($source->sourceUrl) ?>" target="_blank"><?= htmlspecialchars($source->sourceTitle ?? $source->sourceUrl) ?></a></td>
+                            <td><?= htmlspecialchars($source->sourceDomain) ?></td>
+                            <td><?= htmlspecialchars($source->sourceType) ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -140,7 +154,7 @@
 
 <div class="card">
     <div class="card-body">
-        <h6 class="card-title">Findings <span class="text-muted small">(<?= count($findings) ?>)</span></h6>
+        <h6 class="card-title mb-3">Findings <span class="text-muted small">(<?= count($findings) ?>)</span></h6>
 
         <?php if (empty($findings)) { ?>
             <p class="text-muted">No findings extracted.</p>
@@ -150,7 +164,22 @@
                     <tr>
                         <th> Title </th>
                         <th> Type </th>
-                        <th> Confidence </th>
+                        <th>
+                            Confidence
+
+                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                data-bs-title="
+                                    <div class='text-start'>
+                                        <strong>LLM self-reported confidence (0.0 - 1.0)</strong><br>
+                                        <ul>
+                                            <li><b>0.9</b> — strong, clear evidence found</li>
+                                            <li><b>0.5</b> — uncertain, source was vague</li>
+                                            <li><b>0.2</b> — found something but accuracy unclear</li>
+                                        </ul>
+                                    </div>
+                                    <small class='text-warning'>Below 0.5 triggers a QA review flag.</small>">
+                            </i>
+                        </th>
                         <th> Status </th>
                     </tr>
                 </thead>
@@ -158,10 +187,10 @@
                 <tbody>
                     <?php foreach ($findings as $finding) { ?>
                         <tr>
-                            <td><?= htmlspecialchars($finding['title']) ?></td>
-                            <td><?= htmlspecialchars($finding['finding_type']) ?></td>
-                            <td><?= number_format((float)$finding['confidence_score'], 2) ?></td>
-                            <td><?= htmlspecialchars($finding['status']) ?></td>
+                            <td><?= htmlspecialchars($finding->title) ?></td>
+                            <td><?= htmlspecialchars($finding->findingType) ?></td>
+                            <td><?= number_format((float)$finding->confidenceScore, 2) ?></td>
+                            <td><?= htmlspecialchars($finding->status) ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -169,3 +198,13 @@
         <?php } ?>
     </div>
 </div>
+
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').each(function () {
+            new bootstrap.Tooltip(this);
+        });
+    });
+</script>

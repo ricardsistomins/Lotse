@@ -2,6 +2,8 @@
 
 namespace app\Storage;
 
+use app\Model\ProviderCallModel;
+
 class ProviderCallStorage extends AbstractStorage
 {
     /**
@@ -91,26 +93,26 @@ class ProviderCallStorage extends AbstractStorage
         ]);    
     }
     
-   /**                                                                           
-    * Fetch all provider calls for a run                                      
-    *
-    * @param int $runId
-    * @return array
-    */
+    /**
+     * Fetch all provider calls for a run.
+     *
+     * @param int $runId
+     * @return ProviderCallModel[]
+     */
     public function getAllByRunId(int $runId): array
-    {                                                                             
+    {
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT * 
-                FROM provider_calls 
-                WHERE run_id = :runId 
-                ORDER BY id ASC';                                                                         
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM provider_calls
+                WHERE run_id = :runId
+                ORDER BY id ASC';
 
-        $sth = $pdo->prepare($sql);                                               
+        $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':runId' => $runId                                                    
-        ]);                                                                       
+            ':runId' => $runId
+        ]);
 
-        return $sth->fetchAll($pdo::FETCH_ASSOC);                                 
+        return $sth->fetchAll($pdo::FETCH_CLASS, ProviderCallModel::class);
     }              
 }
