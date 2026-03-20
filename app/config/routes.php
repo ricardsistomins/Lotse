@@ -79,4 +79,20 @@ $router->add('/report/{id:[0-9]+}/status', array(
     'action'     => 'updateStatus'
 ));   
   
+
+/******************************
+*
+* Runs
+*
+*****************************/
+$router->add('/runs', array(
+    'controller' => 'run',
+    'action'     => 'index'
+));
+
+$router->add('/run/{id:[0-9]+}', array(
+    'controller' => 'run',
+    'action'     => 'view'
+));
+
 $container->setShared('router', $router);

@@ -108,4 +108,27 @@ class ResearchSourceStorage extends AbstractStorage
 
         return (int)$sth->fetchColumn();
     }
+    
+    /**                                                                           
+     * Fetch all sources for a run                                             
+     *
+     * @param int $runId
+     * @return array
+     */
+    public function getAllByRunId(int $runId): array
+    {                                                                             
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT * 
+                FROM research_sources 
+                WHERE run_id = :runId 
+                ORDER BY id ASC';                                                                         
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':runId' => $runId                                                    
+        ]);                                                                       
+
+        return $sth->fetchAll($pdo::FETCH_ASSOC);                                 
+    }                 
 }

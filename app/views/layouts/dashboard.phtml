@@ -29,9 +29,9 @@
                         <i class="bi bi-speedometer2"></i>
                         <a href="/dashboard" class="nav-link text-white">Dashboard</a>
                     </li>
-                    <li class="nav-item d-flex align-items-center">
+                    <li class="nav-item d-flex align-items-center <?= $activeController == 'run' ? 'selected' : '' ?>">
                         <i class="bi bi-cpu"></i>
-                        <a href="#" class="nav-link text-white">Runs</a>
+                        <a href="/runs" class="nav-link text-white">Runs</a>
                     </li>
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'report' ? 'selected' : '' ?>">
                         <i class="bi bi-file-text"></i>

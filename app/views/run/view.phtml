@@ -1,0 +1,171 @@
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Run #<?= $run['id'] ?></h5>
+
+            <span class="badge bg-<?= match($run['status']) {
+                'completed' => 'success',
+                'failed'    => 'danger',
+                'blocked'   => 'warning',
+                'running'   => 'info',
+                default     => 'secondary'
+            } ?>"><?= ucfirst($run['status']) ?></span>
+        </div>
+
+        <table class="table table-sm mb-0">
+            <tr>
+                <td class="text-muted">Type</td>
+                <td><?= htmlspecialchars($run['run_type']) ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Trigger</td>
+                <td><?= htmlspecialchars($run['trigger_source']) ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Guardrail</td>
+                <td>
+                    <span class="badge bg-<?= match($run['guardrail_status'] ?? 'pending') {
+                        'pass'    => 'success',
+                        'review'  => 'warning',
+                        'blocked' => 'danger',
+                        default   => 'secondary'
+                    } ?>"><?= ucfirst($run['guardrail_status'] ?? 'pending') ?></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-muted">LLM provider</td>
+                <td><?= htmlspecialchars($run['llm_provider_name']) ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Search provider</td>
+                <td><?= htmlspecialchars($run['search_provider_name'] ?? '—') ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Started</td>
+                <td><?= $run['started_at'] ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Finished</td>
+                <td><?= $run['finished_at'] ?? '—' ?></td>
+            </tr>
+            <?php if (!empty($run['error_summary'])) { ?>
+                <tr>
+                    <td class="text-muted">Error</td>
+                    <td class="text-danger"><?= htmlspecialchars($run['error_summary']) ?></td>
+                </tr>
+            <?php } ?>
+        </table>
+    </div>
+</div>
+
+<?php if ($report) { ?>
+    <div class="alert alert-success mb-4">
+        Report generated — <a href="/report/<?= $report['id'] ?>">View report #<?= $report['id'] ?></a>
+    </div>
+<?php } ?>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">Provider calls</h6>
+
+        <?php if (empty($providerCalls)) { ?>
+            <p class="text-muted">No provider calls recorded.</p>
+        <?php } else { ?>
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th> Kind </th>
+                        <th> Provider </th>
+                        <th> Purpose </th>
+                        <th> Status </th>
+                        <th> Latency </th>
+                        <th> Tokens </th>
+                        <th> Error </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php foreach ($providerCalls as $call) { ?>
+                        <tr>
+                            <td><?= htmlspecialchars($call['provider_kind']) ?></td>
+                            <td><?= htmlspecialchars($call['provider_name']) ?></td>
+                            <td><?= htmlspecialchars($call['request_purpose']) ?></td>
+                            <td>
+                                <span class="badge bg-<?= match($call['status']) {
+                                    'succeeded'          => 'success',
+                                    'fallback_succeeded' => 'warning',
+                                    'failed'             => 'danger',
+                                    default              => 'secondary'
+                                } ?>"><?= ucfirst($call['status']) ?></span>
+                            </td>
+                            <td><?= $call['latency_ms'] ? $call['latency_ms'] . 'ms' : '—' ?></td>
+                            <td><?= $call['input_tokens'] ? $call['input_tokens'] . ' / ' . $call['output_tokens'] : '—' ?></td>
+                            <td class="text-danger"><?= htmlspecialchars($call['error_message'] ?? '') ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">Sources <span class="text-muted small">(<?= count($sources) ?>)</span></h6>
+
+        <?php if (empty($sources)) { ?>
+            <p class="text-muted">No sources collected.</p>
+        <?php } else { ?>
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Domain</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($sources as $source) { ?>
+                        <tr>
+                            <td><a href="<?= htmlspecialchars($source['source_url']) ?>" target="_blank"><?= htmlspecialchars($source['source_title'] ?? $source['source_url']) ?></a></td>
+                            <td><?= htmlspecialchars($source['source_domain']) ?></td>
+                            <td><?= htmlspecialchars($source['source_type']) ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h6 class="card-title">Findings <span class="text-muted small">(<?= count($findings) ?>)</span></h6>
+
+        <?php if (empty($findings)) { ?>
+            <p class="text-muted">No findings extracted.</p>
+        <?php } else { ?>
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th> Title </th>
+                        <th> Type </th>
+                        <th> Confidence </th>
+                        <th> Status </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php foreach ($findings as $finding) { ?>
+                        <tr>
+                            <td><?= htmlspecialchars($finding['title']) ?></td>
+                            <td><?= htmlspecialchars($finding['finding_type']) ?></td>
+                            <td><?= number_format((float)$finding['confidence_score'], 2) ?></td>
+                            <td><?= htmlspecialchars($finding['status']) ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+    </div>
+</div>

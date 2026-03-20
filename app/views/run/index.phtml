@@ -1,0 +1,56 @@
+<div class="card">                                                            
+    <div class="card-body">                                                   
+        <h5 class="card-title mb-4">Runs</h5>                                 
+
+        <?php if (empty($runs)) { ?>                                    
+            <p class="text-muted">No runs yet.</p>                         
+        <?php } else { ?>                                                     
+            <table class="table table-hover">                              
+                <thead>                                                       
+                    <tr>                                                   
+                        <th> # </th>                                            
+                        <th> Type </th>                                      
+                        <th> Trigger </th>                                      
+                        <th> Status </th>                                       
+                        <th> Guardrail </th>                                    
+                        <th> Provider </th>                                     
+                        <th> Started </th>                                      
+                        <th></th>                                             
+                    </tr>                                                     
+                </thead>   
+                
+                <tbody>
+                    <?php foreach ($runs as $run) { ?>                  
+                        <tr>                                                  
+                            <td><?= $run['id'] ?></td>
+                            <td><?= htmlspecialchars($run['run_type']) ?></td>
+                            <td><?= htmlspecialchars($run['trigger_source']) ?></td>
+                            <td>                                              
+                                <span class="badge bg-<?= match($run['status']) {                                                       
+                                    'completed' => 'success',                 
+                                    'failed'    => 'danger',                  
+                                    'blocked'   => 'warning',                 
+                                    'running'   => 'info',                    
+                                    default     => 'secondary'                
+                                } ?>"><?= ucfirst($run['status']) ?></span>   
+                            </td>                                          
+                            <td>                                              
+                                <span class="badge bg-<?= match($run['guardrail_status'] ?? 'pending') {
+                                    'pass'    => 'success',                   
+                                    'review'  => 'warning',                   
+                                    'blocked' => 'danger',
+                                    default   => 'secondary'                  
+                                } ?>"><?= ucfirst($run['guardrail_status'] ?? 'pending') ?></span>                                                          
+                            </td>
+                            <td><?= htmlspecialchars($run['llm_provider_name']) ?></td>                           
+                            <td><?= $run['started_at'] ?></td>
+                            <td>                                              
+                                <a href="/run/<?= $run['id'] ?>" class="btn btn-sm btn-outline-primary">Detail</a>                                        
+                            </td>                                          
+                        </tr>                                                 
+                    <?php } ?>                                             
+                </tbody>
+            </table>
+        <?php } ?>                                                            
+    </div>
+</div>                     

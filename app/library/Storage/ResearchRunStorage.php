@@ -145,4 +145,24 @@ class ResearchRunStorage extends AbstractStorage
         
         return $sth->fetch($pdo::FETCH_ASSOC) ?: null;
     }
+     
+    /**                                                                           
+     * Fetch all runs, newest first                                            
+     *                                                                            
+     * @return array
+     */                                                                           
+    public function getAll(): array                                            
+    {                                                                             
+        $pdo = $this->getPdo();                                                
+
+        $sql = 'SELECT *
+                FROM research_runs 
+                ORDER BY id DESC';                 
+
+        $sth = $pdo->prepare($sql);                                               
+        $sth->execute();
+
+        return $sth->fetchAll($pdo::FETCH_ASSOC);                                 
+    }
+
 }

@@ -90,4 +90,27 @@ class ProviderCallStorage extends AbstractStorage
             ':finishedAt'     => date('Y-m-d H:i:s'),
         ]);    
     }
+    
+   /**                                                                           
+    * Fetch all provider calls for a run                                      
+    *
+    * @param int $runId
+    * @return array
+    */
+    public function getAllByRunId(int $runId): array
+    {                                                                             
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT * 
+                FROM provider_calls 
+                WHERE run_id = :runId 
+                ORDER BY id ASC';                                                                         
+
+        $sth = $pdo->prepare($sql);                                               
+        $sth->execute([
+            ':runId' => $runId                                                    
+        ]);                                                                       
+
+        return $sth->fetchAll($pdo::FETCH_ASSOC);                                 
+    }              
 }
