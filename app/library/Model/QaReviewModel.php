@@ -14,4 +14,10 @@ class QaReviewModel
     public ?string $decidedAt = null;
     public string $createdAt;
     public string $updatedAt;
+    
+    // Qa revies decision_status field options
+    const STATUS_PENDING  = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_CHANGES_REQUESTED = 'changes_requested';
 }

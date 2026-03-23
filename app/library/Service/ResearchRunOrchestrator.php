@@ -17,6 +17,11 @@ use app\Storage\ {
     QaReviewStorage
 };
 
+use app\Model\{
+    ReportModel,
+    ResearchRunModel
+};
+
 /**
 * Orchestrates the full research pipeline for a single run.
 * Same code path is used for dashboard triggers and CLI cron runs.
@@ -156,7 +161,7 @@ class ResearchRunOrchestrator
 
                     $revisionId = (new ReportRevisionStorage())->save($reportId, $structuredPayload, $reportResponse->content, $userId);
                     $reportStorage->setCurrentRevision($reportId, $revisionId);
-                    $reportStorage->updateStatus($reportId, 'needs_qa'); 
+                    $reportStorage->updateStatus($reportId, ReportModel::STATUS_NEEDS_QA); 
                     
                     (new QaReviewStorage())->create($revisionId);
                     
@@ -175,7 +180,7 @@ class ResearchRunOrchestrator
             }
 
             // Step 8 — finalize run
-            (new ResearchRunStorage())->finish($runId, 'completed', guardrailStatus: $guardrailStatus);
+            (new ResearchRunStorage())->finish($runId, ResearchRunModel::STATUS_COMPLETED, guardrailStatus: $guardrailStatus);
 
             // Step 9 — log audit
             (new AuditService($db))->log(
@@ -187,7 +192,7 @@ class ResearchRunOrchestrator
                 metadata:    ['guardrail_status' => $guardrailStatus]
             );
         } catch (\Throwable $e) {
-            (new ResearchRunStorage())->finish($runId, 'failed', $e->getMessage());
+            (new ResearchRunStorage())->finish($runId, ResearchRunModel::STATUS_FAILED, $e->getMessage());
 
             (new AuditService($db))->log(
                 actorType:   $userId ? 'user' : 'system',

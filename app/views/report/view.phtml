@@ -1,3 +1,11 @@
+<?php
+    use app\Model\{
+        ReportModel,
+        ResearchRunModel,
+        QaReviewModel
+    };
+?>
+
 <div class="card mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -6,9 +14,9 @@
                 <a href="/run/<?= $run->id ?>" class="text-muted small link-fixed"><- Run #<?= $run->id ?></a>
             </div>
 
-            <span class="badge bg-<?= match($report->status) {
-                'approved' => 'success',
-                'rejected' => 'danger',
+            <span class="badge fs-6 bg-<?= match($report->status) {
+                ReportModel::STATUS_APPROVED => 'success',
+                ReportModel::STATUS_REJECTED => 'danger',
                 default    => 'secondary'
             } ?>"><?= ucfirst($report->status) ?></span>
         </div>
@@ -18,9 +26,9 @@
                 <td class="text-muted">Guardrail</td>
                 <td>
                     <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
-                        'pass'    => 'success',
-                        'review'  => 'warning',
-                        'blocked' => 'danger',
+                        ResearchRunModel::STATUS_PASS    => 'success',
+                        ResearchRunModel::STATUS_REVIEW  => 'warning',
+                        ResearchRunModel::STATUS_BLOCKED => 'danger',
                         default   => 'secondary'
                     } ?>"><?= ucfirst($run->guardrailStatus ?? '—') ?></span>
                 </td>
@@ -37,7 +45,7 @@
     </div>
 </div>
 
-<?php if (($run->guardrailStatus ?? '') === 'blocked') { ?>
+<?php if (($run->guardrailStatus ?? '') === ResearchRunModel::STATUS_BLOCKED) { ?>
     <div class="alert alert-danger mb-4">
         <strong>Blocked:</strong> This revision cannot be approved. The run was blocked by the guardrail evaluator.
     </div>
@@ -46,7 +54,7 @@
 <?php if (!empty($structuredPayload)) { ?>
     <div class="card mb-4">
         <div class="card-body">
-            <h6 class="card-title mb-3">Structured fields</h6>
+            <h6 class="card-title mb-3">Sources</h6>
 
             <table class="table table-sm mb-0">
                 <?php foreach ($structuredPayload as $finding) { ?>
@@ -85,7 +93,7 @@
     </div>
 </div>
 
-<?php if ($canAct && $report->status !== 'approved' && ($run->guardrailStatus ?? '') !== 'blocked') { ?>
+<?php if ($canAct && !in_array($report->status, [ReportModel::STATUS_APPROVED, ReportModel::STATUS_REJECTED]) && ($run->guardrailStatus ?? '') !== ResearchRunModel::STATUS_BLOCKED) { ?>
     <div class="card mb-4">
         <div class="card-body">
             <h6 class="card-title mb-3">Actions</h6>
@@ -127,28 +135,20 @@
                             <td><?= $rev->id ?></td>
                             <td><?= htmlspecialchars($rev->username ?? 'system') ?></td>
                             <td><?= $rev->createdAt ?></td>
-                            <td><span class="text-muted">—</span></td>
-                            <td>—</td>
-                            <td>—</td>
-                        </tr>
-
-                        <?php if (!empty($rev->decisionStatus)) { ?>
-                            <tr>
-                                <td><?= $rev->id ?></td>
-                                <td><?= htmlspecialchars($rev->username ?? 'system') ?></td>
-                                <td><?= $rev->createdAt ?></td>
-                                <td>
+                            <td>
+                                <?php if (!empty($rev->decisionStatus)) { ?>
                                     <span class="badge bg-<?= match($rev->decisionStatus) {
-                                        'approved'          => 'success',
-                                        'rejected'          => 'danger',
-                                        'changes_requested' => 'warning',
-                                        default             => 'secondary'
+                                        QaReviewModel::STATUS_APPROVED => 'success',
+                                        QaReviewModel::STATUS_REJECTED => 'danger',
+                                        default                        => 'secondary'
                                     } ?>"><?= ucfirst($rev->decisionStatus) ?></span>
-                                </td>
-                                <td><?= htmlspecialchars($rev->reviewedByUsername ?? '—') ?></td>
-                                <td><?= $rev->decidedAt ?? '—' ?></td>
-                            </tr>
-                        <?php } ?>
+                                <?php } else { ?>
+                                    <span class="text-muted">—</span>
+                                <?php } ?>
+                            </td>
+                            <td><?= htmlspecialchars($rev->reviewedByUsername ?? '—') ?></td>
+                            <td><?= $rev->decidedAt ?? '—' ?></td>
+                        </tr>
                     <?php } ?>
                 </tbody>
             </table>

@@ -1,3 +1,10 @@
+<?php 
+    use app\Model\{ 
+        ReportModel,
+        ResearchRunModel
+    }; 
+?>
+
 <div class="card">
     <div class="card-body">
         <h5 class="card-title mb-4">Runs</h5>
@@ -27,18 +34,18 @@
                             <td><?= htmlspecialchars($run->triggerSource) ?></td>
                             <td>
                                 <span class="badge bg-<?= match($run->status) {
-                                    'completed' => 'success',
-                                    'failed'    => 'danger',
-                                    'blocked'   => 'warning',
-                                    'running'   => 'info',
+                                    ResearchRunModel::STATUS_COMPLETED => 'success',
+                                    ResearchRunModel::STATUS_FAILED    => 'danger',
+                                    ResearchRunModel::STATUS_BLOCKED   => 'warning',
+                                    ResearchRunModel::STATUS_RUNNING   => 'info',
                                     default     => 'secondary'
                                 } ?>"><?= ucfirst($run->status) ?></span>
                             </td>
                             <td>
                                 <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
-                                    'pass'    => 'success',
-                                    'review'  => 'warning',
-                                    'blocked' => 'danger',
+                                    ResearchRunModel::STATUS_PASS    => 'success',
+                                    ResearchRunModel::STATUS_REVIEW  => 'warning',
+                                    ResearchRunModel::STATUS_BLOCKED => 'danger',
                                     default   => 'secondary'
                                 } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
                             </td>

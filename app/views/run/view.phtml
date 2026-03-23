@@ -1,13 +1,20 @@
+<?php 
+    use app\Model\{ 
+        ReportModel,
+        ResearchRunModel
+    }; 
+?>
+
 <div class="card mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="card-title mb-0">Run #<?= $run->id ?></h5>
 
             <span class="badge bg-<?= match($run->status) {
-                'completed' => 'success',
-                'failed'    => 'danger',
-                'blocked'   => 'warning',
-                'running'   => 'info',
+                ResearchRunModel::STATUS_COMPLETED => 'success',
+                ResearchRunModel::STATUS_FAILED    => 'danger',
+                ResearchRunModel::STATUS_BLOCKED   => 'warning',
+                ResearchRunModel::STATUS_RUNNING   => 'info',
                 default     => 'secondary'
             } ?>"><?= ucfirst($run->status) ?></span>
         </div>
@@ -25,9 +32,9 @@
                 <td class="text-muted">Guardrail</td>
                 <td>
                     <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
-                        'pass'    => 'success',
-                        'review'  => 'warning',
-                        'blocked' => 'danger',
+                        ResearchRunModel::STATUS_PASS    => 'success',
+                        ResearchRunModel::STATUS_REVIEW  => 'warning',
+                        ResearchRunModel::STATUS_BLOCKED => 'danger',
                         default   => 'secondary'
                     } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
                 </td>

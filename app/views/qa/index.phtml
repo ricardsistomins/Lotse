@@ -1,3 +1,10 @@
+<?php 
+    use app\Model\{ 
+        ReportModel,
+        ResearchRunModel
+    }; 
+?>
+
 <div class="card">
     <div class="card-body">
         <h5 class="card-title mb-4">QA Queue</h5>
@@ -10,6 +17,7 @@
                     <tr>
                         <th> # </th>
                         <th> Scope key </th>
+                        <th> Revision </th>
                         <th> Guardrail </th>
                         <th> Status </th>
                         <th> Requested </th>
@@ -22,19 +30,20 @@
                         <tr>
                             <td><?= $item->id ?></td>
                             <td><code><?= htmlspecialchars($item->canonicalScopeKey) ?></code></td>
+                            <td><?= $item->currentRevisionId ?? '—' ?></td>
                             <td>
                                 <span class="badge bg-<?= match($item->runGuardrailStatus ?? 'pending') {
-                                    'pass'    => 'success',
-                                    'review'  => 'warning',
-                                    'blocked' => 'danger',
+                                    ResearchRunModel::STATUS_PASS    => 'success',
+                                    ResearchRunModel::STATUS_REVIEW  => 'warning',
+                                    ResearchRunModel::STATUS_BLOCKED => 'danger',
                                     default   => 'secondary'
                                 } ?>"><?= ucfirst($item->runGuardrailStatus ?? 'pending') ?></span>
                             </td>
                             <td>
                                 <span class="badge bg-<?= match($item->status) {
-                                    'needs_qa'  => 'info',
-                                    'approved'  => 'success',
-                                    'rejected'  => 'danger',
+                                    ReportModel::STATUS_NEEDS_QA => 'info',
+                                    ReportModel::STATUS_APPROVED => 'success',
+                                    ReportModel::STATUS_REJECTED => 'danger',
                                     default     => 'secondary'
                                 } ?>"><?= ucfirst(str_replace('_', ' ', $item->status)) ?></span>
                             </td>
@@ -42,7 +51,7 @@
                             <td class="d-flex gap-2">
                                 <a href="/report/<?= $item->id ?>" class="btn btn-sm btn-outline-primary">Inspect</a>
 
-                                <?php if ($item->runGuardrailStatus !== 'blocked' && in_array($this->session->get('userRole'), ['admin', 'qa'])) { ?>
+                                <?php if ($item->runGuardrailStatus !== ResearchRunModel::STATUS_BLOCKED && in_array($this->session->get('userRole'), ['admin', 'qa'])) { ?>
                                     <form method="POST" action="/qa/<?= $item->currentRevisionId ?>/approve">
                                         <button type="submit" class="btn btn-sm btn-success">Approve</button>
                                     </form>

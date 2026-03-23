@@ -91,7 +91,7 @@ class ResearchRunStorage extends AbstractStorage
             ':searchProviderName'  => $searchProviderName,
             ':customerId'          => $customerId,
             ':createdByUserId'     => $createdByUserId,
-            ':status'              => 'running',
+            ':status'              => ResearchRunModel::STATUS_RUNNING,
             ':startedAt'           => date('Y-m-d H:i:s'),
         ]);
 
@@ -107,7 +107,7 @@ class ResearchRunStorage extends AbstractStorage
      * @param string $guardrailStatus
      * @return void
      */
-    public function finish(int $runId, string $status, ?string $errorSummary = null, string $guardrailStatus = 'pending'): void
+    public function finish(int $runId, string $status, ?string $errorSummary = null, string $guardrailStatus = ResearchRunModel::STATUS_PENDING): void
     {
         $pdo = $this->getPdo();
 

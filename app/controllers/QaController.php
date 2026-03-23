@@ -9,7 +9,10 @@ use app\Storage\ {
     ReportRevisionStorage,
     QaReviewStorage    
 };
-
+use app\Model\{
+    QaReviewModel,
+    ReportModel
+};
 use app\Service\AuditService;   
 
 class QaController extends Controller
@@ -29,7 +32,7 @@ class QaController extends Controller
      */                                                                       
     public function approveAction(int $revisionId): void  
     {                                                                         
-        $this->handleDecision($revisionId, 'approved');
+        $this->handleDecision($revisionId, QaReviewModel::STATUS_APPROVED);
     }                                                                         
 
     /**
@@ -39,7 +42,7 @@ class QaController extends Controller
      */                                                                       
     public function rejectAction(int $revisionId): void                       
     {                                                                         
-        $this->handleDecision($revisionId, 'rejected');                       
+        $this->handleDecision($revisionId, QaReviewModel::STATUS_REJECTED);                       
     }                                                                         
 
     /**                                                                       
@@ -72,7 +75,7 @@ class QaController extends Controller
         $qaReviewStorage = new QaReviewStorage();                             
         $qaReview = $qaReviewStorage->getByRevisionId($revisionId);
 
-        if (!$qaReview || $qaReview->decisionStatus !== 'pending') {
+        if (!$qaReview || $qaReview->decisionStatus !== QaReviewModel::STATUS_PENDING) {
             $this->response->redirect('/qa');
             $this->response->send();
 
@@ -80,10 +83,12 @@ class QaController extends Controller
         }
 
         $qaReviewStorage->decide($qaReview->id, $decision, $userId);
-        $reportStorage = new ReportStorage();
-        $reportStorage->updateStatus($revision->reportId, $decision, $userId);
 
-        if ($decision === 'approved') {
+        $reportStatus  = $decision === QaReviewModel::STATUS_APPROVED ? ReportModel::STATUS_APPROVED : ReportModel::STATUS_REJECTED;
+        $reportStorage = new ReportStorage();
+        $reportStorage->updateStatus($revision->reportId, $reportStatus, $userId);
+
+        if ($decision === QaReviewModel::STATUS_APPROVED) {
             $reportStorage->setApprovedRevision($revision->reportId, $revisionId);
         }
 
@@ -93,7 +98,10 @@ class QaController extends Controller
             action:      'report.' . $decision,
             entityType:  'report_revision',
             entityId:    $revisionId,
-            metadata:    ['report_id' => $revision->reportId, 'qa_review_id' => $qaReview->id]
+            metadata:    [
+                'report_id' => $revision->reportId, 
+                'qa_review_id' => $qaReview->id
+            ]
         );                                                
 
         $this->response->redirect('/qa');                 

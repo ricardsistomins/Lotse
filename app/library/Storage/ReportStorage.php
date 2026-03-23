@@ -60,7 +60,7 @@ class ReportStorage extends AbstractStorage
         $sth->execute([
             ':runId'             => $runId,
             ':canonicalScopeKey' => $canonicalScopeKey,
-            ':status'            => 'draft',
+            ':status'            => ReportModel::STATUS_DRAFT,
             ':createdByUserId'   => $createdByUserId,
         ]);
 
@@ -245,7 +245,7 @@ class ReportStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'needs_qa'
+            ':status' => ReportModel::STATUS_NEEDS_QA
         ]);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ReportModel::class);

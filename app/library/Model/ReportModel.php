@@ -20,4 +20,11 @@ class ReportModel
     public ?string $triggerSource = null;
     public ?string $startedAt = null;
     public ?string $runGuardrailStatus = null;
+    
+    // Report status field options
+    const STATUS_NEEDS_QA = 'needs_qa';
+    const STATUS_DRAFT    = 'draft';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_ARCHIVED = 'archived';
 }

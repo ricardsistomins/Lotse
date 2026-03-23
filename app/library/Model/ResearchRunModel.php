@@ -24,5 +24,18 @@ class ResearchRunModel
     public ?string $finishedAt = null;
     public string $createdAt;
     public string $updatedAt;
+    
+    // run.status values
+    const STATUS_QUEUED    = 'queued';
+    const STATUS_RUNNING   = 'running';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_FAILED    = 'failed';
+    const STATUS_CANCELLED = 'cancelled';
+
+    // run.guardrail_status values
+    const STATUS_PASS      = 'pass';
+    const STATUS_REVIEW    = 'review';
+    const STATUS_PENDING   = 'pending';
+    const STATUS_BLOCKED   = 'blocked';
 }
 

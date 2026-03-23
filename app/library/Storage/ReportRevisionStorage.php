@@ -33,8 +33,7 @@ class ReportRevisionStorage extends AbstractStorage
         'structured_payload' => 'structuredPayload',
         'final_markdown'     => 'finalMarkdown',
         'created_by_user_id' => 'createdByUserId',
-        'created_at'         => 'createdAt',
-        'updated_at'         => 'updatedAt',
+        'created_at'         => 'createdAt'
     );
 
     /**
@@ -132,11 +131,11 @@ class ReportRevisionStorage extends AbstractStorage
                 FROM report_revisions
                 WHERE id = :id';
 
-        $sth = $pdo->prepare($sql);
+        $sth = $pdo->prepare($sql);   
         $sth->execute([
             ':id' => $revisionId
         ]);
-
+    
         return $sth->fetchObject(ReportRevisionModel::class) ?: null;
     }
 }

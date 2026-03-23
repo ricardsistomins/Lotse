@@ -56,7 +56,7 @@ class QaReviewStorage extends AbstractStorage
         $sth = $pdo->prepare($sql);
         $sth->execute([                                                       
             ':reportRevisionId' => $reportRevisionId,     
-            ':decisionStatus'   => 'pending',
+            ':decisionStatus'   => QaReviewModel::STATUS_PENDING,
             ':requestedAt'      => date('Y-m-d H:i:s'),
         ]);                                                                   
 

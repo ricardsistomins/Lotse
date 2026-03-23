@@ -10,6 +10,10 @@ use app\Storage\ {
     ResearchSourceStorage,
     ResearchFindingStorage
 };
+use app\Model\{
+    ReportModel,
+    ResearchRunModel
+};
 use app\Service\AuditService;
 
 class ReportController extends Controller
@@ -46,6 +50,7 @@ class ReportController extends Controller
 
         $revisionStorage = new ReportRevisionStorage();
         $latestRevision  = $revisionStorage->getById($report->currentRevisionId ?? 0);
+
         $finalMarkdown = $latestRevision->finalMarkdown ?? '';
         $structuredPayload = json_decode($latestRevision->structuredPayload ?? '[]', true);
 
@@ -131,7 +136,7 @@ class ReportController extends Controller
         $status = $request->getPost('status', 'string');
         $userId = $session->get('userId', 'int');
 
-        if (!in_array($status, ['approved', 'rejected'])) {
+        if (!in_array($status, [ReportModel::STATUS_APPROVED, ReportModel::STATUS_REJECTED])) {
             $response->redirect('/report/' . $id);
             $response->send();
 
@@ -139,11 +144,11 @@ class ReportController extends Controller
         }
 
         // Block approval if run guardrail is blocked
-        if ($status === 'approved') {
+        if ($status === ReportModel::STATUS_APPROVED) {
             $report = (new ReportStorage())->getById($id);
             $run    = (new ResearchRunStorage())->getById($report->runId);
 
-            if (($run->guardrailStatus ?? '') === 'blocked') {
+            if (($run->guardrailStatus ?? '') === ResearchRunModel::STATUS_BLOCKED) {
                 $response->redirect('/report/' . $id);
                 $response->send();
 
@@ -156,11 +161,11 @@ class ReportController extends Controller
         $report     = $report ?? (new ReportStorage())->getById($id);
         $revisionId = $report->currentRevisionId ?? null;
 
-        if ($status === 'approved' && $revisionId) {
+        if ($status === ReportModel::STATUS_APPROVED && $revisionId) {
             (new ReportStorage())->setApprovedRevision($id, $revisionId);
         }
 
-        $action = $status === 'approved' ? 'report.approved' : 'report.rejected';
+        $action = $status === ReportModel::STATUS_APPROVED ? 'report.approved' : 'report.rejected';
 
         (new AuditService($this->db))->log(
             actorType:   'user',
