@@ -1,6 +1,8 @@
 <?php
-    $runId    = $this->request->getQuery('runId', 'int');
-    $reportId = $this->request->getQuery('reportId', 'int');
+    $request = $this->request;
+
+    $runId = $request->getQuery('runId', 'int');
+    $reportId = $request->getQuery('reportId', 'int');
 ?>
 
 <div class="row g-3 mb-4">
@@ -67,6 +69,12 @@
         </div>
     </div>
 </div>
+
+<?php if ($this->request->getQuery('duplicate', 'int')) { ?>
+    <div class="alert alert-warning">
+        A run for this query was already started less than a minute ago (run #<?= $this->request->getQuery('runId', 'int') ?>). No new run was created.
+    </div>
+<?php } ?>  
 
 <?php if ($runId) { ?>                                                                       
       <div class="alert alert-success d-flex justify-content-between align-items-center">

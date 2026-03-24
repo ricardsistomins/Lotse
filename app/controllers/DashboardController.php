@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Phalcon\Mvc\Controller;
+use app\Service\DuplicateRunException;
 use app\Storage\ {
     ReportStorage,
     DashboardStorage
@@ -53,7 +54,14 @@ class DashboardController extends Controller
             default => 'dashboard_admin'
         };
         
-        $runId = $this->orchestrator->run($triggerSource, $query, $userId, $this->db);
+        try {                                                                                    
+            $runId = $this->orchestrator->run($triggerSource, $query, $userId, $this->db);
+        } catch (DuplicateRunException $e) {                                                     
+            $response->redirect('/dashboard?duplicate=1&runId=' . $e->existingRunId);
+            $response->send(); 
+            
+            return;                                                                              
+        }        
                        
         $report = (new ReportStorage())->getByRunId($runId);
         $reportId = $report ? $report->id : null;                                                  

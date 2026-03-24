@@ -99,6 +99,29 @@ class ResearchRunStorage extends AbstractStorage
     }
 
     /**
+     * Find a run by its idempotency key.                                            
+     *                                                                               
+     * @param string $idempotencyKey                                                 
+     * @return ResearchRunModel|null                                                 
+     */                                                                              
+    public function getByIdempotencyKey(string $idempotencyKey): ?ResearchRunModel   
+    {                                                                                
+        $pdo = $this->getPdo();                                                      
+                                                                                     
+        $sql = 'SELECT ' . $this->mapFields() . '                                    
+                FROM research_runs                                                   
+                WHERE idempotency_key = :idempotencyKey                              
+                LIMIT 1';
+                                                                                     
+        $sth = $pdo->prepare($sql);                                                  
+        $sth->execute([
+            ':idempotencyKey' => $idempotencyKey
+        ]);                       
+                                                                                     
+        return $sth->fetchObject(ResearchRunModel::class) ?: null;                   
+    }                
+    
+    /**
      * Update run status and finished timestamp.
      *
      * @param int $runId

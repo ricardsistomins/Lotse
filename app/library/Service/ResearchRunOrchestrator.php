@@ -5,6 +5,7 @@ namespace app\Service;
 use app\Provider\LLM\OpenAIAdapter;
 use app\Provider\Search\SerpApiAdapter;
 use Phalcon\Db\Adapter\Pdo\Mysql;
+use app\Service\DuplicateRunException; 
 
 use app\Storage\ {
     ProviderCallStorage,
@@ -61,7 +62,14 @@ class ResearchRunOrchestrator
         $canonicalScopeKey  = md5($query);
 
         // Step 1 — create run row
-        $runId = (new ResearchRunStorage())->create(
+        $runStorage = new ResearchRunStorage();
+        $existingRun = $runStorage->getByIdempotencyKey($idempotencyKey);
+        
+        if ($existingRun) {
+            throw new DuplicateRunException($existingRun->id);
+        }
+        
+        $runId = $runStorage->create(
             runType:              'source_sync',
             triggerSource:        $triggerSource,
             idempotencyKey:       $idempotencyKey,
