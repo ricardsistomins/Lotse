@@ -53,7 +53,9 @@ class ResearchRunOrchestrator
     public function run(string $triggerSource, string $query, ?int $userId = null, ?Mysql $db = null): int
     {
         $settings = new SystemSettingsStorage();
-        $profile  = $settings->get('provider_profiles')['default'];
+        $profiles       = $settings->get('provider_profiles');
+        $fallbackChain  = $settings->get('provider_fallback_chain');
+        $chainNames     = $fallbackChain['chain'] ?? (array)$fallbackChain;
 
         $idempotencyKey     = md5($triggerSource . $query . date('YmdHi'));
         $canonicalScopeKey  = md5($query);
@@ -71,14 +73,10 @@ class ResearchRunOrchestrator
         );
 
         try {
-            // Step 2 — collect sources via search
+            // Step 2 — collect sources via search           
+            $firstProfile  = $profiles[$chainNames[0]] ?? [];
             $callStorage   = new ProviderCallStorage();
-            $searchAdapter = new SerpApiAdapter(
-                $profile['search']['api_key'],
-                $callStorage,
-                $runId
-            );
-
+            $searchAdapter = new SerpApiAdapter($firstProfile['search']['api_key'], $callStorage, $runId);
             $searchResults = $searchAdapter->search($query);
 
             // Step 3 — save sources
@@ -97,26 +95,45 @@ class ResearchRunOrchestrator
                 );
             }
 
-            // Step 4 — build prompt and call LLM
+            // Step 4 — build prompt and call LLM with fallback chain
             $sourcesText = implode("\n\n", array_map(
-                fn($r) => "URL: {$r->url}\nTitle: {$r->title}\nExcerpt: {$r->snippet}",
+                fn($result) => "Title: {$result->title}\nURL: {$result->url}\nSnippet: {$result->snippet}",
                 $searchResults
             ));
-
             $prompt = $this->buildExtractionPrompt($sourcesText);
+            $llmResponse = null;
+            $isFallback = false;
 
-            $llmAdapter = new OpenAIAdapter(
-                $profile['llm']['api_key'],
-                $profile['llm']['model'],
-                $callStorage,
-            );
+            foreach ($chainNames as $profileName) {
+                $profileData = $profiles[$profileName] ?? null;
 
-            $llmResponse = $llmAdapter->complete($prompt, ['purpose' => 'findings_extraction', 'run_id' => $runId]);
+                if (!$profileData) {
+                    continue;
+                }
+
+                $llmAdapter  = new OpenAIAdapter(
+                    $profileData['llm']['api_key'],
+                    $profileData['llm']['model'],
+                    $callStorage,
+                );
+
+                $llmResponse = $llmAdapter->complete($prompt, [
+                    'purpose'       => 'findings_extraction',
+                    'run_id'        => $runId,
+                    'fallback_used' => $isFallback,
+                ]);
+
+                if ($llmResponse->success) {
+                    break;
+                }
+
+                $isFallback = true;
+            }
 
             // Step 5 — parse and save findings
             $findingStorage = new ResearchFindingStorage();
 
-            if ($llmResponse->success) {
+            if ($llmResponse?->success) {
                 $raw = preg_replace('/^```(?:json)?\s*/m', '', $llmResponse->content);   
                 $raw = preg_replace('/```\s*$/m', '', $raw);                             
                 $findings = json_decode(trim($raw), true) ?? [];   
@@ -137,16 +154,17 @@ class ResearchRunOrchestrator
             }
 
             // Step 6 — evaluate guardrails
-            $findings = isset($findings) ? $findings : [];
+            $findings = $findings ?? [];
             $guardrailStatus = (new GuardrailEvaluator())->evaluate($findings, count($searchResults));
 
             // Step 7 — generate report if guardrail allows
-            if (in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
+            if (isset($llmAdapter) && in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
                 $reportPrompt   = $this->buildReportPrompt($findings);
-                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation', 'run_id' => $runId]);
+                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation', 'run_id' => $runId, 'fallback_used' => $isFallback]);
 
                 if ($reportResponse->success) {
                     $savedFindings     = $findingStorage->getAllByRunId($runId);
+                    
                     $structuredPayload = array_map(fn($f) => [
                         'title'        => $f->title,
                         'finding_type' => $f->findingType,

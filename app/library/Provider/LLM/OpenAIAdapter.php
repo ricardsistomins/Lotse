@@ -62,7 +62,8 @@ class OpenAIAdapter implements LLMProviderAdapter
                 latencyMs:      $latencyMs,
                 inputTokens:    $response->usage->promptTokens,
                 outputTokens:   $response->usage->completionTokens,
-                runId:          $context['run_id'] ?? null
+                runId:          $context['run_id'] ?? null,
+                fallbackUsed:   $context['fallback_used'] ?? false
             );
             
             return new LLMResponse(
@@ -84,7 +85,8 @@ class OpenAIAdapter implements LLMProviderAdapter
                 latencyMs:      $latencyMs,
                 inputTokens:    0,
                 outputTokens:   0,
-                runId:          $context['run_id'] ?? null
+                runId:          $context['run_id'] ?? null,
+                fallbackUsed:   $context['fallback_used'] ?? false    
             );
             
             return new LLMResponse(
