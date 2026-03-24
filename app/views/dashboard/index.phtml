@@ -1,9 +1,80 @@
-<?php 
-    $runId = $this->request->getQuery('runId', 'int'); 
-    $reportId = $this->request->getQuery('reportId', 'int'); 
+<?php
+    use app\Model\{
+        ResearchRunModel,
+        ReportModel,
+        CustomerModel
+    };
+
+    $runId    = $this->request->getQuery('runId', 'int');
+    $reportId = $this->request->getQuery('reportId', 'int');
 ?>
 
- <?php if ($runId) { ?>                                                                       
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold"><?= $activeCustomers ?></div>
+                <div class="text-muted small">Active customers</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-primary"><?= $runsInProgress ?></div>
+                <div class="text-muted small">Runs in progress</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-warning"><?= $blockedRuns ?></div>
+                <div class="text-muted small">Blocked runs</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-info"><?= $reportsAwaitingQa ?></div>
+                <div class="text-muted small">Reports awaiting QA</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-success"><?= $approvedReports ?></div>
+                <div class="text-muted small">Approved reports</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold <?= $providerFailures24h > 0 ? 'text-danger' : 'text-success' ?>"><?= $providerFailures24h ?></div>
+                <div class="text-muted small">Provider failures (24h)</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold <?= $guardrailBlocks24h > 0 ? 'text-danger' : 'text-success' ?>"><?= $guardrailBlocks24h ?></div>
+                <div class="text-muted small">Guardrail blocks (24h)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if ($runId) { ?>                                                                       
       <div class="alert alert-success d-flex justify-content-between align-items-center">
           <span>Run #<?= $runId ?> completed successfully.</span>          
           

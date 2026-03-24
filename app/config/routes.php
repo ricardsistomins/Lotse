@@ -115,4 +115,47 @@ $router->add('/qa/{revisionId:[0-9]+}/reject', [
     'action'     => 'reject'                                                  
 ]);  
 
+
+/******************************
+*                                                                             
+* Settings
+*                                                                             
+******************************/
+$router->add('/settings', [
+    'controller' => 'settings',
+    'action'     => 'index'
+]);                                                                           
+
+$router->add('/settings/{key:[a-z_]+}', [                                     
+    'controller' => 'settings',
+    'action'     => 'view'
+]);                                                                           
+
+$router->add('/settings/{key:[a-z_]+}/save', [                                
+    'controller' => 'settings',
+    'action'     => 'save'
+]);
+
+
+/******************************
+*
+* Customers
+*
+******************************/
+$router->add('/customers', [
+    'controller' => 'customer',
+    'action'     => 'index'
+]);
+
+$router->add('/customer/{id:[0-9]+}', [
+    'controller' => 'customer',
+    'action'     => 'view'
+]);
+
+$router->add('/customer/{id:[0-9]+}/save', [
+    'controller' => 'customer',
+    'action'     => 'save'
+]);
+
+  
 $container->setShared('router', $router);

@@ -1,0 +1,33 @@
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title mb-4">System Settings</h5>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Description</th>
+                    <th>Last updated</th>
+                    <th></th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                <?php foreach ($settings as $setting) { ?>
+                    <tr>
+                        <td><code><?= htmlspecialchars($setting['setting_key']) ?></code></td>
+                        <td><?= htmlspecialchars($setting['description'] ?? '—') ?></td>
+                        <td><?= $setting['updated_at'] ?? '—' ?></td>
+                        <td>
+                            <?php if (in_array($this->session->get('userRole'), ['admin', 'dev'])) { ?>
+                                <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <?php } else { ?>
+                                <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-secondary">View</a>
+                            <?php } ?>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</div>

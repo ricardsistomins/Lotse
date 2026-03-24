@@ -60,4 +60,53 @@ class SystemSettingsStorage extends AbstractStorage
 
         return json_decode($row['setting_value_json'], true);
     }
+    
+    /**
+     * Insert or update a setting value by key.
+     *
+     * @param string $key
+     * @param mixed $value
+     * @param int|null $updatedByUserId
+     * @return void
+     */
+    public function set(string $key, mixed $value, ?int $updatedByUserId = null): void
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'INSERT INTO system_settings 
+                    (setting_key, setting_value_json, updated_by_user_id, updated_at)
+                VALUES 
+                    (:key, :value, :updatedByUserId, :updatedAt)
+                ON DUPLICATE KEY UPDATE
+                    setting_value_json  = :value,
+                    updated_by_user_id  = :updatedByUserId,
+                    updated_at          = :updatedAt';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':key'             => $key,
+            ':value'           => json_encode($value),
+            ':updatedByUserId' => $updatedByUserId,
+            ':updatedAt'       => date('Y-m-d H:i:s'),
+        ]);
+    }
+    
+    /**
+     * Fetch all settings rows, ordered by key.                                   
+     *                                                                            
+     * @return array
+     */                                                                           
+    public function getAll(): array
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT setting_key, description, updated_at
+                FROM system_settings                                              
+                ORDER BY setting_key ASC';
+
+        $sth = $pdo->prepare($sql);                                               
+        $sth->execute();
+
+        return $sth->fetchAll($pdo::FETCH_ASSOC);
+    }
 }

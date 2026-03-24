@@ -1,0 +1,48 @@
+<?php use app\Model\CustomerModel; ?>                                         
+   
+<div class="card">                                                            
+    <div class="card-body">
+        <h5 class="card-title mb-4"> Customers </h5>                            
+
+        <?php if (empty($customers)) { ?>                                     
+            <p class="text-muted">No customers found.</p>
+        <?php } else { ?>                                                     
+            <table class="table table-hover">
+                <thead>                                                       
+                    <tr>
+                        <th> # </th>                                            
+                        <th> Company </th>
+                        <th> Country </th>
+                        <th> Industry </th>
+                        <th> Employee band </th>                                
+                        <th> Status </th>
+                        <th></th>                                             
+                    </tr>
+                </thead>
+                
+                <tbody>                                                       
+                    <?php foreach ($customers as $customer) { ?>
+                        <tr>                                                  
+                            <td><?= $customer->id ?></td>
+                            <td><?= htmlspecialchars($customer->companyName) ?></td>                                                                       
+                            <td><?= htmlspecialchars($customer->countryCode) ?></td>                                                                       
+                            <td><?= htmlspecialchars($customer->industry) ?></td>
+                            <td><?= htmlspecialchars($customer->employeeBand) ?></td>                                                                       
+                            <td>
+                                <span class="badge bg-<?= match($customer->status) {                                                    
+                                    CustomerModel::STATUS_ACTIVE   => 'success',                                                                    
+                                    CustomerModel::STATUS_PAUSED   => 'warning',
+                                    CustomerModel::STATUS_ARCHIVED => 'secondary',                                                                  
+                                    default                        => 'secondary'                                                                   
+                                } ?>"><?= ucfirst($customer->status) ?></span>
+                            </td>                                             
+                            <td>
+                                <a href="/customer/<?= $customer->id ?>" class="btn btn-sm btn-outline-primary">View</a>                               
+                            </td>
+                        </tr>                                                 
+                    <?php } ?>
+                </tbody>
+            </table>
+        <?php } ?>
+    </div>
+</div>                                   

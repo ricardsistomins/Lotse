@@ -3,11 +3,28 @@
 namespace app\controllers;
 
 use Phalcon\Mvc\Controller;
-use app\Storage\ReportStorage;
+use app\Storage\ {
+    ReportStorage,
+    DashboardStorage
+};
+
 
 class DashboardController extends Controller
 {
-    public function indexAction() {}
+    public function indexAction() 
+    {
+       $dashboardStorage = new DashboardStorage();
+
+        $this->view->setVars([
+            'activeCustomers'       => $dashboardStorage->countActiveCustomers(),
+            'runsInProgress'        => $dashboardStorage->countRunsInProgress(),
+            'blockedRuns'           => $dashboardStorage->countBlockedRuns(),
+            'reportsAwaitingQa'     => $dashboardStorage->countReportsAwaitingQa(),
+            'approvedReports'       => $dashboardStorage->countApprovedReports(),
+            'providerFailures24h'   => $dashboardStorage->countProviderFailuresLast24h(),
+            'guardrailBlocks24h'    => $dashboardStorage->countGuardrailBlocksLast24h()
+        ]);
+    }
     
     /**
      * Handle manual research run trigger from the dashboard.
