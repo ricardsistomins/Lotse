@@ -4,17 +4,18 @@ namespace app\Model;
 
 class ReportModel
 {
-    public int $id;
-    public int $runId;
+    public int     $id;
+    public int     $runId;
+    public ?int    $customerId = null;
     public ?string $canonicalScopeKey = null;
-    public string $status;
-    public ?int $currentRevisionId = null;
-    public ?int $approvedRevisionId = null;
-    public ?int $createdByUserId = null;
-    public ?int $approvedByUserId = null;
+    public string  $status;
+    public ?int    $currentRevisionId = null;
+    public ?int    $approvedRevisionId = null;
+    public ?int    $createdByUserId = null;
+    public ?int    $approvedByUserId = null;
     public ?string $approvedAt = null;
-    public string $createdAt;
-    public string $updatedAt;
+    public string  $createdAt;
+    public string  $updatedAt;
 
     // Extra fields from JOIN queries
     public ?string $triggerSource = null;

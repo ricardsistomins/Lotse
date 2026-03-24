@@ -1,10 +1,4 @@
 <?php
-    use app\Model\{
-        ResearchRunModel,
-        ReportModel,
-        CustomerModel
-    };
-
     $runId    = $this->request->getQuery('runId', 'int');
     $reportId = $this->request->getQuery('reportId', 'int');
 ?>
@@ -13,7 +7,7 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold"><?= $activeCustomers ?></div>
+                <div class="fs-2 fw-bold"> <i class="bi bi-people"></i> <?= $activeCustomers ?></div>
                 <div class="text-muted small">Active customers</div>
             </div>
         </div>
@@ -22,7 +16,7 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold text-primary"><?= $runsInProgress ?></div>
+                <div class="fs-2 fw-bold text-primary"> <i class="bi bi-cpu"></i> <?= $runsInProgress ?></div>
                 <div class="text-muted small">Runs in progress</div>
             </div>
         </div>
@@ -31,7 +25,7 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold text-warning"><?= $blockedRuns ?></div>
+                <div class="fs-2 fw-bold text-danger"> <i class="bi bi-cpu"></i> <?= $blockedRuns ?></div>
                 <div class="text-muted small">Blocked runs</div>
             </div>
         </div>
@@ -40,7 +34,7 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold text-info"><?= $reportsAwaitingQa ?></div>
+                <div class="fs-2 fw-bold text-info"> <i class="bi bi-journals"></i> <?= $reportsAwaitingQa ?></div>
                 <div class="text-muted small">Reports awaiting QA</div>
             </div>
         </div>
@@ -49,7 +43,7 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold text-success"><?= $approvedReports ?></div>
+                <div class="fs-2 fw-bold text-success"> <i class="bi bi-card-checklist"></i> <?= $approvedReports ?></div>
                 <div class="text-muted small">Approved reports</div>
             </div>
         </div>
@@ -58,7 +52,7 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold <?= $providerFailures24h > 0 ? 'text-danger' : 'text-success' ?>"><?= $providerFailures24h ?></div>
+                <div class="fs-2 fw-bold <?= $providerFailures24h > 0 ? 'text-danger' : 'text-success' ?>"> <i class="bi bi-bug"></i> <?= $providerFailures24h ?></div>
                 <div class="text-muted small">Provider failures (24h)</div>
             </div>
         </div>
@@ -67,7 +61,7 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold <?= $guardrailBlocks24h > 0 ? 'text-danger' : 'text-success' ?>"><?= $guardrailBlocks24h ?></div>
+                <div class="fs-2 fw-bold <?= $guardrailBlocks24h > 0 ? 'text-danger' : 'text-success' ?>"> <i class="bi bi-ban"></i> <?= $guardrailBlocks24h ?></div>
                 <div class="text-muted small">Guardrail blocks (24h)</div>
             </div>
         </div>

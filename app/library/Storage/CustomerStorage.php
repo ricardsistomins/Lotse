@@ -132,7 +132,7 @@ class CustomerStorage extends AbstractStorage
     }
     
     /**
-     * Fetch reports related to a customer via research_runs.                     
+     * Fetch reports related to a customer.                     
      *                                                                            
      * @param int $customerId
      * @return array                                                              
@@ -141,10 +141,9 @@ class CustomerStorage extends AbstractStorage
     {                                                                             
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT r.id, r.status, r.canonical_scope_key, r.updated_at        
+        $sql = 'SELECT r.id, r.status, r.canonical_scope_key, r.updated_at
                 FROM reports r
-                JOIN research_runs rr ON rr.id = r.run_id                         
-                WHERE rr.customer_id = :customerId
+                WHERE r.customer_id = :customerId
                 ORDER BY r.updated_at DESC';                                      
 
         $sth = $pdo->prepare($sql);                                               
@@ -165,10 +164,11 @@ class CustomerStorage extends AbstractStorage
     {
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT id, status, guardrail_status, started_at
-                FROM research_runs
-                WHERE customer_id = :customerId
-                ORDER BY id DESC
+        $sql = 'SELECT rr.id, rr.status, rr.guardrail_status, rr.started_at
+                FROM research_runs rr
+                JOIN reports r ON r.run_id = rr.id
+                WHERE r.customer_id = :customerId
+                ORDER BY rr.id DESC
                 LIMIT 1';
 
         $sth = $pdo->prepare($sql);
@@ -193,8 +193,7 @@ class CustomerStorage extends AbstractStorage
                 FROM qa_reviews qr
                 JOIN report_revisions rv ON rv.id = qr.report_revision_id
                 JOIN reports r ON r.id = rv.report_id
-                JOIN research_runs rr ON rr.id = r.run_id
-                WHERE rr.customer_id = :customerId
+                WHERE r.customer_id = :customerId
                 ORDER BY qr.id DESC
                 LIMIT 1';
 

@@ -2,6 +2,12 @@
 
 namespace app\Storage;
 
+use app\Model\{
+    CustomerModel,
+    ResearchRunModel,
+    ReportModel
+};
+
 class DashboardStorage extends AbstractStorage
 {
     /**
@@ -19,7 +25,7 @@ class DashboardStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'active'
+            ':status' => CustomerModel::STATUS_ACTIVE
         ]);
 
         return (int)$sth->fetchColumn();
@@ -40,7 +46,7 @@ class DashboardStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'running'
+            ':status' => ResearchRunModel::STATUS_RUNNING
         ]);
 
         return (int)$sth->fetchColumn();
@@ -61,7 +67,7 @@ class DashboardStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'blocked'
+            ':status' => ResearchRunModel::STATUS_BLOCKED
         ]);
 
         return (int)$sth->fetchColumn();
@@ -82,7 +88,7 @@ class DashboardStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'needs_qa'
+            ':status' => ReportModel::STATUS_NEEDS_QA
         ]);
 
         return (int)$sth->fetchColumn();
@@ -103,7 +109,7 @@ class DashboardStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'approved'
+            ':status' => ReportModel::STATUS_APPROVED
         ]);
 
         return (int)$sth->fetchColumn();
@@ -148,7 +154,7 @@ class DashboardStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'blocked',
+            ':status' => ResearchRunModel::STATUS_BLOCKED,
             ':since'  => date('Y-m-d H:i:s', strtotime('-24 hours')),
         ]);
 

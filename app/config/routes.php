@@ -78,6 +78,11 @@ $router->add('/report/{id:[0-9]+}/status', array(
     'controller' => 'report', 
     'action'     => 'updateStatus'
 ));   
+
+$router->add('/report/{id:[0-9]+}/customer', array(
+    'controller' => 'report', 
+    'action'     => 'saveCustomer'
+));   
   
 
 /******************************

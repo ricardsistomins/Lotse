@@ -11,7 +11,7 @@ use app\Storage\ {
 
 class DashboardController extends Controller
 {
-    public function indexAction() 
+    public function indexAction(): void
     {
        $dashboardStorage = new DashboardStorage();
 

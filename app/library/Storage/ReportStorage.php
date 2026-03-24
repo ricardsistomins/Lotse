@@ -30,6 +30,7 @@ class ReportStorage extends AbstractStorage
     protected array $fieldMap = array(
         'id'                   => 'id',
         'run_id'               => 'runId',
+        'customer_id'          => 'customerId',
         'canonical_scope_key'  => 'canonicalScopeKey',
         'status'               => 'status',
         'current_revision_id'  => 'currentRevisionId',
@@ -249,5 +250,27 @@ class ReportStorage extends AbstractStorage
         ]);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ReportModel::class);
+    }
+    
+    /**
+     * Assign a customer to a report.
+     *
+     * @param int $reportId
+     * @param int|null $customerId
+     * @return void
+     */
+    public function updateCustomer(int $reportId, ?int $customerId): void
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'UPDATE reports
+                SET customer_id = :customerId
+                WHERE id = :id';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':customerId' => $customerId,
+            ':id'         => $reportId,
+        ]);
     }
 }

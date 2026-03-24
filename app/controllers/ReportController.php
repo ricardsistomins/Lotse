@@ -8,7 +8,8 @@ use app\Storage\ {
     ReportRevisionStorage,
     ResearchRunStorage,
     ResearchSourceStorage,
-    ResearchFindingStorage
+    ResearchFindingStorage,
+    CustomerStorage
 };
 use app\Model\{
     ReportModel,
@@ -70,6 +71,8 @@ class ReportController extends Controller
             'finalMarkdown'     => $finalMarkdown,
             'structuredPayload' => $structuredPayload,
             'renderedHtml'      => $renderedHtml,
+            'customers'         => (new CustomerStorage())->getAll(),
+            'customerId'        => $report->customerId
         ]);
     }
 
@@ -176,6 +179,44 @@ class ReportController extends Controller
             metadata:    [
                 'status'      => $status,
                 'revision_id' => $revisionId
+            ]
+        );
+
+        $response->redirect('/report/' . $id);
+        $response->send();
+    }
+    
+    /**
+     * Assign a customer to a report.
+     *
+     * @param int $id
+     * @return void
+     */
+    public function saveCustomerAction(int $id): void
+    {
+        $request  = $this->request;
+        $response = $this->response;
+
+        if (!$request->isPost()) {
+            $response->redirect('/report/' . $id);
+            $response->send();
+
+            return;
+        }
+
+        $customerId = $request->getPost('customer_id', 'int') ?: null;
+        $userId     = (int)$this->session->get('userId');
+
+        (new ReportStorage())->updateCustomer($id, $customerId);
+
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: $userId,
+            action:      'report.customer_assigned',
+            entityType:  'report',
+            entityId:    $id,
+            metadata:    [
+                'customer_id' => $customerId
             ]
         );
 

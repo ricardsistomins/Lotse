@@ -6,42 +6,71 @@
     };
 ?>
 
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h5 class="card-title mb-0">Report #<?= $report->id ?></h5>
-                <a href="/run/<?= $run->id ?>" class="text-muted small link-fixed"><- Run #<?= $run->id ?></a>
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">Report #<?= $report->id ?></h5>
+                        <a href="/run/<?= $run->id ?>" class="text-muted small link-fixed"><- Run #<?= $run->id ?></a>
+                    </div>
+
+                    <span class="badge fs-6 bg-<?= match($report->status) {
+                        ReportModel::STATUS_APPROVED => 'success',
+                        ReportModel::STATUS_REJECTED => 'danger',
+                        default    => 'secondary'
+                    } ?>"><?= ucfirst($report->status) ?></span>
+                </div>
+
+                <table class="table table-sm mb-0">
+                    <tr>
+                        <td class="text-muted">Guardrail</td>
+                        <td>
+                            <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
+                                ResearchRunModel::STATUS_PASS    => 'success',
+                                ResearchRunModel::STATUS_REVIEW  => 'warning',
+                                ResearchRunModel::STATUS_BLOCKED => 'danger',
+                                default   => 'secondary'
+                            } ?>"><?= ucfirst($run->guardrailStatus ?? '—') ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Sources</td>
+                        <td><?= (int)$sourceCount ?></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Findings</td>
+                        <td><?= (int)$findingCount ?></td>
+                    </tr>
+                </table>
             </div>
-
-            <span class="badge fs-6 bg-<?= match($report->status) {
-                ReportModel::STATUS_APPROVED => 'success',
-                ReportModel::STATUS_REJECTED => 'danger',
-                default    => 'secondary'
-            } ?>"><?= ucfirst($report->status) ?></span>
         </div>
+    </div>
 
-        <table class="table table-sm mb-0">
-            <tr>
-                <td class="text-muted">Guardrail</td>
-                <td>
-                    <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
-                        ResearchRunModel::STATUS_PASS    => 'success',
-                        ResearchRunModel::STATUS_REVIEW  => 'warning',
-                        ResearchRunModel::STATUS_BLOCKED => 'danger',
-                        default   => 'secondary'
-                    } ?>"><?= ucfirst($run->guardrailStatus ?? '—') ?></span>
-                </td>
-            </tr>
-            <tr>
-                <td class="text-muted">Sources</td>
-                <td><?= (int)$sourceCount ?></td>
-            </tr>
-            <tr>
-                <td class="text-muted">Findings</td>
-                <td><?= (int)$findingCount ?></td>
-            </tr>
-        </table>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title mb-3">Customer</h6>
+                
+                <form method="POST" action="/report/<?= $report->id ?>/customer">
+                    <div class="d-flex gap-2 align-items-center">
+                        
+                        <select name="customer_id" class="form-select">
+                            <option value=""> Select customer... </option>
+                            
+                            <?php foreach ($customers as $customer) { ?>
+                                <option value="<?= $customer->id ?>" <?= $customerId === $customer->id ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($customer->companyName) ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                        
+                        <button type="submit" class="btn btn-outline-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
