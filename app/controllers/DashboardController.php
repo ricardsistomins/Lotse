@@ -57,9 +57,9 @@ class DashboardController extends Controller
         try {                                                                                    
             $runId = $this->orchestrator->run($triggerSource, $query, $userId, $this->db);
         } catch (DuplicateRunException $e) {                                                     
-            $response->redirect('/dashboard?duplicate=1&runId=' . $e->existingRunId);
-            $response->send(); 
-            
+            $response->redirect('/run/' . $e->existingRunId . '?retrigger=1');
+            $response->send();
+      
             return;                                                                              
         }        
                        

@@ -74,6 +74,7 @@ class ResearchRunOrchestrator
             triggerSource:        $triggerSource,
             idempotencyKey:       $idempotencyKey,
             canonicalScopeKey:    $canonicalScopeKey,
+            query:                $query,
             providerProfileName:  'default',
             llmProviderName:      self::PROVIDER_NAME_OPENAI,
             searchProviderName:   self::PROVIDER_NAME_SERPAPI,
@@ -81,8 +82,13 @@ class ResearchRunOrchestrator
         );
 
         try {
-            // Step 2 — collect sources via search           
-            $firstProfile  = $profiles[$chainNames[0]] ?? [];
+            // Step 2 — collect sources via search
+            $firstProfile = $profiles[$chainNames[0]] ?? [];
+
+            if (empty($firstProfile['search']['api_key'])) {
+                throw new \RuntimeException('Search provider API key is not configured for profile: ' . ($chainNames[0] ?? 'unknown'));
+            }
+
             $callStorage   = new ProviderCallStorage();
             $searchAdapter = new SerpApiAdapter($firstProfile['search']['api_key'], $callStorage, $runId);
             $searchResults = $searchAdapter->search($query);
@@ -183,8 +189,14 @@ class ResearchRunOrchestrator
 
                     $reportStorage = new ReportStorage();
                     $report        = $reportStorage->getByCanonicalScopeKey($canonicalScopeKey);
-                    $reportId      = $report ? $report->id : $reportStorage->create($runId, $canonicalScopeKey, $userId);
-
+                    
+                    if ($report) {
+                        $reportId = $report->id;
+                        $reportStorage->updateRunId($reportId, $runId);
+                    } else {
+                        $reportId = $reportStorage->create($runId, $canonicalScopeKey, $userId);
+                    }
+        
                     $revisionId = (new ReportRevisionStorage())->save($reportId, $structuredPayload, $reportResponse->content, $userId);
                     $reportStorage->setCurrentRevision($reportId, $revisionId);
                     $reportStorage->updateStatus($reportId, ReportModel::STATUS_NEEDS_QA); 

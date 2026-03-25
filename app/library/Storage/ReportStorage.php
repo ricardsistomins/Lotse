@@ -273,4 +273,26 @@ class ReportStorage extends AbstractStorage
             ':id'         => $reportId,
         ]);
     }
+    
+    /**
+     * Update the run_id linked to a report.
+     *
+     * @param int $reportId
+     * @param int $runId
+     * @return void
+     */
+    public function updateRunId(int $reportId, int $runId): void
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'UPDATE reports
+                SET run_id = :runId 
+                WHERE id = :id';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':runId' => $runId, 
+            ':id' => $reportId
+        ]);
+    }
 }

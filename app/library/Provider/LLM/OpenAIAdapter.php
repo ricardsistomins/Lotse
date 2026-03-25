@@ -47,8 +47,10 @@ class OpenAIAdapter implements LLMProviderAdapter
             $response = $this->client->chat()->create([
                 'model'    => $this->model,
                 'messages' => [
-                    ['role' => 'user', 
-                    'content' => $prompt]
+                    [
+                        'role' => 'user', 
+                        'content' => $prompt
+                    ]
                 ],
             ]);
 

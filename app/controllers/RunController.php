@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Phalcon\Mvc\Controller;
+use app\Service\DuplicateRunException;
 use app\Storage\ {
     ResearchRunStorage,
     ProviderCallStorage,
@@ -18,7 +19,16 @@ class RunController extends Controller
      */
     public function indexAction(): void
     {   
-        $this->view->setVar('runs', (new ResearchRunStorage())->getAll());
+        $request = $this->request;
+        
+        $status = $request->getQuery('status', 'string') ?: null;
+        $triggerSource = $request->getQuery('trigger', 'string') ?: null;
+        
+        $this->view->setVars([
+            'runs'          => (new ResearchRunStorage())->getAll($status, $triggerSource),
+            'filterStatus'  => $status,
+            'filterTrigger' => $triggerSource
+        ]);
     }                                                                          
 
     /**                                                                       
@@ -49,5 +59,54 @@ class RunController extends Controller
             'findings'      => $findings,                                     
             'report'        => $report,                                       
         ]);                                                                
+    }
+    
+    /**
+     * Re-trigger a run using the same query. Admin and dev only.
+     * 
+     * @param int $id
+     * @return void
+     */
+    public function retriggerAction(int $id): void 
+    {
+        $response = $this->response;
+        $session = $this->session;
+        
+        $userRole = $session->get('userRole', 'string');
+
+        if (!in_array($userRole, ['admin', 'dev'])) {
+            $response->redirect('/run/' . $id);
+            $response->send();
+
+            return;
+        }
+
+        $run = (new ResearchRunStorage())->getById($id);
+
+        if (!$run || empty($run->query)) {
+            $response->redirect('/run/' . $id);
+            $response->send();
+            
+            return;
+        }
+     
+        $userId = $session->get('userId', 'int');
+        $triggerSource = match($userRole) {
+            'admin'   => 'dashboard_admin',
+            'dev'     => 'dashboard_dev',
+            default => 'dashboard_admin'
+        };
+        
+        try {
+            $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db);
+        } catch (DuplicateRunException $e) {
+            $response->redirect('/run/' . $e->existingRunId . '?duplicate=1');
+            $response->send();
+
+            return;
+        }
+
+        $response->redirect('/run/' . $newRunId . '?retrigger=1');
+        $response->send();
     }
 }

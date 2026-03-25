@@ -72,7 +72,7 @@
 
 <?php if ($this->request->getQuery('duplicate', 'int')) { ?>
     <div class="alert alert-warning">
-        A run for this query was already started less than a minute ago (run #<?= $this->request->getQuery('runId', 'int') ?>). No new run was created.
+        A run for this query was already started less than a minute ago (run #<?= $this->request->getQuery('runId', 'int') ?>). <b>No new run was created.</b>
     </div>
 <?php } ?>  
 
@@ -88,14 +88,14 @@
       </div>
 <?php } ?>   
 
-<div class="card mb-4">
+<div class="card mb-4 w-50">
     <div class="card-body">
         <h5 class="card-title">Trigger Research Run</h5>
         
         <form method="POST" action="/dashboard/trigger">
             <div class="mb-3">
                 <label for="query" class="form-label">Search query</label>
-                <input type="text" id="query" name="query" class="form-control" placeholder="e.g. AI funding Germany 2025" required>
+                <input type="text" id="query" name="query" class="form-control" placeholder="e.g. AI funding Germany 2026..." required>
             </div>
             
             <button type="submit" class="btn btn-primary" id="run-btn">Run</button>

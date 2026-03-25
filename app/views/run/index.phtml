@@ -5,6 +5,33 @@
     }; 
 ?>
 
+<form method="GET" action="/runs" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="status" class="form-select form-select-sm">
+            <option value="">All statuses</option>
+            <option value="completed" <?= $filterStatus === 'completed' ? 'selected' : '' ?>> Completed </option>
+            <option value="failed"    <?= $filterStatus === 'failed'    ? 'selected' : '' ?>> Failed </option>
+            <option value="running"   <?= $filterStatus === 'running'   ? 'selected' : '' ?>> Running </option>
+            <option value="blocked"   <?= $filterStatus === 'blocked'   ? 'selected' : '' ?>> Blocked </option>
+        </select>
+    </div>
+    
+    <div class="col-auto">
+        <select name="trigger" class="form-select form-select-sm">
+            <option value="">All triggers</option>
+            <option value="dashboard_admin" <?= $filterTrigger === 'dashboard_admin' ? 'selected' : '' ?>> Dashboard (admin) </option>
+            <option value="dashboard_dev"   <?= $filterTrigger === 'dashboard_dev'   ? 'selected' : '' ?>> Dashboard (dev) </option>
+            <option value="cron"            <?= $filterTrigger === 'cron'            ? 'selected' : '' ?>> Cron </option>
+        </select>
+    </div>
+    
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+        <a href="/runs" class="btn btn-sm btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+
 <div class="card">
     <div class="card-body">
         <h5 class="card-title mb-4">Runs</h5>

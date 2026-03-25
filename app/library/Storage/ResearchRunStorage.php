@@ -33,6 +33,7 @@ class ResearchRunStorage extends AbstractStorage
         'trigger_source'        => 'triggerSource',
         'idempotency_key'       => 'idempotencyKey',
         'canonical_scope_key'   => 'canonicalScopeKey',
+        'query'                 => 'query',    
         'customer_id'           => 'customerId',
         'report_id'             => 'reportId',
         'parent_run_id'         => 'parentRunId',
@@ -59,23 +60,24 @@ class ResearchRunStorage extends AbstractStorage
      * @param string $canonicalScopeKey
      * @param string $providerProfileName
      * @param string $llmProviderName
+     * @param string|null $query
      * @param string|null $searchProviderName
      * @param int|null $customerId
      * @param int|null $createdByUserId
      * @return int
      */
-    public function create(string $runType, string $triggerSource, string $idempotencyKey, string $canonicalScopeKey, string $providerProfileName, string $llmProviderName, ?string $searchProviderName = null, ?int $customerId = null, ?int $createdByUserId = null): int
+    public function create(string $runType, string $triggerSource, string $idempotencyKey, string $canonicalScopeKey, string $providerProfileName, string $llmProviderName, ?string $query = null, ?string $searchProviderName = null, ?int $customerId = null, ?int $createdByUserId = null): int
     {
         $pdo = $this->getPdo();
 
         $sql = 'INSERT INTO research_runs (
                     run_type, trigger_source, idempotency_key, canonical_scope_key,
-                    provider_profile_name, llm_provider_name, search_provider_name,
+                    query, provider_profile_name, llm_provider_name, search_provider_name,
                     customer_id, created_by_user_id, status, started_at
                 )
                 VALUES (
                     :runType, :triggerSource, :idempotencyKey, :canonicalScopeKey,
-                    :providerProfileName, :llmProviderName, :searchProviderName,
+                    :query, :providerProfileName, :llmProviderName, :searchProviderName,
                     :customerId, :createdByUserId, :status, :startedAt
                 )';
 
@@ -86,6 +88,7 @@ class ResearchRunStorage extends AbstractStorage
             ':triggerSource'       => $triggerSource,
             ':idempotencyKey'      => $idempotencyKey,
             ':canonicalScopeKey'   => $canonicalScopeKey,
+            ':query'               => $query,
             ':providerProfileName' => $providerProfileName,
             ':llmProviderName'     => $llmProviderName,
             ':searchProviderName'  => $searchProviderName,
@@ -170,21 +173,37 @@ class ResearchRunStorage extends AbstractStorage
     }
 
     /**
-     * Fetch all runs, newest first.
+     * Fetch all runs, newest first - with optional filters
      *
+     * @param string|null $status
+     * @param string|null $triggerSource
      * @return ResearchRunModel[]
      */
-    public function getAll(): array
+    public function getAll(?string $status = null, ?string $triggerSource = null): array
     {
         $pdo = $this->getPdo();
 
+        $where = [];
+        $params = [];
+        
+        if ($status !== null) {
+            $where[] = 'status = :status';
+            $params[':status'] = $status;
+        }
+        
+        if ($triggerSource !== null) {
+            $where[] = 'trigger_source = :triggerSource';
+            $params[':triggerSource'] = $triggerSource;
+        }
+
         $sql = 'SELECT ' . $this->mapFields() . '
-                FROM research_runs
+                FROM research_runs ' .
+                ($where ? ' WHERE ' . implode(' AND ', $where) : '') . '
                 ORDER BY id DESC
                 LIMIT 100';
 
         $sth = $pdo->prepare($sql);
-        $sth->execute();
+        $sth->execute($params);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ResearchRunModel::class);
     }

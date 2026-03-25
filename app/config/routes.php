@@ -100,6 +100,12 @@ $router->add('/run/{id:[0-9]+}', array(
     'action'     => 'view'
 ));
 
+$router->add('/run/{id:[0-9]+}/retrigger', array(
+    'controller' => 'run',
+    'action'     => 'retrigger'
+));
+
+
 /******************************                                               
 *                                                                             
 * QA

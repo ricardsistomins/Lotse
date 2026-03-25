@@ -9,6 +9,7 @@ class ResearchRunModel
     public string $triggerSource;
     public string $idempotencyKey;
     public string $canonicalScopeKey;
+    public ?string $query = null;
     public ?int $customerId = null;
     public ?int $reportId = null;
     public ?int $parentRunId = null;
