@@ -98,6 +98,41 @@
     </div>
 <?php } ?>
 
+<div class="card my-4">
+    <div class="card-body">
+        <h6 class="card-title mb-3">Run summary</h6>
+        
+        <table class="table table-sm mb-0">
+            <tr>
+                <td class="text-muted">Sources collected</td>
+                <td><?= $sourceCount ?></td>
+            </tr>
+            <tr>
+                <td class="text-muted">Findings extracted</td>
+                <td><?= $findingCount ?></td>
+            </tr>
+            <?php if ($run) { ?>
+                <tr>
+                    <td class="text-muted">Guardrail</td>
+                    <td>
+                        <span class="badge bg-<?= match($run->guardrailStatus ?? ResearchRunModel::STATUS_PENDING) {
+                            ResearchRunModel::STATUS_PASS    => 'success',
+                            ResearchRunModel::STATUS_REVIEW  => 'warning',
+                            ResearchRunModel::STATUS_BLOCKED => 'danger',
+                            default                          => 'secondary'
+                        } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Run</td>
+                    <td><a href="/run/<?= $run->id ?>">Run #<?= $run->id ?></a></td>
+                </tr>
+            <?php } ?>
+        </table>
+    </div>
+</div>
+
+
 <div class="card mb-4">
     <div class="card-body">
         <h6 class="card-title mb-3">Report text</h6>
@@ -184,3 +219,35 @@
         <?php } ?>
     </div>
 </div>
+
+<div class="card mt-4">                                                                                                                                                         
+    <div class="card-body">
+        <h6 class="card-title mb-3">Audit history</h6>
+
+        <?php if (empty($auditLog)) { ?>
+            <p class="text-muted">No audit entries found.</p>                                                                                                                   
+        <?php } else { ?>                                                                                                                                                       
+            <table class="table table-sm mb-0">
+                <thead>                                                                                                                                                         
+                    <tr>
+                        <th>Action</th>
+                        <th>Actor</th>                                                                                                                                          
+                        <th>Details</th>
+                        <th>Date</th>                                                                                                                                           
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($auditLog as $entry) { ?>
+                        <tr>                                                                                                                                                    
+                            <td><code><?= htmlspecialchars($entry->action) ?></code></td>
+                            <td><?= $entry->actorUserId ? 'User #' . $entry->actorUserId : 'System' ?></td>                                                                     
+                            <td class="text-muted small"><?= htmlspecialchars($entry->metadataJson ?? '') ?></td>
+                            <td><?= $entry->createdAt ?></td>                                                                                                                   
+                        </tr>                                                                                                                                                   
+                    <?php } ?>                                                                                                                                                  
+                </tbody>                                                                                                                                                        
+            </table>
+        <?php } ?>
+    </div>
+</div>
+

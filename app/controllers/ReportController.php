@@ -9,7 +9,8 @@ use app\Storage\ {
     ResearchRunStorage,
     ResearchSourceStorage,
     ResearchFindingStorage,
-    CustomerStorage
+    CustomerStorage,
+    AuditLogStorage
 };
 use app\Model\{
     ReportModel,
@@ -24,7 +25,24 @@ class ReportController extends Controller
      */
     public function indexAction()
     {
-        $this->view->setVar('reports', (new ReportStorage())->getAll());
+        $request = $this->request;
+        
+        $status = $request->getQuery('status', 'string') ?: null;
+        $customerId = $request->getQuery('customer_id', 'int') ?: null;
+
+        $customers = (new CustomerStorage())->getAll();
+        $customersName = [];
+        
+        foreach ($customers as $customer) {
+            $customersName[$customer->id] = $customer->companyName;
+        }
+                
+        $this->view->setVars([
+            'reports'        => (new ReportStorage())->getAll($status, $customerId),
+            'customersName'  => $customersName,
+            'filterStatus'   => $status,
+            'filterCustomer' => $customerId
+        ]);
     }
 
     /**
@@ -72,7 +90,8 @@ class ReportController extends Controller
             'structuredPayload' => $structuredPayload,
             'renderedHtml'      => $renderedHtml,
             'customers'         => (new CustomerStorage())->getAll(),
-            'customerId'        => $report->customerId
+            'customerId'        => $report->customerId,
+            'auditLog'          => (new AuditLogStorage())->getAllByEntity('report', $id)
         ]);
     }
 

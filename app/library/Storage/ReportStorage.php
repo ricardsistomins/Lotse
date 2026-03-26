@@ -206,22 +206,35 @@ class ReportStorage extends AbstractStorage
     /**
      * Fetch all reports with their run info, newest first.
      *
+     * @param string|null $status
+     * @param int|null $customerId
      * @return ReportModel[]
      */
-    public function getAll(): array
+    public function getAll(?string $status = null, ?int $customerId = null): array
     {
         $pdo = $this->getPdo();
+        
+        $where = [];
+        $params = [];
+        
+        if ($status !== null) {
+            $where[] = 'status = :status';
+            $params[':status'] = $status;
+        }
+  
+        if ($customerId !== null) {
+            $where[] = 'customer_id = :customerId';
+            $params[':customerId'] = $customerId;
+        }
 
-        $sql = 'SELECT ' . $this->mapFields() . ',
-                       rr.trigger_source AS triggerSource,
-                       rr.started_at AS startedAt
-                FROM reports
-                JOIN research_runs rr ON rr.id = reports.run_id
-                ORDER BY reports.id DESC
-                LIMIT 100';
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM reports' . 
+                ($where ? ' WHERE ' . implode(' AND ', $where) : '') . '
+                ORDER BY id DESC
+                LIMIT 50';
 
-        $sth = $pdo->prepare($sql);
-        $sth->execute();
+        $sth = $pdo->prepare($sql); 
+        $sth->execute($params);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ReportModel::class);
     }

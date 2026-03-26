@@ -1,3 +1,35 @@
+<?php use app\Model\ReportModel; ?>
+
+<form method="GET" action="/reports" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="status" class="form-select form-select-sm">
+            <option value=""> All statuses </option>
+            <option value="<?= ReportModel::STATUS_NEEDS_QA ?>" <?= $filterStatus === ReportModel::STATUS_NEEDS_QA ? 'selected' : '' ?>> Needs QA </option>
+            <option value="<?= ReportModel::STATUS_APPROVED ?>" <?= $filterStatus === ReportModel::STATUS_APPROVED ? 'selected' : '' ?>> Approved </option>
+            <option value="<?= ReportModel::STATUS_REJECTED ?>" <?= $filterStatus === ReportModel::STATUS_REJECTED ? 'selected' : '' ?>> Rejected </option>
+            <option value="<?= ReportModel::STATUS_DRAFT ?>"    <?= $filterStatus === ReportModel::STATUS_DRAFT    ? 'selected' : '' ?>> Draft </option>
+        </select>
+    </div>
+    
+    <div class="col-auto">
+        <select name="customer_id" class="form-select form-select-sm">
+            <option value=""> All customers </option>
+            
+            <?php foreach ($customers as $customer) { ?>
+                <option value="<?= $customer->id ?>" <?= $filterCustomer == $customer->id ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($customer->companyName) ?>
+                </option>
+            <?php } ?>
+        </select>
+    </div>
+    
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+        <a href="/reports" class="btn btn-sm btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+
 <div class="card">
     <div class="card-body">
         <h5 class="card-title mb-4">Reports</h5>
@@ -10,8 +42,8 @@
                     <tr>
                         <th> # </th>
                         <th> Run </th>
-                        <th> Trigger </th>
-                        <th> Started </th>
+                        <th> Updated at </th>
+                        <th> Customer </th>
                         <th> Status </th>
                         <th></th>
                     </tr>
@@ -22,14 +54,14 @@
                         <tr>
                             <td><?= $report->id ?></td>
                             <td>#<?= $report->runId ?></td>
-                            <td><?= htmlspecialchars($report->triggerSource ?? '—') ?></td>
-                            <td><?= $report->startedAt ?? '—' ?></td>
+                            <td><?= $report->updatedAt ?? '—' ?></td>
+                            <td><?= $report->customerId ? $customersName[$report->customerId] : '—' ?></td>
                             <td>
                                 <span class="badge bg-<?= match($report->status) {
-                                    'approved'  => 'success',
-                                    'rejected'  => 'danger',
-                                    'needs_qa'  => 'info',
-                                    default     => 'secondary'
+                                    ReportModel::STATUS_APPROVED => 'success',
+                                    ReportModel::STATUS_REJECTED => 'danger',
+                                    ReportModel::STATUS_NEEDS_QA => 'info',
+                                    default                      => 'secondary'
                                 } ?>"><?= ucfirst(str_replace('_', ' ', $report->status)) ?></span>
                             </td>
                             <td>
