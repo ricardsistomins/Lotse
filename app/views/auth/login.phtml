@@ -13,33 +13,24 @@
                 <div class="card-body p-4">
                     <h1 class="h4 mb-4 text-center">LOTSE</h1>
 
-                    <?php if (!empty($error)): ?>
+                    <?php if (!empty($error)) { ?>
                         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-                    <?php endif; ?>
+                    <?php } ?>
+                        
+                    <?php if (!empty($sessionExpired)) { ?>
+                        <div class="alert alert-warning">Your session expired due to inactivity. Please sign in again.</div>
+                    <?php } ?>
 
                     <form method="POST" action="/auth/login">
 
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                class="form-control"
-                                required
-                                autofocus
-                                value="<?= htmlspecialchars($email ?? '') ?>">
+                            <input type="email" id="email" name="email" class="form-control" required autofocus value="<?= htmlspecialchars($email ?? '') ?>">
                         </div>
 
                         <div class="mb-4">
                             <label for="password" class="form-label">Password</label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                class="form-control"
-                                required
-                            >
+                            <input type="password" id="password" name="password" class="form-control" required>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">Sign in</button>

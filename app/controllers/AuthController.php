@@ -15,12 +15,18 @@ class AuthController extends Controller
     {
         // This disables the layout for login page only. All other pages will use dashboard.phtml automatically.
         $this->view->setRenderLevel(\Phalcon\Mvc\View::LEVEL_ACTION_VIEW);
-
+        $session = $this->session;
         $response = $this->response;
         $request = $this->request;
         $view = $this->view;
-        $session = $this->session;
         
+        $sessionExpired = $session->get('sessionExpired', false);
+        
+        if ($sessionExpired) {
+            $session->remove('sessionExpired');
+            $view->setVar('sessionExpired', true);
+        }
+       
         if ($session->has('userId')) {
             $response->redirect('/dashboard');
             $response->send();

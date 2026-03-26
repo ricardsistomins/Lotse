@@ -14,16 +14,42 @@ class AuthGuard extends Injectable
         'error:notFound',
     ];
 
+    // 30 min
+    private const SESSION_TIMEOUT = 1800;
+    
     public function beforeDispatch(Event $event, Dispatcher $dispatcher): void
     {
+        $session = $this->session;
         $route = $dispatcher->getControllerName() . ':' . $dispatcher->getActionName();
 
         if (in_array($route, self::PUBLIC_ROUTES, true)) {
             return;
         }
 
-        if (!$this->session->has('userId')) {
-            $dispatcher->forward(['controller' => 'auth', 'action' => 'login']);
+        if (!$session->has('userId')) {
+            $dispatcher->forward([
+                'controller' => 'auth', 
+                'action' => 'login'
+            ]);
+            
+            return;
         }
+        
+        $lastActivity = $session->get('lastActivity');
+        
+        if ($lastActivity !== null && (time() - $lastActivity) > self::SESSION_TIMEOUT) {
+            $session->destroy();
+            $session->start();
+            
+            $session->set('sessionExpired', true);
+            $dispatcher->forward([
+                'controller' => 'auth', 
+                'action' => 'login'
+            ]);
+            
+            return;
+        }
+        
+        $session->set('lastActivity', time());
     }
 }
