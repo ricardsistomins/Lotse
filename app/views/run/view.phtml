@@ -235,6 +235,7 @@
                             </i>
                         </th>
                         <th> Status </th>
+                        <th> Deadline <span class="text-muted small">apply by</span></th>  
                     </tr>
                 </thead>
 
@@ -245,6 +246,15 @@
                             <td><?= htmlspecialchars($finding->findingType) ?></td>
                             <td><?= number_format((float)$finding->confidenceScore, 2) ?></td>
                             <td><?= htmlspecialchars($finding->status) ?></td>
+                            <td><?php
+                                if ($finding->deadline) {
+                                    $daysLeft = (strtotime($finding->deadline) - time()) / 86400;
+                                    $color = $daysLeft <= 30 ? 'text-danger' : '';
+                                    echo '<span class="' . $color . '">' . $finding->deadline . '</span>';
+                                } else {
+                                    echo '—';
+                                }
+                            ?></td>
                         </tr>
                     <?php } ?>
                 </tbody>

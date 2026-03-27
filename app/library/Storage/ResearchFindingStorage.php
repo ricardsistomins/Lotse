@@ -34,6 +34,7 @@ class ResearchFindingStorage extends AbstractStorage
         'finding_type'            => 'findingType',
         'title'                   => 'title',
         'normalized_payload'      => 'normalizedPayload',
+        'deadline'                => 'deadline',  
         'source_count'            => 'sourceCount',
         'official_source_present' => 'officialSourcePresent',
         'confidence_score'        => 'confidenceScore',
@@ -53,25 +54,26 @@ class ResearchFindingStorage extends AbstractStorage
      * @param string $title
      * @param array $normalizedPayload
      * @param string $dedupeHash
+     * @param string|null $deadline
      * @param int $sourceCount
      * @param bool $officialSourcePresent
      * @param float $confidenceScore
      * @param array|null $riskFlags
      * @return int
      */
-    public function save(int $runId, string $findingKey, string $findingType, string $title, array $normalizedPayload, string $dedupeHash, int $sourceCount = 0, bool $officialSourcePresent = false, float $confidenceScore = 0.0, ?array $riskFlags = null): int 
+    public function save(int $runId, string $findingKey, string $findingType, string $title, array $normalizedPayload, string $dedupeHash, ?string $deadline = null, int $sourceCount = 0, bool $officialSourcePresent = false, float $confidenceScore = 0.0, ?array $riskFlags = null): int 
     {
         $pdo = $this->getPdo();
 
         $sql = 'INSERT INTO research_findings (
                     run_id, finding_key, finding_type, title, normalized_payload,
-                    source_count, official_source_present, confidence_score,
-                    risk_flags, dedupe_hash, status
+                    deadline, source_count, official_source_present, 
+                    confidence_score, risk_flags, dedupe_hash, status
                 )
                 VALUES (
                     :runId, :findingKey, :findingType, :title, :normalizedPayload,
-                    :sourceCount, :officialSourcePresent, :confidenceScore,
-                    :riskFlags, :dedupeHash, :status
+                    :deadline, :sourceCount, :officialSourcePresent, 
+                    :confidenceScore, :riskFlags, :dedupeHash, :status
                 )';
 
         $sth = $pdo->prepare($sql);
@@ -82,6 +84,7 @@ class ResearchFindingStorage extends AbstractStorage
             ':findingType'            => $findingType,
             ':title'                  => $title,
             ':normalizedPayload'      => json_encode($normalizedPayload),
+            ':deadline'               => $deadline,
             ':sourceCount'            => $sourceCount,
             ':officialSourcePresent'  => (int)$officialSourcePresent,
             ':confidenceScore'        => $confidenceScore,

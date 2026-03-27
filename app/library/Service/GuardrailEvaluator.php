@@ -21,13 +21,14 @@ class GuardrailEvaluator
     * Evaluate a set of findings and return the guardrail status.
     *
     * what it checks:                                                                                                                         
-    * 1. Source presence — no sources collected at all -> blocked                    
+    * 1. Source presence — no sources collected at all -> blocked                          
     * 2. Findings presence — LLM returned no findings -> blocked
-    * 3. Extraction completeness — any finding missing title or finding_type -> blocked                                                                       
-    * 4. Confidence score — any finding with confidence_score < 0.5 - review        
-    * 5. High-impact fields — any finding missing funding_body or eligibility -> review                                                                        
-    * 6. Risk flags — any finding with non-empty risk_flags -> review                
-    * 7. Duplicate detection — any two findings share the same dedupe_hash -> review 
+    * 3. Extraction completeness — any finding missing title or finding_type -> blocked    
+    * 4. Confidence score — any finding with confidence_score < 0.5 -> review              
+    * 5. Missing deadline — any finding with no deadline -> review
+    * 6. High-impact fields — any finding missing funding_body or eligibility -> review    
+    * 7. Risk flags — any finding with non-empty risk_flags -> review                      
+    * 8. Duplicate detection — any two findings share the same dedupe_hash -> review
     *                                                                                
     * If none of the review or block rules trigger → pass.  
     * 
@@ -73,18 +74,23 @@ class GuardrailEvaluator
                 $needsReview = true;
             }
 
-            // Rule 5 — high-impact fields missing flags as review
+            // Rule 5 — missing deadline flags as review
+            if (empty($finding['deadline'])) {                                             
+                $needsReview = true;
+            }
+            
+            // Rule 6 — high-impact fields missing flags as review
             if (empty($finding['funding_body']) || empty($finding['eligibility'])) {
                 $needsReview = true;
             }
 
-            // Rule 6 — risk flags present flags as review
+            // Rule 7 — risk flags present flags as review
             if (!empty($finding['risk_flags'])) {
                 $needsReview = true;
             }         
         }
 
-        // Rule 7 — duplicate findings flagged as review      
+        // Rule 8 — duplicate findings flagged as review      
         $dedupeHashes = array_column($findings, 'dedupe_hash');  
         
         if (count($dedupeHashes) !== count(array_unique($dedupeHashes))) {            

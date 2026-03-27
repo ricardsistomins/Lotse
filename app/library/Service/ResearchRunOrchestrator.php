@@ -160,6 +160,7 @@ class ResearchRunOrchestrator
                         title:             $finding['title'] ?? '',
                         normalizedPayload: $finding,
                         dedupeHash:        md5(($finding['title'] ?? '') . $runId),
+                        deadline:          $finding['deadline'] ?? null,
                         sourceCount:       count($finding['source_urls'] ?? []),
                         confidenceScore:   (float)($finding['confidence_score'] ?? 0.0),
                         riskFlags:         $finding['risk_flags'] ?? null
