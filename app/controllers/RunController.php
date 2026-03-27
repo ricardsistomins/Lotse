@@ -11,6 +11,7 @@ use app\Storage\ {
     ResearchFindingStorage,
     ReportStorage
 };
+use app\Model\UserModel;
 
 class RunController extends Controller
 {
@@ -74,7 +75,7 @@ class RunController extends Controller
         
         $userRole = $session->get('userRole', 'string');
 
-        if (!in_array($userRole, ['admin', 'dev'])) {
+        if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {
             $response->redirect('/run/' . $id);
             $response->send();
 
@@ -92,8 +93,8 @@ class RunController extends Controller
      
         $userId = $session->get('userId', 'int');
         $triggerSource = match($userRole) {
-            'admin'   => 'dashboard_admin',
-            'dev'     => 'dashboard_dev',
+            UserModel::ROLE_ADMIN => 'dashboard_admin',                                            
+            UserModel::ROLE_DEV   => 'dashboard_dev',  
             default => 'dashboard_admin'
         };
         

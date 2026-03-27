@@ -19,7 +19,7 @@
                         <td><?= htmlspecialchars($setting['description'] ?? '—') ?></td>
                         <td><?= $setting['updated_at'] ?? '—' ?></td>
                         <td>
-                            <?php if (in_array($this->session->get('userRole'), ['admin', 'dev'])) { ?>
+                            <?php if (in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) { ?>
                                 <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-primary">Edit</a>
                             <?php } else { ?>
                                 <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-secondary">View</a>

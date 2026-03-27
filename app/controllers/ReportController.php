@@ -14,7 +14,8 @@ use app\Storage\ {
 };
 use app\Model\{
     ReportModel,
-    ResearchRunModel
+    ResearchRunModel,
+    UserModel
 };
 use app\Service\AuditService;
 
@@ -77,7 +78,7 @@ class ReportController extends Controller
         $revisions    = $revisionStorage->getAllByReportId($id);
 
         $role   = $session->get('userRole', 'string');
-        $canAct = in_array($role, ['admin', 'qa']);
+        $canAct = in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA]);
 
         $view->setVars([
             'report'            => $report,
@@ -148,7 +149,7 @@ class ReportController extends Controller
 
         $role = $session->get('userRole', 'string');
 
-        if (!in_array($role, ['admin', 'qa'])) {
+        if (!in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) {
             $response->redirect('/report/' . $id);
             $response->send();
 

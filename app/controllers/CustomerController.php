@@ -58,7 +58,7 @@ class CustomerController extends Controller
         $response = $this->response;
         $userRole = $this->session->get('userRole');
 
-        if (!in_array($userRole, ['admin', 'dev'])) {
+        if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {
             $response->redirect('/customer/' . $id);
             $response->send();
 

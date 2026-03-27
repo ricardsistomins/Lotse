@@ -11,7 +11,8 @@ use app\Storage\ {
 };
 use app\Model\{
     QaReviewModel,
-    ReportModel
+    ReportModel,
+    UserModel
 };
 use app\Service\AuditService;   
 
@@ -56,7 +57,7 @@ class QaController extends Controller
         $userId = (int)$this->session->get('userId');     
         $role   = $this->session->get('userRole');                            
 
-        if (!in_array($role, ['admin', 'qa'])) {                              
+        if (!in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) {                              
             $this->response->redirect('/qa');                                 
             $this->response->send();  
             

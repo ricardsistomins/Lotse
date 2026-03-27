@@ -14,4 +14,9 @@ class UserModel {
     public ?string $lastLoginAt = null;
     public string  $createdAt;
     public string  $updatedAt;
+    
+    // User roles
+    const ROLE_ADMIN = 'admin';
+    const ROLE_DEV   = 'dev';
+    const ROLE_QA    = 'qa';
 }

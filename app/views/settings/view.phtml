@@ -14,7 +14,7 @@
         <?php } ?>
 
 
-        <?php if (in_array($this->session->get('userRole'), ['admin', 'dev'])) { ?>
+        <?php if (in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) { ?>
             <form method="POST" action="/settings/<?= htmlspecialchars($key) ?>/save">       
                 <div class="mb-3">
                     <textarea name="value" class="form-control font-monospace" rows="20"><?= htmlspecialchars($value) ?></textarea>

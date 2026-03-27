@@ -3,7 +3,8 @@
         CustomerModel,
         ReportModel,
         ResearchRunModel,
-        QaReviewModel
+        QaReviewModel,
+        UserModel
     };
 ?>
 
@@ -14,7 +15,7 @@
             <a href="/customers" class="btn btn-sm btn-outline-secondary"> << Back </a>
         </div>
 
-        <?php if (in_array($this->session->get('userRole'), ['admin', 'dev'])) { ?>
+        <?php if (in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) { ?>
             <form method="POST" action="/customer/<?= $customer->id ?>/save">
                 <div class="row g-3">
                     <div class="col-md-6">

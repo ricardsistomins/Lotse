@@ -127,6 +127,10 @@
                     <td class="text-muted">Run</td>
                     <td><a href="/run/<?= $run->id ?>">Run #<?= $run->id ?></a></td>
                 </tr>
+                <tr>
+                    <td class="text-muted">Query text</td>
+                    <td><?= $run->query ?></td>
+                </tr>
             <?php } ?>
         </table>
     </div>

@@ -1,7 +1,8 @@
 <?php 
     use app\Model\{ 
         ReportModel,
-        ResearchRunModel
+        ResearchRunModel,
+        UserModel
     }; 
 ?>
 
@@ -51,7 +52,7 @@
                             <td class="d-flex gap-2">
                                 <a href="/report/<?= $item->id ?>" class="btn btn-sm btn-outline-primary">Inspect</a>
 
-                                <?php if ($item->runGuardrailStatus !== ResearchRunModel::STATUS_BLOCKED && in_array($this->session->get('userRole'), ['admin', 'qa'])) { ?>
+                                <?php if ($item->runGuardrailStatus !== ResearchRunModel::STATUS_BLOCKED && in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) { ?>
                                     <form method="POST" action="/qa/<?= $item->currentRevisionId ?>/approve">
                                         <button type="submit" class="btn btn-sm btn-success">Approve</button>
                                     </form>

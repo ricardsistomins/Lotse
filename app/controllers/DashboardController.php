@@ -8,7 +8,7 @@ use app\Storage\ {
     ReportStorage,
     DashboardStorage
 };
-
+use app\Model\UserModel;
 
 class DashboardController extends Controller
 {
@@ -48,9 +48,9 @@ class DashboardController extends Controller
         $role = $session->get('userRole', 'string');
         
         $triggerSource = match($role) {
-            'admin' => 'dashboard_admin',
-            'dev'   => 'dashboard_dev',
-            'qa'    => 'dashboard_qa',
+            UserModel::ROLE_ADMIN => 'dashboard_admin',                                                
+            UserModel::ROLE_DEV   => 'dashboard_dev',
+            UserModel::ROLE_QA    => 'dashboard_qa',  
             default => 'dashboard_admin'
         };
         

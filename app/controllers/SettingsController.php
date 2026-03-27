@@ -6,6 +6,7 @@ use Phalcon\Mvc\Controller;
 
 use app\Storage\SystemSettingsStorage;                                        
 use app\Service\AuditService;
+use app\Model\UserModel;
 
 class SettingsController extends Controller                                   
 {
@@ -57,7 +58,7 @@ class SettingsController extends Controller
         $response = $this->response;
         $userRole = $this->session->get('userRole');                          
 
-        if (!in_array($userRole, ['admin', 'dev'])) {                             
+        if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {                             
             $response->redirect('/settings');
             $response->send();                                                
 
