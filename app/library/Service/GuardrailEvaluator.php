@@ -33,24 +33,33 @@ class GuardrailEvaluator
     * 
     * @param  array  $findings  Raw findings array decoded from LLM response
     * @param  int    $sourceCount  Number of sources collected during the run
-    * @return string  'pass', 'review', or 'blocked'
+    * @return array{status: string, reason: string|null}
     */
-    public function evaluate(array $findings, int $sourceCount): string
+    public function evaluate(array $findings, int $sourceCount): array
     {
         // Rule 1 — no sources collected at all
         if ($sourceCount === 0) {
-            return self::STATUS_BLOCKED;
+            return [
+                'status' => self::STATUS_BLOCKED,
+                'reason' => 'No sources were collected'
+            ];
         }
 
         // Rule 2 — LLM returned no findings
         if (empty($findings)) {
-            return self::STATUS_BLOCKED;
+            return [
+                'status' => self::STATUS_BLOCKED,
+                'reason' => 'LLM returned no findings'
+            ];
         }
 
         // Rule 3 — extraction produced unparseable or incomplete results
         foreach ($findings as $finding) {
             if (empty($finding['title']) || empty($finding['finding_type'])) {
-                return self::STATUS_BLOCKED;
+                return [
+                    'status' => self::STATUS_BLOCKED,
+                    'reason' => 'One or more findings are missing title or finding type'
+                ];
             }
         }
 
@@ -82,7 +91,9 @@ class GuardrailEvaluator
             $needsReview = true;                                                      
         }  
         
-        return $needsReview ? self::STATUS_REVIEW : self::STATUS_PASSED;
+        return $needsReview 
+            ? ['status' => self::STATUS_REVIEW, 'reason' => null]
+            : ['status' => self::STATUS_PASSED, 'reason' => null];
     }
 }
 

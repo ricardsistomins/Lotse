@@ -21,7 +21,7 @@ class AuditService
      * @param mixed $metadata
      * @return void
      */
-    public function log(string $actorType, ?int $actorUserId, string $action, string $entityType, int $entityId, mixed $before = null, mixed $after = null, mixed  $metadata = null): void 
+    public function log(string $actorType, ?int $actorUserId, string $action, string $entityType, int $entityId, mixed $before = null, mixed $after = null, mixed $metadata = null): void 
     {
         $this->db->insertAsDict('audit_log', [
             'actor_type'    => $actorType,

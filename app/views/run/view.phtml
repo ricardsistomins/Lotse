@@ -29,6 +29,10 @@
                 <td><?= htmlspecialchars($run->triggerSource) ?></td>
             </tr>
             <tr>
+                <td class="text-muted"> Query text </td>
+                <td> <?= htmlspecialchars($run->query) ?> </td>
+            </tr>
+            <tr>
                 <td class="text-muted">Guardrail</td>
                 <td>
                     <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
@@ -93,10 +97,14 @@
         <div class="alert alert-warning mb-4">
             Run failed: <?= htmlspecialchars($run->errorSummary ?? 'unknown error') ?>                              
         </div>                                                                                                      
-    <?php } elseif ($run->guardrailStatus === ResearchRunModel::STATUS_BLOCKED) { ?>
-        <div class="alert alert-warning mb-4">                                                                      
-            Report was not generated because the guardrail blocked this run.                                        
-        </div>
+    <?php } elseif ($run->guardrailStatus === ResearchRunModel::STATUS_BLOCKED) { ?>       
+        <div class="alert alert-warning mb-4">                                             
+            Report was not generated because the guardrail blocked this run.
+            
+            <?php if (!empty($run->blockReason)) { ?>                                      
+                <div class="mt-1 small"><?= htmlspecialchars($run->blockReason) ?></div>   
+            <?php } ?>                                                                     
+        </div> 
     <?php } elseif ($run->guardrailStatus === ResearchRunModel::STATUS_PENDING) { ?>                                
         <div class="alert alert-warning mb-4">
             Report was not generated: guardrail evaluation did not complete.

@@ -169,8 +169,10 @@ class ResearchRunOrchestrator
 
             // Step 6 — evaluate guardrails
             $findings = $findings ?? [];
-            $guardrailStatus = (new GuardrailEvaluator())->evaluate($findings, count($searchResults));
-
+            $guardrailResult = (new GuardrailEvaluator())->evaluate($findings, count($searchResults));
+            $guardrailStatus = $guardrailResult['status'];
+            $blockReason = $guardrailResult['reason'];
+            
             // Step 7 — generate report if guardrail allows
             if (isset($llmAdapter) && in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
                 $reportPrompt   = $this->buildReportPrompt($findings);
@@ -218,7 +220,7 @@ class ResearchRunOrchestrator
             }
 
             // Step 8 — finalize run
-            (new ResearchRunStorage())->finish($runId, ResearchRunModel::STATUS_COMPLETED, guardrailStatus: $guardrailStatus);
+            (new ResearchRunStorage())->finish($runId, ResearchRunModel::STATUS_COMPLETED, guardrailStatus: $guardrailStatus, blockReason: $blockReason);
 
             // Step 9 — log audit
             (new AuditService($db))->log(
@@ -252,7 +254,9 @@ class ResearchRunOrchestrator
     {
         return <<<PROMPT
 You are a funding research assistant for German companies.
-Analyze the following sources and extract all relevant public funding programs.
+Analyze the following sources and extract only funding programs relevant to German companies. 
+Ignore any programs that are not available in Germany or to German-registered companies.
+EU-wide programs should only be included if they are directly accessible to German-registered companies.
 For each funding program found, return a JSON array with this exact structure:
 
 [

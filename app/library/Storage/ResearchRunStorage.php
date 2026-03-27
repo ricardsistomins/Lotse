@@ -44,6 +44,7 @@ class ResearchRunStorage extends AbstractStorage
         'guardrail_status'      => 'guardrailStatus',
         'retry_count'           => 'retryCount',
         'error_summary'         => 'errorSummary',
+        'block_reason'          => 'blockReason',
         'created_by_user_id'    => 'createdByUserId',
         'started_at'            => 'startedAt',
         'finished_at'           => 'finishedAt',
@@ -130,15 +131,17 @@ class ResearchRunStorage extends AbstractStorage
      * @param int $runId
      * @param string $status
      * @param string|null $errorSummary
+     * @param string|null $blockReason
      * @param string $guardrailStatus
      * @return void
      */
-    public function finish(int $runId, string $status, ?string $errorSummary = null, string $guardrailStatus = ResearchRunModel::STATUS_PENDING): void
+    public function finish(int $runId, string $status, ?string $errorSummary = null, ?string $blockReason = null, string $guardrailStatus = ResearchRunModel::STATUS_PENDING): void
     {
         $pdo = $this->getPdo();
 
         $sql = 'UPDATE research_runs
-                SET status = :status, guardrail_status = :guardrailStatus, error_summary = :errorSummary, finished_at = :finishedAt
+                SET status = :status, guardrail_status = :guardrailStatus, 
+                error_summary = :errorSummary, block_reason = :blockReason, finished_at = :finishedAt
                 WHERE id = :id';
 
         $sth = $pdo->prepare($sql);
@@ -147,6 +150,7 @@ class ResearchRunStorage extends AbstractStorage
             ':status'          => $status,
             ':guardrailStatus' => $guardrailStatus,
             ':errorSummary'    => $errorSummary,
+            ':blockReason'     => $blockReason,
             ':finishedAt'      => date('Y-m-d H:i:s'),
             ':id'              => $runId,
         ]);

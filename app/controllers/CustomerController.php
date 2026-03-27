@@ -6,6 +6,7 @@ use Phalcon\Mvc\Controller;
 
 use app\Storage\CustomerStorage;
 use app\Model\CustomerModel;
+use app\Service\AuditService;
 
 class CustomerController extends Controller
 {
@@ -80,6 +81,15 @@ class CustomerController extends Controller
             notes:               $request->getPost('notes', 'string') ?: null,
         );
 
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: (int)$this->session->get('userId'),
+            action:      'customer.updated',
+            entityType:  'customer',
+            entityId:    $id,
+            metadata:    []
+        );
+ 
         $response->redirect('/customer/' . $id);
         $response->send();
     }

@@ -5,7 +5,7 @@ namespace app\Storage;
 use app\Model\AuditLogModel;
 use app\Storage\AbstractStorage;
 
-abstract class AuditLogStorage extends AbstractStorage
+class AuditLogStorage extends AbstractStorage
 {
     /**
      * Primary key
@@ -52,10 +52,10 @@ abstract class AuditLogStorage extends AbstractStorage
     {
         $pdo = $this->getPdo();
         
-        $sql = 'SELECT' . $this->mapFields() . '
+        $sql = 'SELECT ' . $this->mapFields() . '
                 FROM audit_log
                 WHERE entity_type = :entityType
-                AND entity = :entityId
+                AND entity_id = :entityId
                 ORDER BY id DESC';
         
         $sth = $pdo->prepare($sql);

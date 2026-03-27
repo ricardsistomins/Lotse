@@ -5,6 +5,7 @@ namespace app\controllers;
 use Phalcon\Mvc\Controller;
 use app\Storage\UserStorage;
 use app\Validator\LoginValidator;
+use app\Service\AuditService;
 
 class AuthController extends Controller
 {
@@ -66,6 +67,15 @@ class AuthController extends Controller
         $session->set('userRole', $user->role);
         $session->set('userName', $user->name);
         
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: $user->userId,
+            action:      'auth.login',
+            entityType:  'user',
+            entityId:    $user->userId,
+            metadata:    []
+        );
+
         $response->redirect('/dashboard');
         $response->send();
         
@@ -79,6 +89,15 @@ class AuthController extends Controller
      */
     public function logoutAction(): void
     {
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: (int)$this->session->get('userId'),
+            action:      'auth.logout',
+            entityType:  'user',
+            entityId:    (int)$this->session->get('userId'),
+            metadata:    []
+        );
+    
         $this->session->destroy();
         $this->response->redirect('/auth/login');
         $this->response->send();
