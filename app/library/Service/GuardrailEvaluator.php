@@ -26,7 +26,7 @@ class GuardrailEvaluator
     * 3. Extraction completeness — any finding missing title or finding_type -> blocked    
     * 4. Confidence score — any finding with confidence_score < 0.5 -> review              
     * 5. Missing deadline — any finding with no deadline -> review
-    * 6. High-impact fields — any finding missing funding_body or eligibility -> review    
+    * 6. High-impact fields — any finding missing funding_body or eligibility -> blocked    
     * 7. Risk flags — any finding with non-empty risk_flags -> review                      
     * 8. Duplicate detection — any two findings share the same dedupe_hash -> review
     *                                                                                
@@ -79,9 +79,12 @@ class GuardrailEvaluator
                 $needsReview = true;
             }
             
-            // Rule 6 — high-impact fields missing flags as review
+            // Rule 6 — high-impact fields missing is a hard block
             if (empty($finding['funding_body']) || empty($finding['eligibility'])) {
-                $needsReview = true;
+                return [
+                    'status' => self::STATUS_BLOCKED,
+                    'reason' => 'One or more findings are missing funding body or eligibility'
+                ];
             }
 
             // Rule 7 — risk flags present flags as review
