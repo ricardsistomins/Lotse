@@ -32,8 +32,15 @@ require_once '/var/www/shared/config/config-lotse.php';
 use Phalcon\Di\FactoryDefault;
 use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Autoload\Loader;                                                               
-use app\Service\{ResearchRunOrchestrator, DuplicateRunException};
-use app\Storage\SystemSettingsStorage;                   
+use app\Service\{
+    ResearchRunOrchestrator, 
+    DuplicateRunException
+};
+use app\Storage\{
+    SystemSettingsStorage,
+    ResearchRunStorage
+};    
+use app\Model\ResearchRunModel;
 
 /**
  * Bootstrap:
@@ -97,34 +104,64 @@ if (empty($queries)) {
     exit(0);
 }                                                                                          
                   
-/**
- * Run loop
- * iterates over the queries and calls ResearchRunOrchestrator->run() 
- * for each one with triggerSource: 'cron'; 
- * catches DuplicateRunException to skip without error, 
- * catches any other exception to log and continue to the next query
- */
+/**                                                                                                                        
+ * Run loop                                                                                                                
+ * iterates over the queries and calls ResearchRunOrchestrator->run() for each one.                                        
+ * On success: logs the completed run ID and moves to the next query.                                                      
+ * On DuplicateRunException: skips silently — a run for this query is already in progress.                                 
+ * On transient error: retries up to 3 times with backoff (30s, 120s, 600s).                                               
+ *     Each retry increments research_runs.retry_count on the existing run row.                                            
+ * After all attempts exhausted: logs the final error and moves to the next query.                                         
+ */   
 $db  = $container->get('db');
 $orchestrator = new ResearchRunOrchestrator();
 
-foreach ($queries as $query) {                                                             
+$runStorage = new ResearchRunStorage();              
+$backoff = [30, 120, 600];
+$maxAttempts = 4;
+
+foreach ($queries as $query) {
     echo timestamp() . ' Starting: ' . $query . PHP_EOL;
 
-    try {       
-        $runId = $orchestrator->run(
-            triggerSource: 'cron',
-            query:         $query,
-            userId:        null,
-            db:            $db                                                             
-        );
-        
-        echo timestamp() . ' Completed run #' . $runId . PHP_EOL;                                 
-    } catch (DuplicateRunException $e) {
-        echo timestamp() . ' Skipped (duplicate of run #' . $e->existingRunId . ')' . PHP_EOL;
-    } catch (\Throwable $e) {                                                              
-        echo timestamp() . ' ERROR: ' . $e->getMessage() . PHP_EOL;
-    }                                                                                      
-}               
+    $existingRunId = null;
+
+    for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+        try {
+            $runId = $orchestrator->run(
+                triggerSource: ResearchRunModel::TRIGGER_CRON,
+                query:         $query,
+                userId:        null,
+                db:            $db,
+                existingRunId: $existingRunId
+            );
+
+            echo timestamp() . ' Completed run #' . $runId . PHP_EOL;
+            break;
+
+        } catch (DuplicateRunException $e) {
+            echo timestamp() . ' Skipped (duplicate of run #' . $e->existingRunId . ')' . PHP_EOL;
+            break;
+
+        } catch (\Throwable $e) {
+            $existingRunId = $orchestrator->lastRunId ?: null;
+
+            if ($attempt < $maxAttempts) {
+                $wait = $backoff[$attempt - 1];
+
+                if ($existingRunId) {
+                    $runStorage->incrementRetryCount($existingRunId);
+                }
+
+                echo timestamp() . ' Attempt ' . $attempt . '/' . $maxAttempts . ' after transient error: ' . $e->getMessage() . PHP_EOL;
+                echo timestamp() . ' Retrying in ' . $wait . 's...' . PHP_EOL;
+                sleep($wait);
+            } else {
+                echo timestamp() . ' All ' . $maxAttempts . ' attempts exhausted for: ' . $query . PHP_EOL;
+                echo timestamp() . ' Final error: ' . $e->getMessage() . PHP_EOL;
+            }
+        }
+    }
+}
 
 echo timestamp() . ' Worker finished.' . PHP_EOL;                                                 
    

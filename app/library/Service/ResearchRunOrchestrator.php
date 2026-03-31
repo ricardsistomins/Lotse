@@ -43,6 +43,8 @@ class ResearchRunOrchestrator
     const PROVIDER_NAME_SERPAPI = 'serpapi';
     const PROVIDER_NAME_OPENAI  = 'openai';
 
+    public int $lastRunId = 0;
+    
     /**
      * Run the full research pipeline.
      *
@@ -51,7 +53,7 @@ class ResearchRunOrchestrator
      * @param int|null      $userId         ID of the user who triggered, null for cron
      * @param Mysql|null    $db             DB connection, required for audit logging
      */
-    public function run(string $triggerSource, string $query, ?int $userId = null, ?Mysql $db = null): int
+    public function run(string $triggerSource, string $query, ?int $userId = null, ?Mysql $db = null, ?int $existingRunId = null): int
     {
         $settings = new SystemSettingsStorage();
         $profiles       = $settings->get('provider_profiles');
@@ -63,24 +65,31 @@ class ResearchRunOrchestrator
 
         // Step 1 — create run row
         $runStorage = new ResearchRunStorage();
-        $existingRun = $runStorage->getByIdempotencyKey($idempotencyKey);
         
-        if ($existingRun) {
-            throw new DuplicateRunException($existingRun->id);
-        }
-        
-        $runId = $runStorage->create(
-            runType:              'source_sync',
-            triggerSource:        $triggerSource,
-            idempotencyKey:       $idempotencyKey,
-            canonicalScopeKey:    $canonicalScopeKey,
-            query:                $query,
-            providerProfileName:  'default',
-            llmProviderName:      self::PROVIDER_NAME_OPENAI,
-            searchProviderName:   self::PROVIDER_NAME_SERPAPI,
-            createdByUserId:      $userId
-        );
+        if ($existingRunId) {
+            $runId = $existingRunId;
+        } else {
+            $existingRun = $runStorage->getRunningByCanonicalScopeKey($canonicalScopeKey);
 
+            if ($existingRun) {
+                throw new DuplicateRunException($existingRun->id);
+            }
+
+            $runId = $runStorage->create(
+                runType:              ResearchRunModel::RUN_TYPE_SOURCE_SYNC,
+                triggerSource:        $triggerSource,
+                idempotencyKey:       $idempotencyKey,
+                canonicalScopeKey:    $canonicalScopeKey,
+                query:                $query,
+                providerProfileName:  'default',
+                llmProviderName:      self::PROVIDER_NAME_OPENAI,
+                searchProviderName:   self::PROVIDER_NAME_SERPAPI,
+                createdByUserId:      $userId
+            );
+        }
+
+        $this->lastRunId = $runId;
+        
         try {
             // Step 2 — collect sources via search
             $firstProfile = $profiles[$chainNames[0]] ?? [];
@@ -243,6 +252,8 @@ class ResearchRunOrchestrator
                 entityId:    $runId,
                 metadata:    ['error' => $e->getMessage()]
             );
+            
+            throw $e;
         }
 
         return $runId;

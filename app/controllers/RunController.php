@@ -11,7 +11,10 @@ use app\Storage\ {
     ResearchFindingStorage,
     ReportStorage
 };
-use app\Model\UserModel;
+use app\Model\{
+    UserModel,
+    ResearchRunModel
+};
 
 class RunController extends Controller
 {
@@ -93,9 +96,9 @@ class RunController extends Controller
      
         $userId = $session->get('userId', 'int');
         $triggerSource = match($userRole) {
-            UserModel::ROLE_ADMIN => 'dashboard_admin',                                            
-            UserModel::ROLE_DEV   => 'dashboard_dev',  
-            default => 'dashboard_admin'
+            UserModel::ROLE_ADMIN => ResearchRunModel::TRIGGER_DASHBOARD_ADMIN,                                                
+            UserModel::ROLE_DEV   => ResearchRunModel::TRIGGER_DASHBOARD_DEV, 
+            default               => ResearchRunModel::TRIGGER_DASHBOARD_ADMIN
         };
         
         try {

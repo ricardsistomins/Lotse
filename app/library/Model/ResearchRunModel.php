@@ -27,6 +27,7 @@ class ResearchRunModel
     public string  $createdAt;
     public string  $updatedAt;
     
+    
     // run.status values
     const STATUS_QUEUED    = 'queued';
     const STATUS_RUNNING   = 'running';
@@ -35,9 +36,18 @@ class ResearchRunModel
     const STATUS_CANCELLED = 'cancelled';
 
     // run.guardrail_status values
-    const STATUS_PASS      = 'pass';
-    const STATUS_REVIEW    = 'review';
-    const STATUS_PENDING   = 'pending';
-    const STATUS_BLOCKED   = 'blocked';
+    const STATUS_PASS    = 'pass';
+    const STATUS_REVIEW  = 'review';
+    const STATUS_PENDING = 'pending';
+    const STATUS_BLOCKED = 'blocked';
+    
+    // run_type possible meanings
+    const RUN_TYPE_SOURCE_SYNC = 'source_sync';
+    
+    // trigger source values
+    const TRIGGER_CRON            = 'cron';
+    const TRIGGER_DASHBOARD_ADMIN = 'dashboard_admin';
+    const TRIGGER_DASHBOARD_DEV   = 'dashboard_dev';
+    const TRIGGER_DASHBOARD_QA    = 'dashboard_qa';
 }
 

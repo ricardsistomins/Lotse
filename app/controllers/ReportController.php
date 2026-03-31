@@ -126,7 +126,7 @@ class ReportController extends Controller
             entityId:    $id,
             metadata:    ['revision_id' => $revisionId]
         );
-
+        
         $response->redirect('/report/' . $id);
         $response->send();
     }

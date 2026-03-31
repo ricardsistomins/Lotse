@@ -126,6 +126,31 @@ class ResearchRunStorage extends AbstractStorage
     }                
     
     /**
+     * Get run by canonical_scope_key and status
+     * 
+     * @param string $canonicalScopeKey
+     * @return ResearchRunModel|null
+     */
+    public function getRunningByCanonicalScopeKey(string $canonicalScopeKey): ?ResearchRunModel
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM research_runs
+                WHERE canonical_scope_key = :canonicalScopeKey
+                AND status = :status
+                LIMIT 1';
+
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':canonicalScopeKey' => $canonicalScopeKey,
+            ':status'            => ResearchRunModel::STATUS_RUNNING
+        ]);
+        
+        return $sth->fetchObject(ResearchRunModel::class) ?: null;
+    }
+    
+    /**
      * Update run status and finished timestamp.
      *
      * @param int $runId
@@ -155,7 +180,29 @@ class ResearchRunStorage extends AbstractStorage
             ':id'              => $runId,
         ]);
     }
-
+    
+    /**
+     * Increments run retry count
+     * 
+     * @param int $runId
+     * @return void
+     */
+    public function incrementRetryCount(int $runId): void
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'UPDATE research_runs
+                SET retry_count = retry_count + 1, status = :status, finished_at = NULL, updated_at = :updatedAt
+                WHERE id = :id';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':status'    => ResearchRunModel::STATUS_RUNNING,
+            ':updatedAt' => date('Y-m-d H:i:s'),
+            ':id'        => $runId
+        ]); 
+    }
+    
     /**
      * Fetch a single run by ID.
      *
