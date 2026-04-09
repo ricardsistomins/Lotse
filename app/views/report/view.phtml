@@ -6,6 +6,12 @@
     };
 ?>
 
+<style>
+    .d-contents { 
+        display: contents; 
+    }
+</style>
+
 <div class="row g-4">
     <div class="col-md-8">
         <div class="card mb-4">
@@ -80,19 +86,65 @@
     </div>
 <?php } ?>
 
-<?php if (!empty($structuredPayload)) { ?>
+<?php if (!empty($findings)) { ?>
     <div class="card mb-4">
         <div class="card-body">
-            <h6 class="card-title mb-3">Sources</h6>
+            <h6 class="card-title mb-3">Findings</h6>
 
             <table class="table table-sm mb-0">
-                <?php foreach ($structuredPayload as $finding) { ?>
+                <thead>
                     <tr>
-                        <td class="text-muted"><?= htmlspecialchars($finding['title'] ?? '') ?></td>
-                        <td><?= htmlspecialchars($finding['finding_type'] ?? '') ?></td>
-                        <td><?= htmlspecialchars((string)(number_format($finding['confidence'], 2) ?? '')) ?></td>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Deadline</th>
+                        <th>Confidence</th>
+                        <?php if ($canAct) { ?>
+                            <th></th>
+                        <?php } ?>
                     </tr>
-                <?php } ?>
+                </thead>
+                
+                <tbody>
+                    <?php foreach ($findings as $finding) { ?>
+                        <?php $edited = $finding->updatedAt > $finding->createdAt; ?>
+                        <tr>
+                            <?php if ($canAct) { ?>
+                                <form method="POST" action="/finding/<?= $finding->id ?>/edit" class="d-contents">
+                                    <input type="hidden" name="report_id" value="<?= $report->id ?>">
+                                    <td>
+                                        <input type="text" name="title" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->title) ?>">
+                                    </td>
+                                    <td>
+                                        <input type="text" name="finding_type" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->findingType) ?>">
+                                    </td>
+                                    <td class="pe-3">
+                                        <input type="date" name="deadline" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->deadline ?? '') ?>">
+                                    </td>
+                                    <td><?= number_format($finding->confidenceScore, 2) ?></td>
+                                    <td class="d-flex">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                                        
+                                        <?php if ($edited) { ?>
+                                            <div class="text-end ms-auto">
+                                                <span class="badge bg-warning text-dark ms-3">Edited</span>
+                                            </div>
+                                        <?php } ?>
+                                    </td>
+                                </form>
+                            <?php } else { ?>
+                                <td>
+                                    <?= htmlspecialchars($finding->title) ?>
+                                    <?php if ($edited) { ?>
+                                        <span class="badge bg-warning text-dark ms-1">Edited</span>
+                                    <?php } ?>
+                                </td>
+                                <td><?= htmlspecialchars($finding->findingType) ?></td>
+                                <td><?= htmlspecialchars($finding->deadline ?? '—') ?></td>
+                                <td><?= number_format($finding->confidenceScore, 2) ?></td>
+                            <?php } ?>
+                        </tr>
+                    <?php } ?>
+                </tbody>
             </table>
         </div>
     </div>

@@ -84,6 +84,10 @@ $router->add('/report/{id:[0-9]+}/customer', array(
     'action'     => 'saveCustomer'
 ));   
   
+$router->add('/finding/{id:[0-9]+}/edit', array(
+    'controller' => 'report', 
+    'action'     => 'editFinding'
+)); 
 
 /******************************
 *

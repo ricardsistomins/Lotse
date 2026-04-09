@@ -68,6 +68,8 @@ class ReportController extends Controller
         $sourceCount = (new ResearchSourceStorage())->countByRunId($report->runId);
         $findingCount = (new ResearchFindingStorage())->countByRunId($report->runId);
 
+        $findings = (new ResearchFindingStorage())->getAllByRunId($report->runId);
+        
         $revisionStorage = new ReportRevisionStorage();
         $latestRevision  = $revisionStorage->getById($report->currentRevisionId ?? 0);
 
@@ -92,7 +94,8 @@ class ReportController extends Controller
             'renderedHtml'      => $renderedHtml,
             'customers'         => (new CustomerStorage())->getAll(),
             'customerId'        => $report->customerId,
-            'auditLog'          => (new AuditLogStorage())->getAllByEntity('report', $id)
+            'auditLog'          => (new AuditLogStorage())->getAllByEntity('report', $id),
+            'findings'          => $findings
         ]);
     }
 
@@ -241,6 +244,72 @@ class ReportController extends Controller
         );
 
         $response->redirect('/report/' . $id);
+        $response->send();
+    }
+    
+    /**
+     * Edit a single finding field. Admin and QA only.
+     * 
+     * @param int $id
+     * @return void
+     */
+    public function editFindingAction(int $id): void
+    {
+        $response = $this->response;
+        $request = $this->request;
+        $session = $this->session;
+        
+        $role = $session->get('userRole', 'string');
+        
+        if (!$request->isPost() || !in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) {
+            $response->redirect('/dashboard');
+            $response->send();
+            
+            return;
+        }
+        
+        $findingStorage = new ResearchFindingStorage();
+        $finding = $findingStorage->getById($id);
+        
+        if (!$finding) {
+            $response->redirect('/dashboard');
+            $response->send();
+            
+            return;
+        }
+        
+        $reportId = $request->getPost('report_id', 'int');
+        $title = $request->getPost('title', 'string');
+        $findingType = $request->getPost('finding_type', 'string');
+        $deadline = $request->getPost('deadline', 'string') ?: null;
+        $userId = $session->get('userId', 'int');
+        
+        $before = [
+            'title'        => $finding->title,
+            'finding_type' => $finding->findingType,
+            'deadline'     => $finding->deadline
+        ];
+        
+        $findingStorage->update($id, $title, $findingType, $deadline);
+        
+        $after = [
+            'title'        => $title,
+            'finding_type' => $findingType,
+            'deadline'     => $deadline
+        ];
+        
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: $userId,                                                 
+            action:      'finding.edited',
+            entityType:  'finding',                                               
+            entityId:    $id,
+            before:      $before,                                                 
+            after:       $after,
+            metadata:    ['report_id' => $reportId]   
+        );
+        
+        $response->redirect('/report/' . $reportId);
         $response->send();
     }
 }

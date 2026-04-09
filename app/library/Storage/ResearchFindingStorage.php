@@ -140,4 +140,57 @@ class ResearchFindingStorage extends AbstractStorage
         return $sth->fetchAll($pdo::FETCH_CLASS, ResearchFindingModel::class);
     }
 
+    /**
+     * Get a single finding by id
+     * 
+     * @param int $id
+     * @return ResearchFindingModel|null
+     */
+    public function getById(int $id): ?ResearchFindingModel 
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM research_findings 
+                WHERE id = :id
+                LIMIT 1';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':id' => $id
+        ]);
+        
+        $result = $sth->fetchObject(ResearchFindingModel::class);
+        
+        return $result ?: null;
+    }
+    
+    /**
+     * Update editable fields on a finding
+     * 
+     * @param int $id
+     * @param string $title
+     * @param string $findingType
+     * @param string|null $deadline
+     * @return void
+     */
+    public function update(int $id, string $title, string $findingType, ?string $deadline): void
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'UPDATE research_findings
+                SET title = :title,
+                    finding_type = :findingType,
+                    deadline = :deadline,
+                    updated_at = NOW()
+                WHERE id = :id';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':title'       => $title,
+            ':findingType' => $findingType,
+            ':deadline'    => $deadline,
+            ':id'          => $id
+        ]);
+    }
 }
