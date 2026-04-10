@@ -20,4 +20,6 @@ class ProviderCallModel
     public bool    $fallbackUsed;
     public string  $createdAt;
     public ?string $finishedAt = null;
+    
+    const STATUS_FAILED = 'failed';
 }

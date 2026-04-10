@@ -5,7 +5,8 @@ namespace app\Storage;
 use app\Model\{
     CustomerModel,
     ResearchRunModel,
-    ReportModel
+    ReportModel,
+    ProviderCallModel
 };
 
 class DashboardStorage extends AbstractStorage
@@ -116,6 +117,17 @@ class DashboardStorage extends AbstractStorage
     }
 
     /**
+     * Return now() - 24h
+     * 
+     * @return string
+     */
+    private function since24h(): string 
+    {
+//        CHANGE BACK TO 24H
+        return date('Y-m-d H:i:s', strtotime('-1 month')); 
+    }
+    
+    /**
      * Count provider call failures in the last 24 hours.
      *
      * @return int
@@ -131,8 +143,8 @@ class DashboardStorage extends AbstractStorage
 
         $sth = $pdo->prepare($sql);
         $sth->execute([
-            ':status' => 'failed',
-            ':since'  => date('Y-m-d H:i:s', strtotime('-24 hours')),
+            ':status' => ProviderCallModel::STATUS_FAILED,
+            ':since'  => $this->since24h(),
         ]);
 
         return (int)$sth->fetchColumn();
@@ -155,9 +167,63 @@ class DashboardStorage extends AbstractStorage
         $sth = $pdo->prepare($sql);
         $sth->execute([
             ':status' => ResearchRunModel::STATUS_BLOCKED,
-            ':since'  => date('Y-m-d H:i:s', strtotime('-24 hours')),
+            ':since'  => $this->since24h(),
         ]);
 
         return (int)$sth->fetchColumn();
+    }
+    
+    /**
+     * Get provider call failures in the last 24h
+     * 
+     * @return \stdClass[]
+     */
+    public function getProviderFailuresLast24h(): array
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT pc.id, pc.run_id, pc.provider_name,
+                       pc.request_purpose, pc.error_code,
+                       pc.error_message, pc.created_at
+                FROM provider_calls pc
+                WHERE pc.status = :status
+                AND pc.created_at >= :since
+                ORDER BY pc.created_at DESC
+                LIMIT 10';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':status' => ProviderCallModel::STATUS_FAILED,
+            ':since'  => $this->since24h()
+        ]);
+        
+        return $sth->fetchAll($pdo::FETCH_OBJ);
+    }
+    
+    /**
+     * Get guardrail-blocked runs in the last 24h
+     * 
+     * @return \stdClass[]
+     */
+    public function getGuardrailBlocksLast24h(): array
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT rr.id, rr.query, rr.block_reason, 
+                       rr.created_at, c.company_name
+                FROM research_runs rr
+                LEFT JOIN customers c ON c.id = rr.customer_id
+                WHERE rr.guardrail_status = :status
+                AND rr.created_at >= :since
+                ORDER BY rr.created_at DESC
+                LIMIT 10';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':status' => ResearchRunModel::STATUS_BLOCKED,
+            ':since'  => $this->since24h()
+        ]);
+        
+        return $sth->fetchAll($pdo::FETCH_OBJ);
     }
 }

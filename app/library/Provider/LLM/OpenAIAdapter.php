@@ -88,6 +88,7 @@ class OpenAIAdapter implements LLMProviderAdapter
                 inputTokens:    0,
                 outputTokens:   0,
                 runId:          $context['run_id'] ?? null,
+                errorMessage:   $e->getMessage(),   
                 fallbackUsed:   $context['fallback_used'] ?? false    
             );
             

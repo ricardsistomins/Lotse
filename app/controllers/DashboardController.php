@@ -26,7 +26,9 @@ class DashboardController extends Controller
             'reportsAwaitingQa'     => $dashboardStorage->countReportsAwaitingQa(),
             'approvedReports'       => $dashboardStorage->countApprovedReports(),
             'providerFailures24h'   => $dashboardStorage->countProviderFailuresLast24h(),
-            'guardrailBlocks24h'    => $dashboardStorage->countGuardrailBlocksLast24h()
+            'guardrailBlocks24h'    => $dashboardStorage->countGuardrailBlocksLast24h(),
+            'providerFailureRows'   => $dashboardStorage->getProviderFailuresLast24h(),
+            'guardrailBlockRows'    => $dashboardStorage->getGuardrailBlocksLast24h()
         ]);
     }
     
