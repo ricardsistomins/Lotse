@@ -1,0 +1,399 @@
+<?php 
+    $analyticsMap = [];
+    
+    foreach ($analytics['findings_analysis'] as $item) {
+        $analyticsMap[$item['finding_key']] = $item;
+    }
+?>
+
+<style>
+    .font-gradient {
+        background: linear-gradient(90deg, green, #38a0df); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent;        
+        background-clip: text;
+    }
+    
+    .light-gray {
+        background-color: #f5f5f5 !important;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-0">
+    <h4 class="mb-0">                                                         
+        <span class="lang-en">Report Preview</span>
+        <span class="lang-de d-none">Berichtsvorschau</span>                         
+        <span class="text-muted fs-6 ms-2">#<?= $report->id ?></span>
+    </h4>   
+ 
+    <div class="btn-group">                                                   
+        <button class="btn btn-dark btn-sm" id="btn-en" onclick="setLang('en')">EN</button>                                           
+        <button class="btn btn-outline-dark btn-sm" id="btn-de" onclick="setLang('de')">DE</button>                                           
+    </div> 
+</div>
+
+<div class="mb-3">
+    <a href="/report/<?= $report->id ?>" class="text-muted small link-fixed"><- Report #<?= $report->id ?> </a>
+</div>
+
+<div class="badge ps-0 mb-1">
+    <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
+        <i class="bi bi-dot text-success fs-3"></i> <?= count($analytics['executive_summary']['en']) ?> matching programs 
+    </span>
+</div>
+
+<div>
+    <h2>AI funding <span class="font-gradient">ranked by confidence</span></h2> 
+    <span class="text-muted fs-5"> Detailed view of the highest-confidence match, with a side-by-side comparison of all eligible programs. </span> 
+</div>
+
+<div class="row">
+    <div class="col-6">
+        <div class="card mb-4 mt-3 rounded-4">
+            <div class="card-header py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-blockquote-left text-muted"></i>
+
+                    <span class="lang-en">Executive Summary</span>
+                    <span class="lang-de d-none">Zusammenfassung</span>
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <ol class="mb-0 list-group list-group-numbered">
+                    <?php foreach ($analytics['executive_summary']['en'] ?? [] as $point) { ?>
+                        <li class="lang-en mb-1 list-group-item"><?= htmlspecialchars($point) ?></li>
+                    <?php } ?>
+
+                    <?php foreach ($analytics['executive_summary']['de'] ?? [] as $point) { ?>
+                        <li class="lang-de d-none mb-1 list-group-item"><?= htmlspecialchars($point) ?></li>
+                    <?php } ?>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6">
+        <div class="card mb-4 mt-3 rounded-4">
+            <div class="card-header py-3">
+                <h5 class="mb-0">
+                    <i class="bi bi-highlighter fs-6 text-muted text-muted"></i>
+
+                    <span class="lang-en">Recommendations</span>
+                    <span class="lang-de d-none">Empfehlungen</span>
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <p class="mb-0 lang-en"><?= htmlspecialchars($analytics['recommendations']['en'] ?? '') ?></p>
+                <p class="mb-0 lang-de d-none"><?= htmlspecialchars($analytics['recommendations']['de'] ?? '') ?></p>
+            </div>
+        </div>
+
+        <?php if (!empty($analytics['risk_summary']['en'])) { ?>
+            <div class="card mb-4 border-warning mt-3 rounded-4">
+                <div class="card-header bg-warning bg-opacity-10 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-lg text-muted"></i>
+
+                        <span class="lang-en">Risk Summary</span>
+                        <span class="lang-de d-none">Risikoübersicht</span>
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <p class="mb-0 lang-en"><?= htmlspecialchars($analytics['risk_summary']['en']) ?></p>
+                    <?php if (!empty($analytics['risk_summary']['de'])) { ?>
+                        <p class="mb-0 lang-de d-none"><?= htmlspecialchars($analytics['risk_summary']['de']) ?></p>
+                    <?php } ?>
+                </div>
+            </div>
+        <?php } ?>
+    </div>
+</div>
+
+<div class="card mb-4 rounded-4">                     
+    <div class="card-header py-3 d-flex justify-content-between">           
+        <h5 class="mb-0">        
+            <i class="bi bi-file-richtext text-muted"></i>
+            
+            <span class="lang-en">Report</span>                               
+            <span class="lang-de d-none">Bericht</span>
+        </h5>   
+        
+        <span class="badge text-bg-dark d-flex align-items-center">Summary</span>
+    </div>   
+
+    <div class="card-body">
+        <div class="lang-en">
+            <?= (new \Parsedown())->text($revision->finalMarkdown ?? '') ?>
+        </div>
+        <div class="lang-de d-none">
+            <?= (new \Parsedown())->text($analytics['report_de'] ?? '') ?>
+        </div>
+    </div>
+</div>                                                                        
+      
+<!--Per findings sections-->
+<div class="pt-2 mb-2">
+    <h5>All matching programs</h5>
+    <span class="text-muted">Side-by-side overview across <?= count($analytics['executive_summary']['en']) ?> programs</span>
+</div>
+
+<div class="row">
+    <?php foreach ($structuredPayload as $item) { ?>
+        <?php                               
+            $key = $item['finding_key'] ?? '';
+            $fa  = $analyticsMap[$key] ?? null;                                   
+            $n   = $item['normalized'] ?? [];   
+            $min = $n['funding_amount_min'] ?? null;                              
+            $max = $n['funding_amount_max'] ?? null;
+
+            if ($min !== null || $max !== null) {
+                $fundingRange = '€' . number_format((float)($min ?? 0)) . ' – €' . number_format((float)($max ?? 0));                                           
+            } else {                        
+                $fundingRange = '—';                                              
+            }                                                                     
+        ?>
+
+        <div class="col-6">
+            <div class="card mb-4 rounded-4">                                                   
+                <div class="card-header py-3 d-flex justify-content-between">           
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-bounding-box-circles text-muted fs-6"></i>
+                        <?= htmlspecialchars($item['title'] ?? '') ?>
+                    </h5>
+                    
+                    <span class="badge text-bg-dark d-flex align-items-center">Program</span>
+                </div>      
+
+                <div class="card-body">
+                    <?php if ($fa) { ?>         
+                        <div class="lang-en">
+                            <p><?= htmlspecialchars($fa['en']['description'] ?? '') ?></p>
+
+                            <?php if (!empty($fa['en']['strong_sides'])) { ?>     
+                                <div class="d-flex align-items-center mb-3">
+
+                                    <?php foreach ($fa['en']['strong_sides'] as $side) { ?>
+
+                                            <div class="ps-0 me-2">
+                                                <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
+                                                    <i class="bi bi-dot fs-3 text-success"></i> <?= $side ?> 
+                                                </span>
+                                            </div>                                
+                                    <?php } ?>    
+                                </div>
+                            <?php } ?>
+
+                            <div class="d-flex gap-3">
+                                <div class="p-3 text-bg-secondary rounded-3 flex-fill light-gray">
+                                    <p class="mb-0 text-muted mb-1"><strong>Best suited for</strong></p>
+                                    <p class="text-dark"><?= htmlspecialchars($fa['en']['use_cases'] ?? '') ?></p>
+                                </div>
+
+                                <div class="p-3 text-bg-secondary rounded-3 flex-fill light-gray">
+                                    <p class="mt-2 text-muted mb-1"><strong>Next steps</strong></p>
+                                    <p class="text-dark"><?= htmlspecialchars($fa['en']['next_steps'] ?? '') ?></p>
+                                </div>
+
+                                <div class="p-3 text-bg-secondary rounded-3 flex-fill light-gray">
+                                    <p class="mt-2 text-muted mb-1"><strong>Eligibility</strong></p>
+                                    <p class="text-dark"><?= htmlspecialchars($fa['en']['eligibility'] ?? $n['eligibility'] ?? '—') ?></p>                  
+                                </div> 
+                            </div> 
+                        </div>                                                        
+
+                        <div class="lang-de d-none">
+                            <p><?= htmlspecialchars($fa['de']['description'] ?? '') ?></p>
+
+                            <?php if (!empty($fa['de']['strong_sides'])) { ?>
+                                <div class="d-flex align-items-center mb-3">
+                                    <?php foreach ($fa['de']['strong_sides'] as $side) { ?>
+                                        <div class="ps-0 me-2">
+                                            <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center">
+                                                <i class="bi bi-dot fs-3 text-success"></i> <?= htmlspecialchars($side) ?>
+                                            </span>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
+
+                            <div class="d-flex gap-3">
+                                <div class="p-3 text-bg-secondary rounded-3 flex-fill light-gray">
+                                    <p class="mb-0 text-muted mb-1"><strong>Am besten geeignet für</strong></p>
+                                    <p class="text-dark"><?= htmlspecialchars($fa['de']['use_cases'] ?? '') ?></p>
+                                </div>
+
+                                <div class="p-3 text-bg-secondary rounded-3 flex-fill light-gray">
+                                    <p class="mt-2 text-muted mb-1"><strong>Nächste Schritte</strong></p>
+                                    <p class="text-dark"><?= htmlspecialchars($fa['de']['next_steps'] ?? '') ?></p>
+                                </div>
+
+                                <div class="p-3 text-bg-secondary rounded-3 flex-fill light-gray">
+                                    <p class="mt-2 text-muted mb-1"><strong>Berechtigung</strong></p>
+                                    <p class="text-dark"><?= htmlspecialchars($fa['de']['eligibility'] ?? $n['eligibility'] ?? '—') ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } ?>
+
+                    <?php if (!empty($n['risk_flags'])) { ?>                                                                                          
+                        <div class="mt-2">                  
+                            <?php foreach ($n['risk_flags'] as $flag) { ?>                                                                            
+                                <span class="badge bg-warning text-dark me-1"><?= htmlspecialchars($flag) ?></span>
+                            <?php } ?>                                                                                                                
+                        </div>                                                                                                                        
+                    <?php } ?>
+
+                    <div class="row mt-3 pt-3 border-top">
+                        <div class="col-md-4">                                                                                                            
+                            <small class="text-muted lang-en text-muted fw-bold">Funding body</small>                                                                        
+                            <small class="text-muted lang-de text-muted fw-bold d-none">Fördergeber</small>                                                                  
+                            <div class="mt-2"><?= htmlspecialchars($n['funding_body'] ?? '—') ?></div>                                                                 
+                        </div>
+
+                        <div class="col-md-2">                                                                                                            
+                            <small class="text-muted lang-en text-muted fw-bold">Funding amount</small>
+                            <small class="text-muted lang-de text-muted fw-bold d-none">Förderbetrag</small>                                                                 
+                            <div class="mt-2"><?= $fundingRange ?></div>                              
+                        </div>
+
+                        <div class="col-md-2">                                                                                                            
+                            <small class="text-muted lang-en text-muted fw-bold">Type</small>
+                            <small class="text-muted lang-de text-muted fw-bold d-none">Typ</small>                                                                          
+                            <div class="mt-2"><?= htmlspecialchars($item['finding_type'] ?? '—') ?></div>
+                        </div>   
+
+                        <div class="col-md-2">
+                            <small class="text-muted lang-en text-muted fw-bold">Deadline</small>    
+                            <small class="text-muted lang-de text-muted fw-bold d-none">Frist</small>
+                            <div class="mt-2"><?= htmlspecialchars($n['deadline'] ?? '—') ?></div> 
+                        </div>
+
+                        <div class="col-md-2">                                        
+                            <small class="text-muted lang-en text-muted fw-bold">Confidence</small>     
+                            <small class="text-muted lang-de text-muted fw-bold d-none">Zuverlässigkeit</small>   
+
+                           <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1"
+                                     role="progressbar"
+                                     aria-valuenow="25"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    <div class="progress-bar" style="width: <?= $item['confidence'] * 100?>%; background: linear-gradient(90deg, green, #38a0df)"></div>
+                                </div>
+
+                                <div>
+                                    <?= number_format(($item['confidence'] ?? 0) * 100) ?>%
+                                </div>
+                            </div>
+                        </div>                  
+                    </div>
+
+                    <?php if (!empty($n['source_urls'])) { ?>                                                                                         
+                        <div class="mt-3 pt-3 border-top">
+                            <small class="text-muted lang-en d-block mb-1 fw-bold">Source</small>                                                            
+                            <small class="text-muted lang-de d-none d-block mb-1">Quellen</small>       
+
+                            <?php foreach ($n['source_urls'] as $url) { ?>
+                                <div>
+                                    <a href="<?= htmlspecialchars($url) ?>" target="_blank" class="small badge text-bg-secondary text-light opacity-50 link-fixed">
+                                        <?= htmlspecialchars($url) ?>
+                                        <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                    </a>
+                                </div>    
+                            <?php } ?>                                                                                                                
+                        </div>
+                    <?php } ?>           
+                </div>
+            </div>    
+        </div>    
+    <?php } ?>      
+</div>
+
+<!--Table with comparison-->
+<div class="pt-2 mb-2">
+    <h5>Compare programs</h5>
+    <span class="text-muted">Detailed table comparing key features and criteria</span>
+</div>
+
+<div class="card mb-4 rounded-4">                     
+    <div class="card-header py-3">           
+        <h5 class="mb-0">
+            <span class="lang-en">Comparison</span>                           
+            <span class="lang-de d-none">Vergleich</span>
+        </h5>                                                                 
+    </div>   
+
+    <div class="card-body p-0">                                               
+        <table class="table table-striped mb-0">
+            <thead>                                                           
+                <tr class="lang-en px-2">        
+                    <th>Program</th>    
+                    <th>Funding</th>
+                    <th>Deadline</th>                                         
+                    <th>Eligibility</th>
+                    <th>Confidence</th>                                       
+                </tr>                   
+                <tr class="lang-de d-none">
+                    <th>Programm</th>                                         
+                    <th>Förderung</th>
+                    <th>Frist</th>                                            
+                    <th>Berechtigung</th>
+                    <th>Zuverlässigkeit</th>
+                </tr>                                                         
+            </thead>
+            <tbody>                                                           
+                <?php foreach ($structuredPayload as $item) { ?>
+                    <?php
+                        $n   = $item['normalized'] ?? [];
+                        $fa  = $analyticsMap[$item['finding_key'] ?? ''] ?? null;
+                        $min = $n['funding_amount_min'] ?? null;
+                        $max = $n['funding_amount_max'] ?? null;
+
+                        if ($min !== null || $max !== null) {
+                            $fundingRange = '€' . number_format((float)($min ?? 0)) . ' – €' . number_format((float)($max ?? 0));
+                        } else {                                              
+                            $fundingRange = '—';
+                        }                                                     
+                    ?>
+                    <tr>                                                      
+                        <td><?= htmlspecialchars($item['title'] ?? '') ?></td>
+                        <td><?= $fundingRange ?></td>
+                        <td><?= htmlspecialchars($n['deadline'] ?? '—') ?></td>                                     
+                        <td>
+                            <span class="lang-en"><?= htmlspecialchars($fa['en']['eligibility'] ?? $n['eligibility'] ?? '—') ?></span>                    
+                            <span class="lang-de d-none"><?= htmlspecialchars($fa['de']['eligibility'] ?? $n['eligibility'] ?? '—') ?></span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2 me-3">
+                                <div class="progress flex-grow-1"
+                                     role="progressbar"
+                                     aria-valuenow="25"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    <div class="progress-bar" style="width: <?= $item['confidence'] * 100?>%; background: linear-gradient(90deg, green, #38a0df)"></div>
+                                </div>
+
+                                <div>
+                                    <?= number_format(($item['confidence'] ?? 0) * 100) ?>%
+                                </div>
+                            </div>
+                        </td>   
+                    </tr>                                                     
+                <?php } ?>
+            </tbody>                        
+        </table>                        
+    </div>
+</div>                                                                                                                                          
+                                          
+<script>                                                                      
+    function setLang(lang) {
+        document.querySelectorAll('.lang-en').forEach(el => el.classList.toggle('d-none', lang === 'de'));
+        document.querySelectorAll('.lang-de').forEach(el => el.classList.toggle('d-none', lang === 'en'));   
+      
+        document.getElementById('btn-en').className = lang === 'en' ? 'btn btn-dark btn-sm' : 'btn btn-outline-dark btn-sm'; 
+        document.getElementById('btn-de').className = lang === 'de' ? 'btn btn-dark btn-sm' : 'btn btn-outline-dark btn-sm';                                   
+    }               
+</script>                                      

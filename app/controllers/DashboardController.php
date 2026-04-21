@@ -20,15 +20,15 @@ class DashboardController extends Controller
        $dashboardStorage = new DashboardStorage();
 
         $this->view->setVars([
-            'activeCustomers'       => $dashboardStorage->countActiveCustomers(),
-            'runsInProgress'        => $dashboardStorage->countRunsInProgress(),
-            'blockedRuns'           => $dashboardStorage->countBlockedRuns(),
-            'reportsAwaitingQa'     => $dashboardStorage->countReportsAwaitingQa(),
-            'approvedReports'       => $dashboardStorage->countApprovedReports(),
-            'providerFailures24h'   => $dashboardStorage->countProviderFailuresLast24h(),
-            'guardrailBlocks24h'    => $dashboardStorage->countGuardrailBlocksLast24h(),
-            'providerFailureRows'   => $dashboardStorage->getProviderFailuresLast24h(),
-            'guardrailBlockRows'    => $dashboardStorage->getGuardrailBlocksLast24h()
+            'activeCustomers'     => $dashboardStorage->countActiveCustomers(),
+            'runsInProgress'      => $dashboardStorage->countRunsInProgress(),
+            'blockedRuns'         => $dashboardStorage->countBlockedRuns(),
+            'reportsAwaitingQa'   => $dashboardStorage->countReportsAwaitingQa(),
+            'approvedReports'     => $dashboardStorage->countApprovedReports(),
+            'providerFailures24h' => $dashboardStorage->countProviderFailuresLast24h(),
+            'guardrailBlocks24h'  => $dashboardStorage->countGuardrailBlocksLast24h(),
+            'providerFailureRows' => $dashboardStorage->getProviderFailuresLast24h(),
+            'guardrailBlockRows'  => $dashboardStorage->getGuardrailBlocksLast24h()
         ]);
     }
     

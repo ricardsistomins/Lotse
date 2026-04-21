@@ -83,6 +83,11 @@ $router->add('/report/{id:[0-9]+}/customer', array(
     'controller' => 'report', 
     'action'     => 'saveCustomer'
 ));   
+
+$router->add('/report/{id:[0-9]+}/preview', [                                 
+    'controller' => 'report',                                                 
+    'action'     => 'preview'           
+]); 
   
 $router->add('/finding/{id:[0-9]+}/edit', array(
     'controller' => 'report', 

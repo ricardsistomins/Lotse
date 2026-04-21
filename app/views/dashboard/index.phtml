@@ -5,9 +5,22 @@
     $reportId = $request->getQuery('reportId', 'int');
 ?>
 
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="text-success">Operations overview</h2>
+        <span class="text-muted fs-5"> Pipeline health, in-flight research runs, and guardrail activity across the last 24 hours. </span> 
+    </div>
+    
+    <div class="badge ps-0 mb-1">
+        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
+            <i class="bi bi-dot text-success fs-3"></i> Live · synced just now 
+        </span>
+    </div>
+</div>
+
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold"> <i class="bi bi-people"></i> <?= $activeCustomers ?></div>
                 <div class="text-muted small">Active customers</div>
@@ -16,7 +29,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-primary"> <i class="bi bi-cpu"></i> <?= $runsInProgress ?></div>
                 <div class="text-muted small">Runs in progress</div>
@@ -25,7 +38,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-danger"> <i class="bi bi-cpu"></i> <?= $blockedRuns ?></div>
                 <div class="text-muted small">Blocked runs</div>
@@ -34,7 +47,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-info"> <i class="bi bi-journals"></i> <?= $reportsAwaitingQa ?></div>
                 <div class="text-muted small">Reports awaiting QA</div>
@@ -43,7 +56,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-success"> <i class="bi bi-card-checklist"></i> <?= $approvedReports ?></div>
                 <div class="text-muted small">Approved reports</div>
@@ -52,7 +65,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold <?= $providerFailures24h > 0 ? 'text-danger' : 'text-success' ?>"> <i class="bi bi-bug"></i> <?= $providerFailures24h ?></div>
                 <div class="text-muted small">Provider failures (24h)</div>
@@ -61,7 +74,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-center">
+        <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold <?= $guardrailBlocks24h > 0 ? 'text-danger' : 'text-success' ?>"> <i class="bi bi-ban"></i> <?= $guardrailBlocks24h ?></div>
                 <div class="text-muted small">Guardrail blocks (24h)</div>
@@ -90,18 +103,24 @@
 
 <div class="row">
     <div class="col-6 pe-2">
-        <div class="card mb-4">
+        <div class="card rounded-4 mb-4">
             <div class="card-body">
-                <h5 class="card-title">Trigger Research Run</h5>
-
+                <div class="mb-3">
+                    <h5 class="card-title mb-0">Trigger Research Run</h5>
+                    <span class="text-muted">Queue a new research job</span>
+                </div>
+                    
                 <form method="POST" action="/dashboard/trigger">
                     <div class="mb-3">
-                        <label for="query" class="form-label text-muted">Search query</label>
+                        <label for="query" class="form-label">Search query</label>
                         <input type="text" id="query" name="query" class="form-control" placeholder="e.g. AI funding Germany 2026..." required>
                     </div>
-
-                    <button type="submit" class="btn btn-primary" id="run-btn">Run</button>
-
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="submit" class="btn btn-success" id="run-btn">Run</button>
+                        <span class="text-muted opacity-50 fst-italic">Avg. completion time: ~20s</span>
+                    </div>
+                        
                     <div id="run-loading" class="mt-3 d-none">                                    
                         <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
                         <span class="text-muted">Running pipeline, please wait…</span>            
@@ -110,10 +129,13 @@
             </div>
         </div>
 
-        <div class="card mb-4">
+        <div class="card rounded-4 mb-4">
             <div class="card-body">
-                <h5 class="card-title">Provider failures (last 24h)</h5>
-
+                <div class="mb-3">
+                    <h5 class="card-title mb-0">Provider failures (last 24h)</h5>
+                    <span class="text-muted">Last 24h · <?= count($providerFailureRows); ?> errors across upstream providers</span>
+                </div>
+                
                 <?php if (empty($providerFailureRows)) { ?>
                     <p class="text-muted">No records in the last 24 hours.</p>
                 <?php } else { ?>
@@ -152,10 +174,13 @@
     </div>
     
     <div class="col-6">
-        <div class="card mb-4">
+        <div class="card rounded-4 mb-4">
             <div class="card-body">
-                <h5 class="card-title">Guardrail blocks (last 24h)</h5>
-
+                <div class="mb-3">
+                    <h5 class="card-title mb-0">Guardrail blocks</h5>
+                    <span class="text-muted">Last 24h · <?= count($guardrailBlockRows); ?> blocked runs</span>
+                </div>
+                
                 <?php if (empty($guardrailBlockRows)) { ?>
                     <p class="text-muted">No records in the last 24 hours.</p>
                 <?php } else { ?>

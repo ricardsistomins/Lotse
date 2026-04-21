@@ -10,14 +10,18 @@ use app\Storage\ {
     ResearchSourceStorage,
     ResearchFindingStorage,
     CustomerStorage,
-    AuditLogStorage
+    AuditLogStorage,
+    ReportAnalyticsStorage
 };
 use app\Model\{
     ReportModel,
     ResearchRunModel,
     UserModel
 };
-use app\Service\AuditService;
+use app\Service\{
+    AuditService,
+    ReportAnalyticsService
+};
 
 class ReportController extends Controller
 {
@@ -40,6 +44,7 @@ class ReportController extends Controller
                 
         $this->view->setVars([
             'reports'        => (new ReportStorage())->getAll($status, $customerId),
+            'customers'      => $customers,
             'customersName'  => $customersName,
             'filterStatus'   => $status,
             'filterCustomer' => $customerId
@@ -311,5 +316,53 @@ class ReportController extends Controller
         
         $response->redirect('/report/' . $reportId);
         $response->send();
+    }
+    
+    /**
+     * Generate or load analytics and render the HTML preview
+     * 
+     * @param int $id
+     * @return void
+     */
+    public function previewAction(int $id): void
+    {
+        $response = $this->response;
+        $view = $this->view;
+        
+        $report = (new ReportStorage())->getById($id);
+        
+        if (!$report) {
+            $response->redirect('/dashboard');
+            $response->send();
+            
+            return;
+        }
+        
+        $revisionStorage = new ReportRevisionStorage();
+        $revision = $revisionStorage->getById($report->currentRevisionId ?? 0);
+        
+        if (!$revision) {
+            $response->redirect('/report/' . $id);
+            $response->send();
+            
+            return;
+        }
+        
+        $analyticsStorage = new ReportAnalyticsStorage();
+        $analytics = $analyticsStorage->getByRevisionId($revision->id);
+ 
+        if (!$analytics) {
+            $structuredPayload = json_decode($revision->structuredPayload ?? '[]', true);
+            $analyticsData = (new ReportAnalyticsService())->generate($id, $revision->id, $structuredPayload, $revision->finalMarkdown ?? '');
+        } else {
+            $analyticsData = json_decode($analytics->analyticsPayload, true);
+        }
+        
+        $view->setVars([
+            'report'            => $report,
+            'revision'          => $revision,
+            'analytics'         => $analyticsData,
+            'structuredPayload' => json_decode($revision->structuredPayload ?? '[]', true)
+        ]);
     }
 }

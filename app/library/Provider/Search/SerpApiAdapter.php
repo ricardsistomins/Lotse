@@ -13,6 +13,11 @@ use app\Storage\ProviderCallStorage;
  */
 class SerpApiAdapter implements SearchProviderAdapter
 {
+    /** 
+     * Maximum number of sources that can be found in a single run
+     */
+    const MAX_RESULTS = 20;
+    
     /**
      * Constructor
      *
@@ -28,7 +33,7 @@ class SerpApiAdapter implements SearchProviderAdapter
      * @param int $limit
      * @return array
      */
-    public function search(string $query, int $limit = 10): array
+    public function search(string $query, int $limit = self::MAX_RESULTS): array
     {
         $start = microtime(true);
 
@@ -38,7 +43,7 @@ class SerpApiAdapter implements SearchProviderAdapter
             $data = $client->get_json([
                 'engine' => 'google',
                 'q'      => $query,
-                'num'    => min($limit, 10),
+                'num'    => min($limit, self::MAX_RESULTS),
             ]);
 
             $latencyMs = (int)((microtime(true) - $start) * 1000);

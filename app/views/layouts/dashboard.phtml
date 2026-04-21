@@ -62,7 +62,7 @@
                         <?= htmlspecialchars($this->session->get('userName') ?? '') ?>
                         <i class="bi bi-person-circle"></i>
                     </span>
-                    <span class="badge bg-secondary me-3">
+                    <span class="badge bg-dark me-3">
                         <?= htmlspecialchars($this->session->get('userRole') ?? '') ?>
                     </span>
                     
@@ -70,7 +70,7 @@
                 </div>
 
                 <!-- Page content -->
-                <div class="p-4">
+                <div class="p-4 mx-4">
                     <?= $this->getContent() ?>
                 </div>
             </div>

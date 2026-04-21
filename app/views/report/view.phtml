@@ -21,12 +21,19 @@
                         <h5 class="card-title mb-0">Report #<?= $report->id ?></h5>
                         <a href="/run/<?= $run->id ?>" class="text-muted small link-fixed"><- Run #<?= $run->id ?></a>
                     </div>
-
-                    <span class="badge fs-6 bg-<?= match($report->status) {
-                        ReportModel::STATUS_APPROVED => 'success',
-                        ReportModel::STATUS_REJECTED => 'danger',
-                        default    => 'secondary'
-                    } ?>"><?= ucfirst($report->status) ?></span>
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/report/<?= $report->id ?>/preview" class="btn btn-sm btn-outline-secondary" id="preview-btn" onclick="previewLoading()">                                                                                   
+                            <span class="spinner-border spinner-border-sm d-none me-1" id="preview-spinner"></span>                                       
+                            Open Preview                                                                                                                  
+                        </a>  
+                        
+                        <span class="badge fs-6 bg-<?= match($report->status) {
+                            ReportModel::STATUS_APPROVED => 'success',
+                            ReportModel::STATUS_REJECTED => 'danger',
+                            default    => 'secondary'
+                        } ?>"><?= ucfirst($report->status) ?></span>
+                    </div>
                 </div>
 
                 <table class="table table-sm mb-0">
@@ -42,7 +49,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-muted">Sources</td>
+                        <td class="text-muted">Source</td>
                         <td><?= (int)$sourceCount ?></td>
                     </tr>
                     <tr>
@@ -307,3 +314,10 @@
     </div>
 </div>
 
+<script>        
+    function previewLoading() {
+        $("#preview-btn").addClass("disabled");
+        document.getElementById('preview-spinner').classList.remove('d-none');
+        setTimeout(() => document.getElementById('preview-spinner').classList.add('d-none'), 10000);
+    }                                                                                                                                 
+</script>

@@ -16,9 +16,9 @@ interface SearchProviderAdapter
     /**
      * Execute a search query and return a list of source candidates.
      *
-     * @param  string        $query  The search query to execute
-     * @param  int           $limit  Maximum number of results to return
+     * @param string $query The search query to execute
+     * @param int $limit Maximum number of results to return
      * @return SearchResult[]
      */
-    public function search(string $query, int $limit = 10): array;
+    public function search(string $query, int $limit = 20): array;
 }
