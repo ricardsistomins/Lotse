@@ -17,7 +17,12 @@ class CustomerController extends Controller
      */
     public function indexAction(): void
     {
-        $this->view->setVar('customers', (new CustomerStorage())->getAll());
+        $customerStorage = new CustomerStorage();
+        
+        $this->view->setVars([
+            'customers' => $customerStorage->getAll(),
+            'customersCount' => $customerStorage->getStatusCounts()
+        ]);
     }
 
     /**

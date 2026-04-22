@@ -79,7 +79,7 @@
                             <?php } ?>
                         </select>
                         
-                        <button type="submit" class="btn btn-outline-primary">Save</button>
+                        <button type="submit" class="btn btn-outline-success">Save</button>
                     </div>
                 </form>
             </div>
@@ -129,7 +129,7 @@
                                     </td>
                                     <td><?= number_format($finding->confidenceScore, 2) ?></td>
                                     <td class="d-flex">
-                                        <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Save</button>
                                         
                                         <?php if ($edited) { ?>
                                             <div class="text-end ms-auto">
@@ -205,7 +205,7 @@
                 <textarea name="final_markdown" class="form-control" rows="20"><?= htmlspecialchars($finalMarkdown) ?></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save revision</button>
+            <button type="submit" class="btn btn-success">Save revision</button>
         </form>
     </div>
 </div>

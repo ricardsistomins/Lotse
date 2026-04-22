@@ -28,10 +28,13 @@ class RunController extends Controller
         $status = $request->getQuery('status', 'string') ?: null;
         $triggerSource = $request->getQuery('trigger', 'string') ?: null;
         
+        $researchRunStorage = new ResearchRunStorage();
+        
         $this->view->setVars([
-            'runs'          => (new ResearchRunStorage())->getAll($status, $triggerSource),
-            'filterStatus'  => $status,
-            'filterTrigger' => $triggerSource
+            'runs'           => $researchRunStorage->getAll($status, $triggerSource),
+            'filterStatus'   => $status,
+            'filterTrigger'  => $triggerSource,
+            'runStatusCount' => $researchRunStorage->getStatusCounts()
         ]);
     }                                                                          
 

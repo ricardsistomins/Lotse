@@ -5,6 +5,57 @@
     }; 
 ?>
 
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="text-success">Runs</h2>
+        <span class="text-muted fs-5"> Every research run, source sync, and pipeline execution. Filter by status, trigger, or guardrail outcome. </span> 
+    </div>
+    
+    <div class="badge ps-0 mb-1">
+        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
+            <i class="bi bi-dot text-success fs-3"></i> Live · <?= count($runs) ?> of <?= $runStatusCount['total_runs'] ?> runs 
+        </span>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card rounded-4 text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold"> <i class="bi bi-cpu"></i> <?= $runStatusCount['total_runs'] ?></div>
+                <div class="text-muted small">Total runs</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card rounded-4 text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-success"> <i class="bi bi-bookmark-check"></i> <?= $runStatusCount['completed'] ?></div>
+                <div class="text-muted small">Completed</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card rounded-4 text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-danger"> <i class="bi bi-bookmark-check"></i> <?= $runStatusCount['blocked'] ?></div>
+                <div class="text-muted small">Blocked runs</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card rounded-4 text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-warning"> <i class="bi bi-clock"></i> <?= $runStatusCount['waiting_review'] ?></div>
+                <div class="text-muted small">Awaiting review</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <form method="GET" action="/runs" class="row g-2 mb-3">
     <div class="col-auto">
         <select name="status" class="form-select form-select-sm">
@@ -26,20 +77,32 @@
     </div>
     
     <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+        <button type="submit" class="btn btn-sm btn-success">Filter</button>
         <a href="/runs" class="btn btn-sm btn-outline-secondary">Reset</a>
     </div>
 </form>
 
 
-<div class="card">
+<div class="card rounded-4">
     <div class="card-body">
-        <h5 class="card-title mb-4">Runs</h5>
-
+        <div class="mb-4">
+            <h5 class="card-title mb-0">Runs</h5>
+            
+            <span class="text-muted small">                                                                                                               
+                <?= count($runs) ?> run<?= count($runs) !== 1 ? 's' : '' ?>  
+                
+                <?php if ($filterStatus || $filterTrigger) { ?>                                                                                           
+                    · filtered by&nbsp                                                                                                                         
+                    <?= $filterStatus ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus) . '</span>' : '' ?>                    
+                    <?= $filterTrigger ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterTrigger) . '</span>' : '' ?>                  
+                <?php } ?>                                                                                                                     
+            </span>            
+        </div>
+            
         <?php if (empty($runs)) { ?>
             <p class="text-muted">No runs yet.</p>
         <?php } else { ?>
-            <table class="table table-hover">
+            <table class="table table-hover table-striped">
                 <thead>
                     <tr>
                         <th> # </th>
@@ -56,9 +119,13 @@
                 <tbody>
                     <?php foreach ($runs as $run) { ?>
                         <tr>
-                            <td><?= $run->id ?></td>
-                            <td><?= htmlspecialchars($run->runType) ?></td>
-                            <td><?= htmlspecialchars($run->triggerSource) ?></td>
+                            <td class="text-muted"><?= $run->id ?></td>
+                            <td>
+                                <small class="font-monospace"><?= htmlspecialchars($run->runType) ?></small>
+                            </td>
+                            <td>
+                                <small class="font-monospace"><?= htmlspecialchars($run->triggerSource) ?></small>
+                            </td>
                             <td>
                                 <span class="badge bg-<?= match($run->status) {
                                     ResearchRunModel::STATUS_COMPLETED => 'success',
@@ -77,9 +144,11 @@
                                 } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
                             </td>
                             <td><?= htmlspecialchars($run->llmProviderName) ?></td>
-                            <td><?= $run->startedAt ?></td>
                             <td>
-                                <a href="/run/<?= $run->id ?>" class="btn btn-sm btn-outline-primary">Detail</a>
+                                <small class="text-muted"><?= $run->startedAt ?></small>
+                            </td>
+                            <td>
+                                <a href="/run/<?= $run->id ?>" class="btn btn-sm btn-outline-success rounded-3">Details <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>
                             </td>
                         </tr>
                     <?php } ?>

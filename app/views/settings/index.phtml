@@ -1,35 +1,76 @@
 <?php use app\Model\UserModel; ?>
 
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title mb-4">System Settings</h5>
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="text-success">Settings</h2>
+        <span class="text-muted fs-5"> Configure runtime knobs, provider profiles and guardrails powering the Lotse research engine. </span> 
+    </div>
+    
+<!--    <div class="badge ps-0 mb-1">
+        <a class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-clock-history me-1"></i> Audit log </a>
+    </div>-->
+</div>
 
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Key</th>
-                    <th>Description</th>
-                    <th>Last updated</th>
-                    <th></th>
-                </tr>
-            </thead>
-            
-            <tbody>
-                <?php foreach ($settings as $setting) { ?>
-                    <tr>
-                        <td><code><?= htmlspecialchars($setting['setting_key']) ?></code></td>
-                        <td><?= htmlspecialchars($setting['description'] ?? '—') ?></td>
-                        <td><?= $setting['updated_at'] ?? '—' ?></td>
-                        <td>
-                            <?php if (in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) { ?>
-                                <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <?php } else { ?>
-                                <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-secondary">View</a>
-                            <?php } ?>
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
+<div class="row">
+    <div class="col-2">
+        <div class="card rounded-4">
+            <div class="card-body">
+                <div class="card rounded-4 border-0 shadow-sm">
+                    <div class="d-grid gap-2">
+                        <a href="#" class="text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between bg-light rounded-4 px-3 py-3 text-dark fw-semibold">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-sliders2"></i>
+                                    <span>System</span>
+                                </div>
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </a>                
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-10">
+        <div class="card rounded-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h5 class="card-title mb-0">System configuration</h5>
+                    <span class="text-muted">Versioned key/value store consumed by the orchestrator at runtime.</span>
+                </div>
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Last updated</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <?php foreach ($settings as $setting) { ?>
+                            <tr>
+                                <td>
+                                    <span class="font-monospace"><?= htmlspecialchars($setting['setting_key']) ?></span>
+                                    <p><small class="text-muted"><?= htmlspecialchars($setting['description'] ?? '—') ?></small></p>
+                                </td>
+                                <td>
+                                    <small><?= $setting['updated_at'] ?? '—' ?></small>
+                                </td>
+                                <td>
+                                    <?php if (in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) { ?>
+                                        <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-success rounded-3"><i class="bi bi-pencil me-1"></i> Edit</a>
+                                    <?php } else { ?>
+                                        <a href="/settings/<?= htmlspecialchars($setting['setting_key']) ?>" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-eyeglasses me-1"></i> View</a>
+                                    <?php } ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>

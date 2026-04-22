@@ -2,7 +2,11 @@
 
 namespace app\Storage;
 
-use app\Model\QaReviewModel;
+use app\Model\{
+    QaReviewModel,
+    ReportModel,
+    ResearchRunModel
+};
 
 class QaReviewStorage extends AbstractStorage
 {
@@ -112,5 +116,40 @@ class QaReviewStorage extends AbstractStorage
             ':decidedAt'         => date('Y-m-d H:i:s'),                      
             ':id'                => $qaReviewId,                              
         ]);                                                                   
-    }                         
+    }                
+    
+    /**                                                                                                                                           
+     * Get counts of reports in the QA queue by guardrail status.                                                                                 
+     *                                                                                                                                            
+     * @return array                                              
+     */                                                                                                                                           
+    public function getQueueStatusCounts(): array                                                                                                 
+    {                                       
+        $pdo = $this->getPdo();                                                                                                                   
+
+        $sql = 'SELECT                                                                                                                            
+                    COUNT(*)                               AS total,                                                                              
+                    SUM(reports.status = :needs_qa)        AS awaiting_review,                                                                    
+                    SUM(rr.guardrail_status = :pass)       AS guardrail_pass,
+                    SUM(rr.guardrail_status = :review)     AS guardrail_review                                                                    
+                FROM reports                    
+                JOIN research_runs rr ON rr.id = reports.run_id                                                                                   
+                WHERE reports.status = :needs_qa';
+
+        $sth = $pdo->prepare($sql);             
+        $sth->execute([                                                                                                                           
+            ':needs_qa' => ReportModel::STATUS_NEEDS_QA,
+            ':pass'     => ResearchRunModel::STATUS_PASS,                                                                                         
+            ':review'   => ResearchRunModel::STATUS_REVIEW,
+        ]);                                                                                                                                       
+
+        $row = $sth->fetch();
+
+        return [
+            'total'            => $row['total'] ?? 0,
+            'awaiting_review'  => $row['awaiting_review'] ?? 0,
+            'guardrail_pass'   => $row['guardrail_pass'] ?? 0,
+            'guardrail_review' => $row['guardrail_review'] ?? 0,
+        ];                                                                                                                                        
+    }
 }

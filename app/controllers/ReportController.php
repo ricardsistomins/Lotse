@@ -41,13 +41,16 @@ class ReportController extends Controller
         foreach ($customers as $customer) {
             $customersName[$customer->id] = $customer->companyName;
         }
-                
+               
+        $reportStorage = new ReportStorage();
+        
         $this->view->setVars([
-            'reports'        => (new ReportStorage())->getAll($status, $customerId),
+            'reports'        => $reportStorage->getAll($status, $customerId),
             'customers'      => $customers,
             'customersName'  => $customersName,
             'filterStatus'   => $status,
-            'filterCustomer' => $customerId
+            'filterCustomer' => $customerId,
+            'getStatusCount' => $reportStorage->getStatusCount()
         ]);
     }
 

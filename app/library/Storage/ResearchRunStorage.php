@@ -258,4 +258,37 @@ class ResearchRunStorage extends AbstractStorage
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ResearchRunModel::class);
     }
+    
+    /**
+     * Get count of run by statuses
+     * 
+     * @return array
+     */
+    public function getStatusCounts(): array
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT
+                    COUNT(*) AS total_runs,
+                    SUM(guardrail_status = :blocked) AS blocked, 
+                    SUM(guardrail_status = :review) AS waiting_review, 
+                    SUM(status = :completed) AS completed
+                FROM research_runs'; 
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':blocked'   => ResearchRunModel::STATUS_BLOCKED,
+            ':review'    => ResearchRunModel::STATUS_REVIEW,
+            ':completed' => ResearchRunModel::STATUS_COMPLETED
+        ]);
+        
+        $row = $sth->fetch();
+        
+        return [
+            'total_runs'     => $row['total_runs'] ?? 0,
+            'blocked'        => $row['blocked'] ?? 0,
+            'waiting_review' => $row['waiting_review'] ?? 0,
+            'completed'      => $row['completed'] ?? 0,
+        ];
+    }
 }

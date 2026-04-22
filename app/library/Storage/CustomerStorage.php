@@ -204,4 +204,38 @@ class CustomerStorage extends AbstractStorage
 
         return $sth->fetch($pdo::FETCH_ASSOC) ?: null;
     }
+    
+    /**                                         
+     * Get counts of customers by status.                                                   
+     *                                          
+     * @return array                 
+     */                                                                                     
+    public function getStatusCounts(): array                                                
+    {                                                                                       
+        $pdo = $this->getPdo();                                                             
+
+        $sql = 'SELECT                                                                      
+                    COUNT(*) AS total,
+                    SUM(status = :active) AS active,                               
+                    SUM(status = :paused) AS paused,
+                    SUM(status = :archived) AS archived
+                FROM customers';                                                            
+
+        $sth = $pdo->prepare($sql);                                                         
+        $sth->execute([                     
+            ':active'   => CustomerModel::STATUS_ACTIVE,                                    
+            ':paused'   => CustomerModel::STATUS_PAUSED,                                    
+            ':archived' => CustomerModel::STATUS_ARCHIVED,
+        ]);                                                                                 
+
+        $row = $sth->fetch();                                                               
+
+        return [                                                                            
+            'total'    => $row['total'] ?? 0,
+            'active'   => $row['active'] ?? 0,
+            'paused'   => $row['paused'] ?? 0,
+            'archived' => $row['archived'] ?? 0,
+        ];                                                                                  
+    }
+
 }

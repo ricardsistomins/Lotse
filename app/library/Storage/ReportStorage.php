@@ -198,7 +198,9 @@ class ReportStorage extends AbstractStorage
                 LIMIT 1';
 
         $sth = $pdo->prepare($sql);
-        $sth->execute([':scopeKey' => $scopeKey]);
+        $sth->execute([
+            ':scopeKey' => $scopeKey
+        ]);
 
         return $sth->fetchObject(ReportModel::class) ?: null;
     }
@@ -305,7 +307,39 @@ class ReportStorage extends AbstractStorage
         $sth = $pdo->prepare($sql);
         $sth->execute([
             ':runId' => $runId, 
-            ':id' => $reportId
+            ':id'    => $reportId
         ]);
+    }
+    
+    /**
+     * Get report count by status
+     * 
+     * @return array
+     */
+    public function getStatusCount(): array
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT 
+                    COUNT(*) AS total,
+                    SUM(customer_id IS NOT NULL) AS with_customer,
+                    SUM(status = :approved) AS approved,
+                    SUM(status = :needs_qa) AS awaiting_qa
+                FROM reports';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':approved' => ReportModel::STATUS_APPROVED,
+            ':needs_qa' => ReportModel::STATUS_NEEDS_QA
+        ]);
+        
+        $row = $sth->fetch();
+
+        return [
+            'total'         => $row['total'] ?? 0,
+            'with_customer' => $row['with_customer'] ?? 0,
+            'approved'      => $row['approved'] ?? 0,
+            'awaiting_qa'   => $row['awaiting_qa'] ?? 0,
+        ];
     }
 }
