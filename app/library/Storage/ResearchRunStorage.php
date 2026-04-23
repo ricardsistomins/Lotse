@@ -53,6 +53,11 @@ class ResearchRunStorage extends AbstractStorage
     );
 
     /**
+     * Count of runs output at page
+     */
+    const PER_PAGE = 25;
+    
+    /**
      * Create a new research run row and return its ID.
      *
      * @param string $runType
@@ -224,13 +229,48 @@ class ResearchRunStorage extends AbstractStorage
     }
 
     /**
+     * Get count of all runs by status and trigger source
+     * 
+     * @param string|null $status
+     * @param string|null $triggerSource
+     * @return int
+     */
+    public function getCount(?string $status = null, ?string $triggerSource = null): int
+    {
+        $pdo = $this->getPdo();
+        
+        $where = [];
+        $params = [];
+        
+        if ($status !== null) {
+            $where[] = 'status = :status';
+            $params[':status'] = $status;
+        }
+        
+        if ($triggerSource !== null) {
+            $where[] = 'trigger_source = :triggerSource';
+            $params[':triggerSource'] = $triggerSource;
+        }
+        
+        $sql = 'SELECT COUNT(*)
+                FROM research_runs '
+                . ($where ? ' WHERE ' . implode(' AND ', $where) : '');
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute($params);
+        
+        return (int)$sth->fetchColumn();
+    }
+    
+    /**
      * Fetch all runs, newest first - with optional filters
      *
      * @param string|null $status
      * @param string|null $triggerSource
+     * @param int $page
      * @return ResearchRunModel[]
      */
-    public function getAll(?string $status = null, ?string $triggerSource = null): array
+    public function getRunsByLimit(?string $status = null, ?string $triggerSource = null, int $page = 1): array
     {
         $pdo = $this->getPdo();
 
@@ -247,11 +287,13 @@ class ResearchRunStorage extends AbstractStorage
             $params[':triggerSource'] = $triggerSource;
         }
 
+        $offset = ($page - 1) * self::PER_PAGE;
+        
         $sql = 'SELECT ' . $this->mapFields() . '
                 FROM research_runs ' .
                 ($where ? ' WHERE ' . implode(' AND ', $where) : '') . '
                 ORDER BY id DESC
-                LIMIT 100';
+                LIMIT ' . self::PER_PAGE . ' OFFSET ' . $offset ;
 
         $sth = $pdo->prepare($sql);
         $sth->execute($params);

@@ -43,6 +43,11 @@ class ReportStorage extends AbstractStorage
     );
 
     /**
+     * Count of reports output at page
+     */
+    const PER_PAGE = 5;
+    
+    /**
      * Create a new draft report for a run and return its ID.
      *
      * @param int $runId
@@ -212,7 +217,7 @@ class ReportStorage extends AbstractStorage
      * @param int|null $customerId
      * @return ReportModel[]
      */
-    public function getAll(?string $status = null, ?int $customerId = null): array
+    public function getAll(?string $status = null, ?int $customerId = null, int $page = 1): array
     {
         $pdo = $this->getPdo();
         
@@ -233,7 +238,7 @@ class ReportStorage extends AbstractStorage
                 FROM reports' . 
                 ($where ? ' WHERE ' . implode(' AND ', $where) : '') . '
                 ORDER BY id DESC
-                LIMIT 50';
+                LIMIT ' . self::PER_PAGE . ' OFFSET ' . (($page - 1) * self::PER_PAGE);
 
         $sth = $pdo->prepare($sql); 
         $sth->execute($params);
@@ -341,5 +346,39 @@ class ReportStorage extends AbstractStorage
             'approved'      => $row['approved'] ?? 0,
             'awaiting_qa'   => $row['awaiting_qa'] ?? 0,
         ];
+    }
+   
+    /**
+     * Get count of report by status and customer id
+     * 
+     * @param string|null $status
+     * @param int|null $customerId
+     * @return int
+     */
+    public function getCount(?string $status = null, ?int $customerId = null): int
+    {
+        $pdo = $this->getPdo();
+        
+        $where = [];
+        $params = [];
+        
+        if ($status !== null) {
+            $where[] = 'status = :status';
+            $params[':status'] = $status;
+        }
+        
+        if ($customerId !== null) {
+            $where[] = 'customer_id = :customerId';
+            $params[':customerId'] = $customerId;
+        }
+        
+        $sql = 'SELECT COUNT(*)
+                FROM reports' 
+                . ($where ? ' WHERE ' . implode(' AND ', $where) : '');
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute($params);
+        
+        return (int)$sth->fetchColumn();
     }
 }

@@ -34,6 +34,7 @@ class ReportController extends Controller
         
         $status = $request->getQuery('status', 'string') ?: null;
         $customerId = $request->getQuery('customer_id', 'int') ?: null;
+        $page = max(1, $request->getQuery('page', 'int', 1));
 
         $customers = (new CustomerStorage())->getAll();
         $customersName = [];
@@ -43,14 +44,20 @@ class ReportController extends Controller
         }
                
         $reportStorage = new ReportStorage();
+        $total = $reportStorage->getCount($status, $customerId);
+        $totalPages = max(1, ceil($total / ReportStorage::PER_PAGE));
+        $page = min($page, $totalPages);
         
         $this->view->setVars([
-            'reports'        => $reportStorage->getAll($status, $customerId),
+            'reports'        => $reportStorage->getAll($status, $customerId, $page),
             'customers'      => $customers,
             'customersName'  => $customersName,
             'filterStatus'   => $status,
             'filterCustomer' => $customerId,
-            'getStatusCount' => $reportStorage->getStatusCount()
+            'getStatusCount' => $reportStorage->getStatusCount(),
+            'page'           => $page,
+            'total'          => $total,
+            'totalPages'     => $totalPages
         ]);
     }
 

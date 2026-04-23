@@ -27,14 +27,21 @@ class RunController extends Controller
         
         $status = $request->getQuery('status', 'string') ?: null;
         $triggerSource = $request->getQuery('trigger', 'string') ?: null;
+        $page = max(1, $request->getQuery('page', 'int', 1));
         
         $researchRunStorage = new ResearchRunStorage();
+        $total = $researchRunStorage->getCount($status, $triggerSource);
+        $totalPages = max(1, ceil($total / ResearchRunStorage::PER_PAGE));
+        $page = min($page, $totalPages);
         
         $this->view->setVars([
-            'runs'           => $researchRunStorage->getAll($status, $triggerSource),
+            'runs'           => $researchRunStorage->getRunsByLimit($status, $triggerSource, $page),
             'filterStatus'   => $status,
             'filterTrigger'  => $triggerSource,
-            'runStatusCount' => $researchRunStorage->getStatusCounts()
+            'runStatusCount' => $researchRunStorage->getStatusCounts(),
+            'page'           => $page,
+            'totalPages'     => $totalPages,
+            'total'          => $total
         ]);
     }                                                                          
 
