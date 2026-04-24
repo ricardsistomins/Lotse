@@ -44,13 +44,18 @@ class CustomerStorage extends AbstractStorage
     );
 
     /**
+     * Count of customers output at page
+     */
+    const PER_PAGE = 5;
+    
+    /**
      * Fetch all customers, filtered by status and country code, ordered by company name.
      *
      * @param string|null $status
      * @param string|null $countryCode
      * @return CustomerModel[]
      */
-    public function getAll(?string $status = null, ?string $countryCode = null): array
+    public function getAll(?string $status = null, ?string $countryCode = null, int $page = 1): array
     {
         $pdo = $this->getPdo();
 
@@ -70,7 +75,8 @@ class CustomerStorage extends AbstractStorage
         $sql = 'SELECT ' . $this->mapFields() . '
                 FROM customers' . 
                 ($where ? ' WHERE ' . implode(' AND ', $where) : '') . '
-                ORDER BY company_name ASC';
+                ORDER BY company_name ASC
+                LIMIT ' . self::PER_PAGE . ' OFFSET ' . (($page - 1) * self::PER_PAGE);
         
         $sth = $pdo->prepare($sql);
         $sth->execute($params);
@@ -273,4 +279,37 @@ class CustomerStorage extends AbstractStorage
         return $sth->fetchAll($pdo::FETCH_COLUMN);
     }
 
+    /**
+     * Get count of customers by status and country
+     * 
+     * @param string|null $status
+     * @param string|null $countryCode
+     * @return int
+     */
+    public function getCount(?string $status = null, ?string $countryCode = null): int
+    {
+        $pdo = $this->getPdo();
+        
+        $where = [];
+        $params = [];
+        
+        if ($status !== null) {
+            $where[] = 'status = :status';
+            $params[':status'] = $status;
+        }
+        
+        if ($countryCode !== null) {
+            $where[] = 'country_code = :countryCode';
+            $params[':countryCode'] = $countryCode;
+        }
+        
+        $sql = 'SELECT COUNT(*)
+                FROM customers ' .
+                ($where ? ' WHERE ' . implode(' AND ', $where) : '');
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute($params);
+        
+        return $sth->fetchColumn();
+    }
 }

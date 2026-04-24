@@ -140,6 +140,27 @@
                     <?php } ?>
                 </tbody>
             </table>
+            
+            <?php if ($totalPages > 1) { ?>
+                <?php $baseQuery = array_filter(['status' => $filterStatus, 'country_code' => $filterCountry]); ?>                                           
+                <nav class="mt-4">                                                                                                                           
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="/customers?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>                         
+                        </li>                                                                                                                                
+
+                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>                                                                                     
+                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">                                                                       
+                                <a class="page-link" href="/customers?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>
+                            </li>                                                                                                                            
+                        <?php } ?>
+
+                        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                            <a class="page-link" href="/customers?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>                         
+                        </li>                                                                                                                                
+                    </ul>                                                                                                                                    
+                </nav>      
+            <?php } ?>
         <?php } ?>
     </div>
 </div>                                   

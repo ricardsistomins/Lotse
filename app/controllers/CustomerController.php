@@ -20,15 +20,22 @@ class CustomerController extends Controller
         $request = $this->request;
         $status = $request->getQuery('status', 'string') ?: null;
         $countryCode = $request->getQuery('country_code', 'string') ?: null;
+        $page = max(1, $request->getQuery('page', 'int', 1));
         
         $customerStorage = new CustomerStorage();
+        $total = $customerStorage->getCount($status, $countryCode);                                                                             
+        $totalPages = max(1, (int) ceil($total / CustomerStorage::PER_PAGE));                                                                        
+        $page = min($page, $totalPages);
         
         $this->view->setVars([
-            'customers'      => $customerStorage->getAll($status, $countryCode),
-            'customersCount' => $customerStorage->getStatusCounts(),
-            'countries'      => $customerStorage->getDistinctCountries(),
-            'filterStatus'   => $status,
-            'filterCountry'  => $countryCode
+            'customers'      => $customerStorage->getAll($status, $countryCode, $page),                                                              
+            'customersCount' => $customerStorage->getStatusCounts(),                                                                                 
+            'countries'      => $customerStorage->getDistinctCountries(),                                                                            
+            'filterStatus'   => $status,                                                                                                             
+            'filterCountry'  => $countryCode,                                                                                                        
+            'page'           => $page,
+            'totalPages'     => $totalPages,                                                                                                         
+            'total'          => $total
         ]);
     }
 
