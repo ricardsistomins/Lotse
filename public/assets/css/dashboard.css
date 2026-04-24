@@ -26,3 +26,22 @@ body {
 .link-fixed:hover {
     text-decoration: underline !important;
 }
+
+/* For pagination styling at /runs, /reports, /qa and /customers pages */
+.pagination .page-link {
+    color: #198754;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #198754;
+    border-color: #198754;
+    color: #fff;
+}
+
+.page-link:hover {
+    color: #198754;
+}
+
+.page-link:focus {
+    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}

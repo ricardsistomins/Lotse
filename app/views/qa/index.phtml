@@ -57,14 +57,45 @@
     </div>
 </div>
 
+<form method="GET" action="/qa" class="row g-2 mb-3">
+    <div class="col-auto">                                                    
+        <select name="status" class="form-select form-select-sm">
+            <option value="">All statuses</option>                            
+            <option value="needs_qa"  <?= $filterStatus === 'needs_qa' ? 'selected' : '' ?>> Needs QA </option>                                        
+            <option value="approved"  <?= $filterStatus === 'approved' ? 'selected' : '' ?>> Approved </option>                                        
+            <option value="rejected"  <?= $filterStatus === 'rejected' ? 'selected' : '' ?>> Rejected </option>                                        
+        </select>
+    </div>                                                                    
 
+    <div class="col-auto">
+        <select name="guardrail" class="form-select form-select-sm">
+            <option value="">All guardrails</option>                          
+            <option value="pass"    <?= $filterGuardrail === 'pass' ? 'selected' : '' ?>> Pass </option>                                            
+            <option value="review"  <?= $filterGuardrail === 'review' ? 'selected' : '' ?>> Review </option>                                          
+            <option value="blocked" <?= $filterGuardrail === 'blocked' ? 'selected' : '' ?>> Blocked </option>                                         
+        </select>
+    </div>
 
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-success">Filter</button>  
+        <a href="/qa" class="btn btn-sm btn-outline-secondary">Reset</a>
+    </div>                                                                    
+</form>         
 
 <div class="card rounded-4">
     <div class="card-body">
         <div class="mb-3">
             <h5 class="card-title mb-0">Pending reviews</h5>
-            <span class="text-muted"><?= count($queue) ?> items awaiting QA decision</span>
+            
+             <span class="text-muted small">                           
+                <?= $total ?> item<?= $total !== 1 ? 's' : '' ?>
+
+                <?php if ($filterStatus || $filterGuardrail) { ?>
+                    · filtered by&nbsp;                                                                                                                      
+                    <?= $filterStatus   ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)   . '</span>' : '' ?>                        
+                    <?= $filterGuardrail ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterGuardrail) . '</span>' : '' ?>                      
+                <?php } ?>                                                                                                                                   
+            </span>  
         </div>
 
         <?php if (empty($queue)) { ?>
@@ -125,6 +156,28 @@
                     <?php } ?>
                 </tbody>
             </table>
+            
+           <?php if ($totalPages > 1) { ?>                                               
+                <?php $baseQuery = array_filter(['status' => $filterStatus, 'guardrail' => $filterGuardrail]); ?> 
+            
+                <nav class="mt-3">                                                        
+                    <ul class="pagination justify-content-center mb-0">     
+                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="/qa?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>                                           
+                        </li>                                                             
+
+                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>
+                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                                <a class="page-link" href="/qa?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>
+                            </li>                                                         
+                        <?php } ?>                                                        
+
+                        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">            
+                            <a class="page-link" href="/qa?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>                                           
+                        </li>
+                    </ul>   
+                </nav>
+            <?php } ?>
         <?php } ?>
     </div>
 </div>

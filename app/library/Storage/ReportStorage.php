@@ -247,27 +247,41 @@ class ReportStorage extends AbstractStorage
     }
 
     /**
-     * Fetch reports currently in the QA queue (status = needs_qa), oldest first.
+     * Fetch reports currently in the QA queue by status and guardrail, oldest first.
      *
+     * @param string|null $status
+     * @param string|null $guardrail
+     * @param int $page
      * @return ReportModel[]
      */
-    public function getQueueItems(): array
+    public function getQueueItems(?string $status = null, ?string $guardrail = null, int $page = 1): array
     {
         $pdo = $this->getPdo();
 
+        $where = ['reports.status = :status'];
+        $params = [':status' => ReportModel::STATUS_NEEDS_QA];
+        
+        if ($status !== null) {
+            $where = ['reports.status = :status'];
+            $params[':status'] = $status;
+        }
+        
+        if ($guardrail !== null) {
+            $where[] = 'rr.guardrail_status = :guardrail';
+            $params[':guardrail'] = $guardrail;
+        }
+        
         $sql = 'SELECT ' . $this->mapFields() . ',
                        rr.guardrail_status AS runGuardrailStatus,
                        rr.started_at AS startedAt
                 FROM reports
                 JOIN research_runs rr ON rr.id = reports.run_id
-                WHERE reports.status = :status
+                WHERE ' . implode(' AND ', $where) . '
                 ORDER BY reports.id ASC
-                LIMIT 50';
+                LIMIT ' . self::PER_PAGE . ' OFFSET ' . (($page - 1) * self::PER_PAGE);
 
         $sth = $pdo->prepare($sql);
-        $sth->execute([
-            ':status' => ReportModel::STATUS_NEEDS_QA
-        ]);
+        $sth->execute($params);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ReportModel::class);
     }
@@ -380,5 +394,40 @@ class ReportStorage extends AbstractStorage
         $sth->execute($params);
         
         return (int)$sth->fetchColumn();
+    }
+    
+    /**
+     * Get queue items count by status and guardrail
+     * 
+     * @param string|null $status
+     * @param string|null $guardrail
+     * @return int
+     */
+    public function getQueueItemsCount(?string $status = null, ?string $guardrail = null): int
+    {
+        $pdo = $this->getPdo();
+        
+        $where = ['reports.status = :status'];
+        $params = [':status' => ReportModel::STATUS_NEEDS_QA];
+        
+        if ($status !== null) {
+            $where = ['reports.status = :status'];
+            $params[':status'] = $status;
+        }
+        
+        if ($guardrail !== null) {
+            $where[] = 'rr.guardrail_status = :guardrail';
+            $params[':guardrail'] = $guardrail;
+        }
+        
+        $sql = 'SELECT COUNT(*)
+                FROM reports
+                JOIN research_runs rr ON rr.id = reports.run_id
+                WHERE ' . implode(' AND ', $where);
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute($params);
+        
+        return $sth->fetchColumn();
     }
 }

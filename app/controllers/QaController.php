@@ -22,10 +22,26 @@ class QaController extends Controller
      * List last 50 reports in the QA queue.                                      
      */
     public function indexAction(): void                                       
-    {                                                                                 
+    {                          
+        $request = $this->request;
+        
+        $status = $request->getQuery('status', 'string') ?: null;
+        $guardrail = $request->getQuery('guardrail', 'string') ?: null;
+        $page = max(1, $request->getQuery('page', 'int', 1));
+        
+        $reportStorage = new ReportStorage();
+        $total = $reportStorage->getQueueItemsCount($status, $guardrail);
+        $totalPages = max(1, ceil($total / ReportStorage::PER_PAGE));
+        $page = min($page, $totalPages);
+        
         $this->view->setVars([
-            'queue' => (new ReportStorage())->getQueueItems(),
-            'getStatusCounts' => (new QaReviewStorage())->getQueueStatusCounts()
+            'queue'           => $reportStorage->getQueueItems($status, $guardrail, $page),
+            'getStatusCounts' => (new QaReviewStorage())->getQueueStatusCounts(),
+            'filterStatus'    => $status,
+            'filterGuardrail' => $guardrail,
+            'page'            => $page,
+            'totalPages'      => $totalPages,
+            'total'           => $total
         ]);
     }                                                                         
 
