@@ -44,20 +44,36 @@ class CustomerStorage extends AbstractStorage
     );
 
     /**
-     * Fetch all customers, ordered by company name.
+     * Fetch all customers, filtered by status and country code, ordered by company name.
      *
+     * @param string|null $status
+     * @param string|null $countryCode
      * @return CustomerModel[]
      */
-    public function getAll(): array
+    public function getAll(?string $status = null, ?string $countryCode = null): array
     {
         $pdo = $this->getPdo();
 
+        $where = [];
+        $params = [];
+        
+        if ($status !== null) {
+            $where[] = 'status = :status';
+            $params[':status'] = $status;
+        }
+        
+        if ($countryCode !== null) {
+            $where[] = 'country_code = :countryCode';
+            $params[':countryCode'] = $countryCode;
+        }
+        
         $sql = 'SELECT ' . $this->mapFields() . '
-                FROM customers
+                FROM customers' . 
+                ($where ? ' WHERE ' . implode(' AND ', $where) : '') . '
                 ORDER BY company_name ASC';
-
+        
         $sth = $pdo->prepare($sql);
-        $sth->execute();
+        $sth->execute($params);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, CustomerModel::class);
     }
@@ -236,6 +252,25 @@ class CustomerStorage extends AbstractStorage
             'paused'   => $row['paused'] ?? 0,
             'archived' => $row['archived'] ?? 0,
         ];                                                                                  
+    }
+    
+    /**
+     * Get countries code(distinct) from customers table
+     * 
+     * @return array
+     */
+    public function getDistinctCountries(): array
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT DISTINCT country_code
+                FROM customers
+                ORDER BY country_code ASC';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+        
+        return $sth->fetchAll($pdo::FETCH_COLUMN);
     }
 
 }

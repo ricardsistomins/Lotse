@@ -49,11 +49,47 @@
     </div>
 </div>
 
+<form method="GET" action="/customers" class="row g-2 mb-3">
+    <div class="col-auto">                                                                                                                       
+        <select name="status" class="form-select form-select-sm">                                                                                
+            <option value="">All statuses</option>                                                                                               
+            <option value="active"   <?= $filterStatus === 'active'   ? 'selected' : '' ?>> Active </option>                                     
+            <option value="paused"   <?= $filterStatus === 'paused'   ? 'selected' : '' ?>> Paused </option>                                     
+            <option value="archived" <?= $filterStatus === 'archived' ? 'selected' : '' ?>> Archived </option>
+        </select>                                                                                                                                
+    </div>      
+
+    <div class="col-auto">
+        <select name="country_code" class="form-select form-select-sm">
+            <option value="">All countries</option>                                                                                              
+            <?php foreach ($countries as $code) { ?>
+                <option value="<?= htmlspecialchars($code) ?>" <?= $filterCountry === $code ? 'selected' : '' ?>>                                
+                    <?= htmlspecialchars($code) ?>                                                                                               
+                </option>
+            <?php } ?>                                                                                                                           
+        </select>                                                                                                                                
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-success">Filter</button>
+        <a href="/customers" class="btn btn-sm btn-outline-secondary">Reset</a>                                                                  
+    </div>
+</form>                         
+
 <div class="card rounded-4">                                                            
     <div class="card-body">                       
         <div class="mb-3">
             <h5 class="card-title mb-0">Customers</h5>
-            <span class="text-muted">Showing <?= count($customers) ?> of <?= $customersCount['total'] ?></span>
+            
+            <span class="text-muted small">                                                                                                                  
+                <?= count($customers) ?> customer<?= count($customers) !== 1 ? 's' : '' ?>                                                                   
+
+                <?php if ($filterStatus || $filterCountry) { ?>                                                                                              
+                    · filtered by&nbsp;                                                                                                                      
+                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)  . '</span>' : '' ?>
+                    <?= $filterCountry ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterCountry) . '</span>' : '' ?>                          
+                <?php } ?>                                                                                                                                   
+            </span>      
         </div>
         
         <?php if (empty($customers)) { ?>                                     

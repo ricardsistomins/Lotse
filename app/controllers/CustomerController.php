@@ -17,11 +17,18 @@ class CustomerController extends Controller
      */
     public function indexAction(): void
     {
+        $request = $this->request;
+        $status = $request->getQuery('status', 'string') ?: null;
+        $countryCode = $request->getQuery('country_code', 'string') ?: null;
+        
         $customerStorage = new CustomerStorage();
         
         $this->view->setVars([
-            'customers' => $customerStorage->getAll(),
-            'customersCount' => $customerStorage->getStatusCounts()
+            'customers'      => $customerStorage->getAll($status, $countryCode),
+            'customersCount' => $customerStorage->getStatusCounts(),
+            'countries'      => $customerStorage->getDistinctCountries(),
+            'filterStatus'   => $status,
+            'filterCountry'  => $countryCode
         ]);
     }
 
