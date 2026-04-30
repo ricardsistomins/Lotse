@@ -1,182 +1,182 @@
-<?php 
-    use app\Model\{ 
-        ReportModel,
-        ResearchRunModel,
+<?php                                                                                                                                                                                    
+    use app\Model\{                                                                                                                                                                      
+        ReportModel,                                                                                                                                                                     
+        ResearchRunModel,                                                                                                                                                                
         UserModel
-    }; 
-?>
+    };                                                                                                                                                                                   
+?>              
 
-<div class="mb-4 d-flex justify-content-between align-items-center">
+<div class="mb-4 d-flex justify-content-between align-items-center">                                                                                                                     
     <div>
-        <h2 class="text-success">QA queue</h2>
-        <span class="text-muted fs-5"> Review research outputs flagged by guardrails. Approve to publish to customers, or reject to send back for refinement. </span> 
-    </div>
-    
-    <div class="badge ps-0 mb-1">
-        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
-            <i class="bi bi-dot text-success fs-3"></i> QA workflow
-        </span>
-    </div>
-</div>
+        <h2 class="text-success"><?= $translate('QA queue') ?></h2>                                                                                                                      
+        <span class="text-muted fs-5"><?= $translate('Review research outputs flagged by guardrails. Approve to publish to customers, or reject to send back for refinement.') ?></span> 
+    </div>                                                                                                                                                                               
+
+    <div class="badge ps-0 mb-1">                                                                                                                                                        
+        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center">                                                                                               
+            <i class="bi bi-dot text-success fs-3"></i> <?= $translate('QA workflow') ?>                                                                                                 
+        </span>                                                                                                                                                                          
+    </div>                                                                                                                                                                               
+</div>                                                                                                                                                                                   
 
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-md-3">                                                                                                                                                               
         <div class="card rounded-4 text-center">
-            <div class="card-body">
+            <div class="card-body">                                                                                                                                                      
                 <div class="fs-2 fw-bold"> <i class="bi bi-clock"></i> <?= $getStatusCounts['awaiting_review'] ?></div>
-                <div class="text-muted small">Awaiting review</div>
+                <div class="text-muted small"><?= $translate('Awaiting review') ?></div>                                                                                                 
             </div>
-        </div>
-    </div>
-    
+        </div>                                                                                                                                                                           
+    </div>      
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-success"> <i class="bi bi-bookmark-check"></i> <?= $getStatusCounts['guardrail_pass'] ?></div>
-                <div class="text-muted small">Guardrail · pass</div>
-            </div>
-        </div>
-    </div>
-    
+                <div class="text-muted small"><?= $translate('Guardrail · pass') ?></div>                                                                                                
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
-            <div class="card-body">
+            <div class="card-body">                                                                                                                                                      
                 <div class="fs-2 fw-bold text-warning"> <i class="bi bi-pencil-square"></i> <?= $getStatusCounts['guardrail_review'] ?></div>
-                <div class="text-muted small">Guardrail · review</div>
+                <div class="text-muted small"><?= $translate('Guardrail · review') ?></div>                                                                                              
             </div>
-        </div>
-    </div>
-    
+        </div>                                                                                                                                                                           
+    </div>      
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
-            <div class="card-body">
+            <div class="card-body">                                                                                                                                                      
                 <div class="fs-2 fw-bold text-info"> <i class="bi bi-journals"></i> <?= $getStatusCounts['total'] ?></div>
-                <div class="text-muted small">Total in queue</div>
+                <div class="text-muted small"><?= $translate('Total in queue') ?></div>                                                                                                  
             </div>
-        </div>
-    </div>
+        </div>                                                                                                                                                                           
+    </div>      
 </div>
 
-<form method="GET" action="/qa" class="row g-2 mb-3">
-    <div class="col-auto">                                                    
+<form method="GET" action="/<?= $language ?>/qa" class="row g-2 mb-3">
+    <div class="col-auto">                                                                                                                                                               
         <select name="status" class="form-select form-select-sm">
-            <option value="">All statuses</option>                            
-            <option value="needs_qa"  <?= $filterStatus === 'needs_qa' ? 'selected' : '' ?>> Needs QA </option>                                        
-            <option value="approved"  <?= $filterStatus === 'approved' ? 'selected' : '' ?>> Approved </option>                                        
-            <option value="rejected"  <?= $filterStatus === 'rejected' ? 'selected' : '' ?>> Rejected </option>                                        
-        </select>
-    </div>                                                                    
+            <option value=""><?= $translate('All statuses') ?></option>                                                                                                                  
+            <option value="needs_qa" <?= $filterStatus === 'needs_qa' ? 'selected' : '' ?>><?= $translate('Needs QA') ?></option>                                                        
+            <option value="approved" <?= $filterStatus === 'approved' ? 'selected' : '' ?>><?= $translate('Approved') ?></option>
+            <option value="rejected" <?= $filterStatus === 'rejected' ? 'selected' : '' ?>><?= $translate('Rejected') ?></option>                                                        
+        </select>                                                                                                                                                                        
+    </div>                                                                                                                                                                               
 
     <div class="col-auto">
         <select name="guardrail" class="form-select form-select-sm">
-            <option value="">All guardrails</option>                          
-            <option value="pass"    <?= $filterGuardrail === 'pass' ? 'selected' : '' ?>> Pass </option>                                            
-            <option value="review"  <?= $filterGuardrail === 'review' ? 'selected' : '' ?>> Review </option>                                          
-            <option value="blocked" <?= $filterGuardrail === 'blocked' ? 'selected' : '' ?>> Blocked </option>                                         
-        </select>
-    </div>
+            <option value=""><?= $translate('All guardrails') ?></option>
+            <option value="pass"    <?= $filterGuardrail === 'pass'    ? 'selected' : '' ?>><?= $translate('Pass') ?></option>                                                           
+            <option value="review"  <?= $filterGuardrail === 'review'  ? 'selected' : '' ?>><?= $translate('Review') ?></option>
+            <option value="blocked" <?= $filterGuardrail === 'blocked' ? 'selected' : '' ?>><?= $translate('Blocked') ?></option>                                                        
+        </select>                                                                                                                                                                        
+    </div>                                                                                                                                                                               
 
     <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-success">Filter</button>  
-        <a href="/qa" class="btn btn-sm btn-outline-secondary">Reset</a>
-    </div>                                                                    
-</form>         
+        <button type="submit" class="btn btn-sm btn-success"><?= $translate('Filter') ?></button>
+        <a href="/<?= $language ?>/qa" class="btn btn-sm btn-outline-secondary"><?= $translate('Reset') ?></a>                                                                           
+    </div>
+</form>                                                                                                                                                                                  
 
 <div class="card rounded-4">
     <div class="card-body">
-        <div class="mb-3">
-            <h5 class="card-title mb-0">Pending reviews</h5>
-            
-             <span class="text-muted small">                           
-                <?= $total ?> item<?= $total !== 1 ? 's' : '' ?>
+        <div class="mb-3">                                                                                                                                                               
+            <h5 class="card-title mb-0"><?= $translate('Pending reviews') ?></h5>
+
+            <span class="text-muted small">
+                <?= $translate('%s items', [$total]) ?>
 
                 <?php if ($filterStatus || $filterGuardrail) { ?>
-                    · filtered by&nbsp;                                                                                                                      
-                    <?= $filterStatus   ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)   . '</span>' : '' ?>                        
-                    <?= $filterGuardrail ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterGuardrail) . '</span>' : '' ?>                      
-                <?php } ?>                                                                                                                                   
-            </span>  
-        </div>
+                    · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             
+                    <?= $filterStatus    ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)    . '</span>' : '' ?>
+                    <?= $filterGuardrail ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterGuardrail) . '</span>' : '' ?>                                                  
+                <?php } ?>                                                                                                                                                               
+            </span>                                                                                                                                                                      
+        </div>                                                                                                                                                                           
 
         <?php if (empty($queue)) { ?>
-            <p class="text-muted">No reports awaiting QA review.</p>
-        <?php } else { ?>
+            <p class="text-muted"><?= $translate('No reports awaiting QA review.') ?></p>
+        <?php } else { ?>                                                                                                                                                                
             <table class="table table-hover table-striped">
-                <thead>
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th> # </th>
-                        <th> Scope key </th>
-                        <th> Revision </th>
-                        <th> Guardrail </th>
-                        <th> Status </th>
-                        <th> Requested </th>
+                        <th><?= $translate('#') ?></th>
+                        <th><?= $translate('Scope key') ?></th>
+                        <th><?= $translate('Revision') ?></th>                                                                                                                           
+                        <th><?= $translate('Guardrail') ?></th>
+                        <th><?= $translate('Status') ?></th>                                                                                                                             
+                        <th><?= $translate('Requested') ?></th>                                                                                                                          
                         <th></th>
-                    </tr>
+                    </tr>                                                                                                                                                                
                 </thead>
 
                 <tbody>
                     <?php foreach ($queue as $item) { ?>
                         <tr>
-                            <td class="text-muted"><?= $item->id ?></td>
+                            <td class="text-muted"><?= $item->id ?></td>                                                                                                                 
                             <td><code><?= htmlspecialchars($item->canonicalScopeKey) ?></code></td>
-                            <td><?= $item->currentRevisionId ?? '—' ?></td>
-                            <td>
+                            <td><?= $item->currentRevisionId ?? '—' ?></td>                                                                                                              
+                            <td>                                                                                                                                                         
                                 <span class="badge bg-<?= match($item->runGuardrailStatus ?? 'pending') {
-                                    ResearchRunModel::STATUS_PASS    => 'success',
-                                    ResearchRunModel::STATUS_REVIEW  => 'warning',
+                                    ResearchRunModel::STATUS_PASS    => 'success',                                                                                                       
+                                    ResearchRunModel::STATUS_REVIEW  => 'warning',                                                                                                       
                                     ResearchRunModel::STATUS_BLOCKED => 'danger',
-                                    default   => 'secondary'
+                                    default                          => 'secondary'                                                                                                      
                                 } ?>"><?= ucfirst($item->runGuardrailStatus ?? 'pending') ?></span>
-                            </td>
+                            </td>                                                                                                                                                        
                             <td>
-                                <span class="badge bg-<?= match($item->status) {
-                                    ReportModel::STATUS_NEEDS_QA => 'warning',
+                                <span class="badge bg-<?= match($item->status) {                                                                                                         
+                                    ReportModel::STATUS_NEEDS_QA => 'warning',                                                                                                           
                                     ReportModel::STATUS_APPROVED => 'success',
-                                    ReportModel::STATUS_REJECTED => 'danger',
-                                    default     => 'secondary'
-                                } ?>"><?= ucfirst(str_replace('_', ' ', $item->status)) ?></span>
+                                    ReportModel::STATUS_REJECTED => 'danger',                                                                                                            
+                                    default                      => 'secondary'
+                                } ?>"><?= ucfirst(str_replace('_', ' ', $item->status)) ?></span>                                                                                        
                             </td>
-                            <td>
+                            <td>                                                                                                                                                         
                                 <small><?= $item->startedAt ?></small>
-                            </td>
+                            </td>                                                                                                                                                        
                             <td class="d-flex gap-2">
-                                <a href="/report/<?= $item->id ?>" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-eyeglasses"></i> Inspect</a>
+                                <a href="/<?= $language ?>/report/<?= $item->id ?>" class="btn btn-sm btn-outline-secondary rounded-3"><i class="bi bi-eyeglasses"></i> <?= $translate('Inspect') ?></a>                                                                                                                                                             
 
-                                <?php if ($item->runGuardrailStatus !== ResearchRunModel::STATUS_BLOCKED && in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) { ?>
-                                    <form method="POST" action="/qa/<?= $item->currentRevisionId ?>/approve">
-                                        <button type="submit" class="btn btn-sm btn-success rounded-3"><i class="bi bi-check-lg"></i> Approve</button>
-                                    </form>
+                                <?php if ($item->runGuardrailStatus !== ResearchRunModel::STATUS_BLOCKED && in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) { ?>                                                                                                                                                               
+                                    <form method="POST" action="/<?= $language ?>/qa/<?= $item->currentRevisionId ?>/approve">
+                                        <button type="submit" class="btn btn-sm btn-success rounded-3"><i class="bi bi-check-lg"></i> <?= $translate('Approve') ?></button>              
+                                    </form>                                                                                                                                              
 
-                                    <form method="POST" action="/qa/<?= $item->currentRevisionId ?>/reject">
-                                        <button type="submit" class="btn btn-sm btn-danger rounded-3"><i class="bi bi-x-lg"></i> Reject</button>
-                                    </form>
-                                <?php } ?>
-                            </td>
+                                    <form method="POST" action="/<?= $language ?>/qa/<?= $item->currentRevisionId ?>/reject">                                                            
+                                        <button type="submit" class="btn btn-sm btn-danger rounded-3"><i class="bi bi-x-lg"></i> <?= $translate('Reject') ?></button>                    
+                                    </form>                                                                                                                                              
+                                <?php } ?>                                                                                                                                               
+                            </td>                                                                                                                                                        
                         </tr>
                     <?php } ?>
                 </tbody>
             </table>
-            
-           <?php if ($totalPages > 1) { ?>                                               
-                <?php $baseQuery = array_filter(['status' => $filterStatus, 'guardrail' => $filterGuardrail]); ?> 
-            
-                <nav class="mt-4">                                                        
-                    <ul class="pagination justify-content-center mb-0">     
+
+            <?php if ($totalPages > 1) { ?>
+                <?php $baseQuery = array_filter(['status' => $filterStatus, 'guardrail' => $filterGuardrail]); ?>
+
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center mb-0">                                                                                                                  
                         <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                            <a class="page-link" href="/qa?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>                                           
-                        </li>                                                             
+                            <a class="page-link" href="/<?= $language ?>/qa?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>                                           
+                        </li>                                                                                                                                                            
 
-                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>
+                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>                                                                                                                 
                             <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                                <a class="page-link" href="/qa?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>
-                            </li>                                                         
-                        <?php } ?>                                                        
+                                <a class="page-link" href="/<?= $language ?>/qa?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>                                      
+                            </li>
+                        <?php } ?>                                                                                                                                                       
 
-                        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">            
-                            <a class="page-link" href="/qa?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>                                           
-                        </li>
-                    </ul>   
-                </nav>
+                        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                            <a class="page-link" href="/<?= $language ?>/qa?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>                                           
+                        </li>                                                                                                                                                            
+                    </ul>                                                                                                                                                                
+                </nav>                                                                                                                                                                   
             <?php } ?>
         <?php } ?>
     </div>

@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use Phalcon\Mvc\Controller;
 use app\Service\DuplicateRunException;
 use app\Storage\ {
     ResearchRunStorage,
@@ -16,7 +15,7 @@ use app\Model\{
     ResearchRunModel
 };
 
-class RunController extends Controller
+class RunController extends BaseController
 {
     /**
      * List all research runs
@@ -48,16 +47,13 @@ class RunController extends Controller
     /**                                                                       
      * Show full detail for a single run
      */                                                                       
-    public function viewAction(int $id): void                              
+    public function viewAction(): void
     {
-        $response = $this->response;
-
+        $id = (int)$this->dispatcher->getParam('id');
         $run = (new ResearchRunStorage())->getById($id);
 
         if (!$run) {                                                          
-            $response->redirect('/runs');
-            $response->send();                                                
-
+            $this->langRedirect('/runs');                                               
             return;
         }                                                                     
 
@@ -81,26 +77,22 @@ class RunController extends Controller
      * @param int $id
      * @return void
      */
-    public function retriggerAction(int $id): void 
+    public function retriggerAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $session = $this->session;
         
         $userRole = $session->get('userRole', 'string');
 
         if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {
-            $response->redirect('/run/' . $id);
-            $response->send();
-
+            $this->langRedirect('/run/' . $id);
             return;
         }
 
         $run = (new ResearchRunStorage())->getById($id);
 
         if (!$run || empty($run->query)) {
-            $response->redirect('/run/' . $id);
-            $response->send();
-            
+            $this->langRedirect('/run/' . $id);
             return;
         }
      
@@ -114,13 +106,10 @@ class RunController extends Controller
         try {
             $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db);
         } catch (DuplicateRunException $e) {
-            $response->redirect('/run/' . $e->existingRunId . '?duplicate=1');
-            $response->send();
-
+            $this->langRedirect('/run/' . $e->existingRunId . '?duplicate=1');
             return;
         }
 
-        $response->redirect('/run/' . $newRunId . '?retrigger=1');
-        $response->send();
+        $this->langRedirect('/run/' . $newRunId . '?retrigger=1');
     }
 }

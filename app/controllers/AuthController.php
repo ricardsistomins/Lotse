@@ -2,12 +2,11 @@
 
 namespace app\controllers;
 
-use Phalcon\Mvc\Controller;
 use app\Storage\UserStorage;
 use app\Validator\LoginValidator;
 use app\Service\AuditService;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     /*
      * User login action
@@ -16,10 +15,13 @@ class AuthController extends Controller
     {
         // This disables the layout for login page only. All other pages will use dashboard.phtml automatically.
         $this->view->setRenderLevel(\Phalcon\Mvc\View::LEVEL_ACTION_VIEW);
+        
         $session = $this->session;
         $response = $this->response;
         $request = $this->request;
         $view = $this->view;
+        
+        $activeLanguage = $this->session->get('language') ?? 'de';
         
         $sessionExpired = $session->get('sessionExpired', false);
         
@@ -29,7 +31,7 @@ class AuthController extends Controller
         }
        
         if ($session->has('userId')) {
-            $response->redirect('/dashboard');
+            $response->redirect('/' . $activeLanguage . '/dashboard');
             $response->send();
 
             return;
@@ -53,7 +55,7 @@ class AuthController extends Controller
         
         $userStorage = new UserStorage();
         $user = $userStorage->getUserByEmail($email);
-        
+
         if (!$user || !$user->isActive || !password_verify($password, $user->passwordHash)) {
             $view->setVar('error', 'Invalid email or password');
             $view->setVar('email', $email);
@@ -76,7 +78,7 @@ class AuthController extends Controller
             metadata:    []
         );
 
-        $response->redirect('/dashboard');
+        $response->redirect('/' . $activeLanguage . '/dashboard');
         $response->send();
         
         return;

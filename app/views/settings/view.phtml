@@ -1,31 +1,30 @@
 <?php use app\Model\UserModel; ?>
 
-<div class="card">                                                            
-    <div class="card-body">                                                   
-        <div class="d-flex justify-content-between align-items-center mb-4">  
-            <h5 class="card-title mb-0"><code><?= htmlspecialchars($key) ?></code></h5>
-            <a href="/settings" class="btn btn-sm btn-outline-secondary"> << Back </a>                                                                      
-        </div>
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0"><code><?= htmlspecialchars($key) ?></code></h5>                                                                                                  
+            <a href="/<?= $language ?>/settings" class="btn btn-sm btn-outline-secondary">&laquo; <?= $translate('Back') ?></a>
+        </div>                                                                                                                                                                           
 
-        <?php if (!empty($error)) { ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>                                                                      
+        <?php if (!empty($error)) { ?>                                                                                                                                                   
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>                                                                                                        
         <?php } ?>
-            
+
         <?php if (!empty($success)) { ?>
             <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-        <?php } ?>
+        <?php } ?>                                                                                                                                                                       
 
-
-        <?php if (in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) { ?>
-            <form method="POST" action="/settings/<?= htmlspecialchars($key) ?>/save">       
-                <div class="mb-3">
+        <?php if (in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) { ?>                                                                          
+            <form method="POST" action="/<?= $language ?>/settings/<?= htmlspecialchars($key) ?>/save">
+                <div class="mb-3">                                                                                                                                                       
                     <textarea name="value" class="form-control font-monospace" rows="20"><?= htmlspecialchars($value) ?></textarea>
-                </div>  
-                
-                <button type="submit" class="btn btn-primary">Save</button>   
+                </div>                                                                                                                                                                   
+
+                <button type="submit" class="btn btn-primary"><?= $translate('Save') ?></button>                                                                                         
             </form>
-        <?php } else { ?>                                                     
-            <pre class="border rounded p-3 bg-light"><?= htmlspecialchars($value) ?></pre>                                             
-        <?php } ?>
-    </div>                                                                    
-</div>          
+        <?php } else { ?>
+            <pre class="border rounded p-3 bg-light"><?= htmlspecialchars($value) ?></pre>
+        <?php } ?>                                                                                                                                                                       
+    </div>
+</div>                

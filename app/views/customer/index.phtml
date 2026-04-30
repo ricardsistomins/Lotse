@@ -1,166 +1,163 @@
-<?php use app\Model\CustomerModel; ?>                                         
+<?php use app\Model\CustomerModel; ?>
 
-<div class="mb-4 d-flex justify-content-between align-items-center">
-    <div>
-        <h2 class="text-success">Customers</h2>
-        <span class="text-muted fs-5"> Manage organizations using Lotse and review their research activity. </span> 
-    </div>
-    
-<!--    <div class="badge ps-0 mb-1">
-        <a class="btn btn-sm btn-outline-success rounded-3"><i class="bi bi-plus"></i> New customer </a>
-    </div>-->
-</div>
+ <div class="mb-4 d-flex justify-content-between align-items-center">                                                                                                                     
+    <div>                                                                                                                                                                                
+        <h2 class="text-success"><?= $translate('Customers') ?></h2>                                                                                                                     
+        <span class="text-muted fs-5"><?= $translate('Manage organizations using Lotse and review their research activity.') ?></span>                                                   
+    </div>                                                                                                                                                                               
+ </div>                                                                                                                                                                                   
 
-<div class="row g-3 mb-4">
+ <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card rounded-4 text-center">
+        <div class="card rounded-4 text-center">                                                                                                                                         
             <div class="card-body">
-                <div class="fs-2 fw-bold"> <i class="bi bi-buildings"></i> <?= $customersCount['total'] ?></div>
-                <div class="text-muted small">Total customers</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card rounded-4 text-center">
-            <div class="card-body">
-                <div class="fs-2 fw-bold text-success"> <i class="bi bi-people"></i> <?= $customersCount['active'] ?></div>
-                <div class="text-muted small">Active</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card rounded-4 text-center">
-            <div class="card-body">
-                <div class="fs-2 fw-bold text-warning"> <i class="bi bi-pause-circle"></i> <?= $customersCount['paused'] ?></div>
-                <div class="text-muted small">Paused</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card rounded-4 text-center">
-            <div class="card-body">
-                <div class="fs-2 fw-bold text-info"> <i class="bi bi-archive"></i> <?= $customersCount['archived'] ?></div>
-                <div class="text-muted small">Archived</div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="fs-2 fw-bold"> <i class="bi bi-buildings"></i> <?= $customersCount['total'] ?></div>                                                                         
+                <div class="text-muted small"><?= $translate('Total customers') ?></div>                                                                                                 
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
 
-<form method="GET" action="/customers" class="row g-2 mb-3">
-    <div class="col-auto">                                                                                                                       
-        <select name="status" class="form-select form-select-sm">                                                                                
-            <option value="">All statuses</option>                                                                                               
-            <option value="active"   <?= $filterStatus === 'active'   ? 'selected' : '' ?>> Active </option>                                     
-            <option value="paused"   <?= $filterStatus === 'paused'   ? 'selected' : '' ?>> Paused </option>                                     
-            <option value="archived" <?= $filterStatus === 'archived' ? 'selected' : '' ?>> Archived </option>
-        </select>                                                                                                                                
+    <div class="col-md-3">
+        <div class="card rounded-4 text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-success"> <i class="bi bi-people"></i> <?= $customersCount['active'] ?></div>                                                              
+                <div class="text-muted small"><?= $translate('Active') ?></div>                                                                                                          
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
     </div>      
 
-    <div class="col-auto">
-        <select name="country_code" class="form-select form-select-sm">
-            <option value="">All countries</option>                                                                                              
-            <?php foreach ($countries as $code) { ?>
-                <option value="<?= htmlspecialchars($code) ?>" <?= $filterCountry === $code ? 'selected' : '' ?>>                                
-                    <?= htmlspecialchars($code) ?>                                                                                               
-                </option>
-            <?php } ?>                                                                                                                           
-        </select>                                                                                                                                
-    </div>
-
-    <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-success">Filter</button>
-        <a href="/customers" class="btn btn-sm btn-outline-secondary">Reset</a>                                                                  
-    </div>
-</form>                         
-
-<div class="card rounded-4">                                                            
-    <div class="card-body">                       
-        <div class="mb-3">
-            <h5 class="card-title mb-0">Customers</h5>
-            
-            <span class="text-muted small">                                                                                                                  
-                <?= count($customers) ?> customer<?= count($customers) !== 1 ? 's' : '' ?>                                                                   
-
-                <?php if ($filterStatus || $filterCountry) { ?>                                                                                              
-                    · filtered by&nbsp;                                                                                                                      
-                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)  . '</span>' : '' ?>
-                    <?= $filterCountry ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterCountry) . '</span>' : '' ?>                          
-                <?php } ?>                                                                                                                                   
-            </span>      
+    <div class="col-md-3">
+        <div class="card rounded-4 text-center">
+            <div class="card-body">                                                                                                                                                      
+                <div class="fs-2 fw-bold text-warning"> <i class="bi bi-pause-circle"></i> <?= $customersCount['paused'] ?></div>
+                <div class="text-muted small"><?= $translate('Paused') ?></div>                                                                                                          
+            </div>                                                                                                                                                                       
         </div>
-        
-        <?php if (empty($customers)) { ?>                                     
-            <p class="text-muted">No customers found.</p>
-        <?php } else { ?>                                                     
-            <table class="table table-hover table-striped">
-                <thead>                                                       
-                    <tr>
-                        <th> # </th>                                            
-                        <th> Company </th>
-                        <th> Country </th>
-                        <th> Industry </th>
-                        <th> Employee band </th>                                
-                        <th> Status </th>
-                        <th></th>                                             
+    </div>                                                                                                                                                                               
+
+    <div class="col-md-3">
+        <div class="card rounded-4 text-center">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-info"> <i class="bi bi-archive"></i> <?= $customersCount['archived'] ?></div>                                                              
+                <div class="text-muted small"><?= $translate('Archived') ?></div>
+            </div>                                                                                                                                                                       
+        </div>  
+    </div>                                                                                                                                                                               
+ </div>          
+
+ <form method="GET" action="/<?= $language ?>/customers" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="status" class="form-select form-select-sm">                                                                                                                        
+            <option value=""><?= $translate('All statuses') ?></option>
+            <option value="active"   <?= $filterStatus === 'active'   ? 'selected' : '' ?>><?= $translate('Active') ?></option>                                                          
+            <option value="paused"   <?= $filterStatus === 'paused'   ? 'selected' : '' ?>><?= $translate('Paused') ?></option>                                                          
+            <option value="archived" <?= $filterStatus === 'archived' ? 'selected' : '' ?>><?= $translate('Archived') ?></option>                                                        
+        </select>                                                                                                                                                                        
+    </div>                                                                                                                                                                               
+
+    <div class="col-auto">
+        <select name="country_code" class="form-select form-select-sm">                                                                                                                  
+            <option value=""><?= $translate('All countries') ?></option>
+            <?php foreach ($countries as $code) { ?>                                                                                                                                     
+                <option value="<?= htmlspecialchars($code) ?>" <?= $filterCountry === $code ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($code) ?>                                                                                                                                       
+                </option>
+            <?php } ?>                                                                                                                                                                   
+        </select>
+    </div>
+
+    <div class="col-auto">                                                                                                                                                               
+        <button type="submit" class="btn btn-sm btn-success"><?= $translate('Filter') ?></button>
+        <a href="/<?= $language ?>/customers" class="btn btn-sm btn-outline-secondary"><?= $translate('Reset') ?></a>                                                                    
+    </div>                                                                                                                                                                               
+</form>
+
+<div class="card rounded-4">
+    <div class="card-body">
+        <div class="mb-3">
+            <h5 class="card-title mb-0"><?= $translate('Customers') ?></h5>
+
+            <span class="text-muted small">
+                <?= $translate('%s customers', [$total]) ?>                                                                                                                              
+
+                <?php if ($filterStatus || $filterCountry) { ?>
+                    · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             
+                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)  . '</span>' : '' ?>
+                    <?= $filterCountry ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterCountry) . '</span>' : '' ?>                                                      
+                <?php } ?>                                                                                                                                                               
+            </span>                                                                                                                                                                      
+        </div>                                                                                                                                                                           
+
+        <?php if (empty($customers)) { ?>
+            <p class="text-muted"><?= $translate('No customers found.') ?></p>
+        <?php } else { ?>
+            <table class="table table-hover table-striped">                                                                                                                              
+                <thead>
+                    <tr>                                                                                                                                                                 
+                        <th><?= $translate('#') ?></th>
+                        <th><?= $translate('Company') ?></th>
+                        <th><?= $translate('Country') ?></th>                                                                                                                            
+                        <th><?= $translate('Industry') ?></th>
+                        <th><?= $translate('Employee band') ?></th>                                                                                                                      
+                        <th><?= $translate('Status') ?></th>
+                        <th></th>                                                                                                                                                        
                     </tr>
-                </thead>
-                
-                <tbody>                                                       
+                </thead>                                                                                                                                                                 
+
+                <tbody>
                     <?php foreach ($customers as $customer) { ?>
-                        <tr>                                                  
+                        <tr>
                             <td class="text-muted"><?= $customer->id ?></td>
-                            <td><?= htmlspecialchars($customer->companyName) ?></td>                                                                       
+                            <td><?= htmlspecialchars($customer->companyName) ?></td>                                                                                                     
                             <td>
-                                <i class="bi bi-geo-alt me-1"></i> 
-                                <?= htmlspecialchars($customer->countryCode) ?>
-                            </td>                                                                       
-                            <td class="font-monospace">
+                                <i class="bi bi-geo-alt me-1"></i>                                                                                                                       
+                                <?= htmlspecialchars($customer->countryCode) ?>                                                                                                          
+                            </td>
+                            <td class="font-monospace">                                                                                                                                  
                                 <small><?= htmlspecialchars($customer->industry) ?></small>
                             </td>
-                            <td>
+                            <td>                                                                                                                                                         
                                 <div class="badge text-secondary border">
-                                    <?= htmlspecialchars($customer->employeeBand) ?>
+                                    <?= htmlspecialchars($customer->employeeBand) ?>                                                                                                     
                                 </div>
-                            </td>                                                                       
-                            <td>
-                                <span class="badge bg-<?= match($customer->status) {                                                    
-                                    CustomerModel::STATUS_ACTIVE   => 'success',                                                                    
-                                    CustomerModel::STATUS_PAUSED   => 'warning',
-                                    CustomerModel::STATUS_ARCHIVED => 'secondary',                                                                  
-                                    default                        => 'secondary'                                                                   
-                                } ?>"><?= ucfirst($customer->status) ?></span>
-                            </td>                                             
-                            <td>
-                                <a href="/customer/<?= $customer->id ?>" class="btn btn-sm btn-outline-success rounded-3">View <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>                               
                             </td>
-                        </tr>                                                 
+                            <td>
+                                <span class="badge bg-<?= match($customer->status) {
+                                    CustomerModel::STATUS_ACTIVE   => 'success',                                                                                                         
+                                    CustomerModel::STATUS_PAUSED   => 'warning',
+                                    CustomerModel::STATUS_ARCHIVED => 'secondary',                                                                                                       
+                                    default                        => 'secondary'
+                                } ?>"><?= ucfirst($customer->status) ?></span>                                                                                                           
+                            </td>
+                            <td>                                                                                                                                                         
+                                <a href="/<?= $language ?>/customer/<?= $customer->id ?>" class="btn btn-sm btn-outline-success rounded-3"><?= $translate('View') ?> <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>                                                                                                                                                 
+                            </td>
+                        </tr>                                                                                                                                                            
                     <?php } ?>
                 </tbody>
             </table>
-            
-            <?php if ($totalPages > 1) { ?>
-                <?php $baseQuery = array_filter(['status' => $filterStatus, 'country_code' => $filterCountry]); ?>                                           
-                <nav class="mt-4">                                                                                                                           
-                    <ul class="pagination justify-content-center mb-0">
-                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                            <a class="page-link" href="/customers?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>                         
-                        </li>                                                                                                                                
 
-                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>                                                                                     
-                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">                                                                       
-                                <a class="page-link" href="/customers?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>
-                            </li>                                                                                                                            
+            <?php if ($totalPages > 1) { ?>
+                <?php $baseQuery = array_filter(['status' => $filterStatus, 'country_code' => $filterCountry]); ?>
+                
+                <nav class="mt-4">                                                                                                                                                       
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">                                                                                                       
+                            <a class="page-link" href="/<?= $language ?>/customers?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>                                    
+                        </li>
+
+                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>
+                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">                                                                                                   
+                                <a class="page-link" href="/<?= $language ?>/customers?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>
+                            </li>                                                                                                                                                        
                         <?php } ?>
 
                         <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                            <a class="page-link" href="/customers?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>                         
-                        </li>                                                                                                                                
-                    </ul>                                                                                                                                    
-                </nav>      
+                            <a class="page-link" href="/<?= $language ?>/customers?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>                                    
+                        </li>                                                                                                                                                            
+                    </ul>                                                                                                                                                                
+                </nav>                                                                                                                                                                   
             <?php } ?>
         <?php } ?>
     </div>
-</div>                                   
+ </div>

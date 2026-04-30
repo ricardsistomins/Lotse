@@ -1,166 +1,164 @@
-<?php use app\Model\ReportModel; ?>
+<?php use app\Model\ReportModel; ?>                                                                                                                                                      
+                                                                                                                                                                                           
+<div class="mb-4 d-flex justify-content-between align-items-center">                                                                                                                     
+    <div>                                                                                                                                                                                
+        <h2 class="text-success"><?= $translate('Reports') ?></h2>                                                                                                                       
+        <span class="text-muted fs-5"><?= $translate('Generated research reports tied to runs and customers. Review, approve, and ship to stakeholders.') ?></span>                      
+    </div>                                                                                                                                                                               
 
-<div class="mb-4 d-flex justify-content-between align-items-center">
-    <div>
-        <h2 class="text-success">Reports</h2>
-        <span class="text-muted fs-5"> Generated research reports tied to runs and customers. Review, approve, and ship to stakeholders. </span> 
-    </div>
-    
-    <div class="badge ps-0 mb-1">
-        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
-            <i class="bi bi-dot text-success fs-3"></i> Live · <?= count($reports) ?> of <?= $getStatusCount['total'] ?> reports 
-        </span>
-    </div>
-</div>
+    <div class="badge ps-0 mb-1">                                                                                                                                                        
+        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center">
+            <i class="bi bi-dot text-success fs-3"></i> <?= $translate('Live · %s of %s reports', [count($reports), $getStatusCount['total']]) ?>                                        
+        </span>                                                                                                                                                                          
+    </div>                                                                                                                                                                               
+</div>                                                                                                                                                                                   
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4">                                                                                                                                                               
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
             <div class="card-body">
-                <div class="fs-2 fw-bold"> <i class="bi bi-file-text"></i> <?= $getStatusCount['total'] ?></div>
-                <div class="text-muted small">Total reports</div>
-            </div>
-        </div>
-    </div>
-    
+                <div class="fs-2 fw-bold"> <i class="bi bi-file-text"></i> <?= $getStatusCount['total'] ?></div>                                                                         
+                <div class="text-muted small"><?= $translate('Total reports') ?></div>                                                                                                   
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>      
+
     <div class="col-md-3">
-        <div class="card rounded-4 text-center">
+        <div class="card rounded-4 text-center">                                                                                                                                         
             <div class="card-body">
-                <div class="fs-2 fw-bold text-success"> <i class="bi bi-bookmark-check"></i> <?= $getStatusCount['approved'] ?></div>
-                <div class="text-muted small">Approved</div>
+                <div class="fs-2 fw-bold text-success"> <i class="bi bi-bookmark-check"></i> <?= $getStatusCount['approved'] ?></div>                                                    
+                <div class="text-muted small"><?= $translate('Approved') ?></div>                                                                                                        
             </div>
-        </div>
-    </div>
-    
+        </div>                                                                                                                                                                           
+    </div>      
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-warning"> <i class="bi bi-clock"></i> <?= $getStatusCount['awaiting_qa'] ?></div>
-                <div class="text-muted small">Awaiting QA</div>
-            </div>
-        </div>
-    </div>
-    
+                <div class="text-muted small"><?= $translate('Awaiting QA') ?></div>                                                                                                     
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-info"> <i class="bi bi-person-check"></i> <?= $getStatusCount['with_customer'] ?></div>
-                <div class="text-muted small">With customer</div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="text-muted small"><?= $translate('With customer') ?></div>                                                                                                   
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+</div>          
 
-<form method="GET" action="/reports" class="row g-2 mb-3">
+<form method="GET" action="/<?= $language ?>/reports" class="row g-2 mb-3">
     <div class="col-auto">
-        <select name="status" class="form-select form-select-sm">
-            <option value=""> All statuses </option>
-            <option value="<?= ReportModel::STATUS_NEEDS_QA ?>" <?= $filterStatus === ReportModel::STATUS_NEEDS_QA ? 'selected' : '' ?>> Needs QA </option>
-            <option value="<?= ReportModel::STATUS_APPROVED ?>" <?= $filterStatus === ReportModel::STATUS_APPROVED ? 'selected' : '' ?>> Approved </option>
-            <option value="<?= ReportModel::STATUS_REJECTED ?>" <?= $filterStatus === ReportModel::STATUS_REJECTED ? 'selected' : '' ?>> Rejected </option>
-            <option value="<?= ReportModel::STATUS_DRAFT ?>"    <?= $filterStatus === ReportModel::STATUS_DRAFT    ? 'selected' : '' ?>> Draft </option>
-        </select>
-    </div>
-    
+        <select name="status" class="form-select form-select-sm">                                                                                                                        
+            <option value=""><?= $translate('All statuses') ?></option>
+            <option value="<?= ReportModel::STATUS_NEEDS_QA ?>" <?= $filterStatus === ReportModel::STATUS_NEEDS_QA ? 'selected' : '' ?>><?= $translate('Needs QA') ?></option>           
+            <option value="<?= ReportModel::STATUS_APPROVED ?>" <?= $filterStatus === ReportModel::STATUS_APPROVED ? 'selected' : '' ?>><?= $translate('Approved') ?></option>           
+            <option value="<?= ReportModel::STATUS_REJECTED ?>" <?= $filterStatus === ReportModel::STATUS_REJECTED ? 'selected' : '' ?>><?= $translate('Rejected') ?></option>           
+            <option value="<?= ReportModel::STATUS_DRAFT ?>"    <?= $filterStatus === ReportModel::STATUS_DRAFT    ? 'selected' : '' ?>><?= $translate('Draft') ?></option>              
+        </select>                                                                                                                                                                        
+    </div>                                                                                                                                                                               
+
     <div class="col-auto">
         <select name="customer_id" class="form-select form-select-sm">
-            <option value=""> All customers </option>
-            
+            <option value=""><?= $translate('All customers') ?></option>
+
             <?php foreach ($customers as $customer) { ?>
-                <option value="<?= $customer->id ?>" <?= $filterCustomer == $customer->id ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($customer->companyName) ?>
+                <option value="<?= $customer->id ?>" <?= $filterCustomer == $customer->id ? 'selected' : '' ?>>                                                                          
+                    <?= htmlspecialchars($customer->companyName) ?>                                                                                                                      
                 </option>
-            <?php } ?>
+            <?php } ?>                                                                                                                                                                   
         </select>
     </div>
-    
+
     <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-success">Filter</button>
-        <a href="/reports" class="btn btn-sm btn-outline-secondary">Reset</a>
-    </div>
-</form>
+        <button type="submit" class="btn btn-sm btn-success"><?= $translate('Filter') ?></button>
+        <a href="/<?= $language ?>/reports" class="btn btn-sm btn-outline-secondary"><?= $translate('Reset') ?></a>                                                                      
+    </div>                                                                                                                                                                               
+</form>                                                                                                                                                                                  
 
 <div class="card rounded-4">
     <div class="card-body">
-        <div class="mb-4">                                                                                                                            
-            <h5 class="card-title mb-0">Reports</h5>
-            
-            <span class="text-muted small">                                                                                                           
-                <?= count($reports) ?> report<?= $total !== 1 ? 's' : '' ?>   
-                
-                <?php if ($filterStatus || $filterCustomer) { ?>                                                                                      
-                    · filtered by&nbsp;                                                                                                               
-                    <?= $filterStatus ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus) . '</span>' : '' ?>
-                    <?= $filterCustomer ? '<span class="badge text-bg-dark">' . htmlspecialchars($customersName[$filterCustomer] ?? '') . '</span>' : '' ?>                                                                                                                                        
-                <?php } ?>                                                                                                                            
-            </span>                                                                                                                                   
-        </div>     
+        <div class="mb-4">
+            <h5 class="card-title mb-0"><?= $translate('Reports') ?></h5>
+
+            <span class="text-muted small">
+                <?= $translate('%s reports', [$total]) ?>                                                                                                                                
+
+                <?php if ($filterStatus || $filterCustomer) { ?>
+                    · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             
+                    <?= $filterStatus   ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus) . '</span>' : '' ?>
+                    <?= $filterCustomer ? '<span class="badge text-bg-dark">' . htmlspecialchars($customersName[$filterCustomer] ?? '') . '</span>' : '' ?>                              
+                <?php } ?>                                                                                                                                                               
+            </span>                                                                                                                                                                      
+        </div>                                                                                                                                                                           
 
         <?php if (empty($reports)) { ?>
-            <p class="text-muted">No reports yet. Trigger a research run from the dashboard.</p>
-        <?php } else { ?>
+            <p class="text-muted"><?= $translate('No reports yet. Trigger a research run from the dashboard.') ?></p>
+        <?php } else { ?>                                                                                                                                                                
             <table class="table table-hover">
-                <thead>
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th> # </th>
-                        <th> Run </th>
-                        <th> Updated at </th>
-                        <th> Customer </th>
-                        <th> Status </th>
-                        <th></th>
+                        <th><?= $translate('#') ?></th>
+                        <th><?= $translate('Run') ?></th>                                                                                                                                
+                        <th><?= $translate('Updated at') ?></th>
+                        <th><?= $translate('Customer') ?></th>                                                                                                                           
+                        <th><?= $translate('Status') ?></th>
+                        <th></th>                                                                                                                                                        
                     </tr>
-                </thead>
+                </thead>                                                                                                                                                                 
 
                 <tbody>
                     <?php foreach ($reports as $report) { ?>
                         <tr>
                             <td class="text-muted"><?= $report->id ?></td>
-                            <td>
-                                <div class="badge text-bg-secondary"> 
-                                    #<?= $report->runId ?>
-                                </div>
-                            </td>
-                            <td>
-                                <small><?= $report->updatedAt ?? '—' ?></td>
-                            </td>
+                            <td>                                                                                                                                                         
+                                <div class="badge text-bg-secondary">#<?= $report->runId ?></div>
+                            </td>                                                                                                                                                        
+                            <td>                                                                                                                                                         
+                                <small><?= $report->updatedAt ?? '—' ?></small>
+                            </td>                                                                                                                                                        
                             <td><?= $report->customerId ? $customersName[$report->customerId] : '—' ?></td>
-                            <td>
+                            <td>                                                                                                                                                         
                                 <span class="badge bg-<?= match($report->status) {
-                                    ReportModel::STATUS_APPROVED => 'success',
+                                    ReportModel::STATUS_APPROVED => 'success',                                                                                                           
                                     ReportModel::STATUS_REJECTED => 'danger',
                                     ReportModel::STATUS_NEEDS_QA => 'warning',
-                                    default                      => 'secondary'
+                                    default                      => 'secondary'                                                                                                          
                                 } ?>"><?= ucfirst(str_replace('_', ' ', $report->status)) ?></span>
+                            </td>                                                                                                                                                        
+                            <td>                                                                                                                                                         
+                                <a href="/<?= $language ?>/report/<?= $report->id ?>" class="btn btn-sm btn-outline-success rounded-3"><?= $translate('Open') ?> <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>                                                                                                                                                 
                             </td>
-                            <td>
-                                <a href="/report/<?= $report->id ?>" class="btn btn-sm btn-outline-success rounded-3">Open <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>
-                            </td>
-                        </tr>
+                        </tr>                                                                                                                                                            
                     <?php } ?>
                 </tbody>
             </table>
-            
-            <?php if ($totalPages > 1) { ?>                                               
-                <?php $baseQuery = array_filter(['status' => $filterStatus, 'customer_id' => $filterCustomer]); ?>                                                      
-                <nav class="mt-4">
-                    <ul class="pagination justify-content-center mb-0">     
-                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">        
-                            <a class="page-link" href="/reports?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>                
-                        </li>                                                             
 
-                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>
+            <?php if ($totalPages > 1) { ?>
+                <?php $baseQuery = array_filter(['status' => $filterStatus, 'customer_id' => $filterCustomer]); ?>                                                                       
+                
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center mb-0">                                                                                                                  
+                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">                                                                                                       
+                            <a class="page-link" href="/<?= $language ?>/reports?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">‹</a>
+                        </li>                                                                                                                                                            
+
+                        <?php for ($p = 1; $p <= $totalPages; $p++) { ?>                                                                                                                 
                             <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                                <a class="page-link" href="/reports?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>               
-                            </li>                                                         
-                        <?php } ?>                                                        
+                                <a class="page-link" href="/<?= $language ?>/reports?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>                                 
+                            </li>                                                                                                                                                        
+                        <?php } ?>                                                                                                                                                       
 
                         <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                            <a class="page-link" href="/reports?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>                
-                        </li>
-                    </ul>   
-                </nav>
+                            <a class="page-link" href="/<?= $language ?>/reports?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">›</a>
+                        </li>                                                                                                                                                            
+                    </ul>
+                </nav>                                                                                                                                                                   
             <?php } ?>
-
-        <?php } ?>
+        <?php } ?>                                                                                                                                                                       
     </div>
-</div>
+</div>                           

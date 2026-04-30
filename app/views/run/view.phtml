@@ -1,274 +1,268 @@
-<?php 
-    use app\Model\{ 
-        ReportModel,
-        ResearchRunModel,
-        UserModel
-    }; 
-?>
+ <?php                                                                                                                                                                                    
+    use app\Model\{                                                                                                                                                                      
+        ReportModel,                                                                                                                                                                     
+        ResearchRunModel,                                                                                                                                                                
+        UserModel                                                                                                                                                                        
+    };          
+?>                                                                                                                                                                                       
 
 <div class="card mb-4">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title mb-0">Run #<?= $run->id ?></h5>
+            <h5 class="card-title mb-0"><?= $translate('Run #%s', [$run->id]) ?></h5>                                                                                                    
 
-            <span class="badge bg-<?= match($run->status) {
-                ResearchRunModel::STATUS_COMPLETED => 'success',
+            <span class="badge bg-<?= match($run->status) {                                                                                                                              
+                ResearchRunModel::STATUS_COMPLETED => 'success',                                                                                                                         
                 ResearchRunModel::STATUS_FAILED    => 'danger',
-                ResearchRunModel::STATUS_BLOCKED   => 'warning',
+                ResearchRunModel::STATUS_BLOCKED   => 'warning',                                                                                                                         
                 ResearchRunModel::STATUS_RUNNING   => 'info',
-                default     => 'secondary'
+                default                            => 'secondary'                                                                                                                        
             } ?>"><?= ucfirst($run->status) ?></span>
-        </div>
+        </div>                                                                                                                                                                           
 
         <table class="table table-sm mb-0">
             <tr>
-                <td class="text-muted">Type</td>
+                <td class="text-muted"><?= $translate('Type') ?></td>                                                                                                                    
                 <td><?= htmlspecialchars($run->runType) ?></td>
-            </tr>
+            </tr>                                                                                                                                                                        
             <tr>
-                <td class="text-muted">Trigger</td>
+                <td class="text-muted"><?= $translate('Trigger') ?></td>                                                                                                                 
                 <td><?= htmlspecialchars($run->triggerSource) ?></td>
-            </tr>
+            </tr>                                                                                                                                                                        
             <tr>
-                <td class="text-muted"> Query text </td>
-                <td> <?= htmlspecialchars($run->query) ?> </td>
-            </tr>
+                <td class="text-muted"><?= $translate('Query text') ?></td>                                                                                                              
+                <td><?= htmlspecialchars($run->query) ?></td>
+            </tr>                                                                                                                                                                        
             <tr>
-                <td class="text-muted">Guardrail</td>
-                <td>
+                <td class="text-muted"><?= $translate('Guardrail') ?></td>
+                <td>                                                                                                                                                                     
                     <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
-                        ResearchRunModel::STATUS_PASS    => 'success',
-                        ResearchRunModel::STATUS_REVIEW  => 'warning',
+                        ResearchRunModel::STATUS_PASS    => 'success',                                                                                                                   
+                        ResearchRunModel::STATUS_REVIEW  => 'warning',                                                                                                                   
                         ResearchRunModel::STATUS_BLOCKED => 'danger',
-                        default   => 'secondary'
+                        default                          => 'secondary'                                                                                                                  
                     } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
-                </td>
+                </td>                                                                                                                                                                    
             </tr>
-            <tr>
-                <td class="text-muted">LLM provider</td>
+            <tr>                                                                                                                                                                         
+                <td class="text-muted"><?= $translate('LLM provider') ?></td>
                 <td><?= htmlspecialchars($run->llmProviderName) ?></td>
-            </tr>
+            </tr>                                                                                                                                                                        
             <tr>
-                <td class="text-muted">Search provider</td>
+                <td class="text-muted"><?= $translate('Search provider') ?></td>                                                                                                         
                 <td><?= htmlspecialchars($run->searchProviderName ?? '—') ?></td>
-            </tr>
+            </tr>                                                                                                                                                                        
             <tr>
-                <td class="text-muted">Started</td>
+                <td class="text-muted"><?= $translate('Started') ?></td>                                                                                                                 
                 <td><?= $run->startedAt ?></td>
-            </tr>
+            </tr>                                                                                                                                                                        
             <tr>
-                <td class="text-muted">Finished</td>
+                <td class="text-muted"><?= $translate('Finished') ?></td>                                                                                                                
                 <td><?= $run->finishedAt ?? '—' ?></td>
-            </tr>
+            </tr>                                                                                                                                                                        
             <?php if (!empty($run->errorSummary)) { ?>
-                <tr>
-                    <td class="text-muted">Error</td>
-                    <td class="text-danger"><?= htmlspecialchars($run->errorSummary) ?></td>
+                <tr>                                                                                                                                                                     
+                    <td class="text-muted"><?= $translate('Error') ?></td>
+                    <td class="text-danger"><?= htmlspecialchars($run->errorSummary) ?></td>                                                                                             
                 </tr>
-            <?php } ?>
+            <?php } ?>                                                                                                                                                                   
         </table>
-    </div>
+    </div>                                                                                                                                                                               
 </div>
 
 <?php if ($this->request->getQuery('retrigger', 'int')) { ?>
-    <div class="alert alert-success mb-4">
-        Re-trigger completed. This is the new run.
-    </div>
-<?php } ?>
+    <div class="alert alert-success mb-4">                                                                                                                                               
+        <?= $translate('Re-trigger completed. This is the new run.') ?>                                                                                                                  
+    </div>                                                                                                                                                                               
+<?php } ?>                                                                                                                                                                               
 
 <?php if ($this->request->getQuery('duplicate', 'int')) { ?>
-    <div class="alert alert-warning mb-4">
-        A run for this query was already started less than a minute ago. No new run was created.
-    </div>
-<?php } ?>
+    <div class="alert alert-warning mb-4">                                                                                                                                               
+        <?= $translate('A run for this query was already started less than a minute ago. No new run was created.') ?>
+    </div>                                                                                                                                                                               
+<?php } ?>      
 
 <?php if (in_array($this->session->get('userRole', 'string'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV]) && !$report) { ?>
-    <form method="POST" action="/run/<?= $run->id ?>/retrigger" class="mb-4">
-        <button type="submit" id="submitRetrigger" class="btn btn-outline-secondary w-100">Re-trigger this run</button>
-        
-        <div id="run-loading" class="mt-3 d-none">                                    
-            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-            <span class="text-muted">Running pipeline, please wait…</span>            
-        </div>
-    </form>
-<?php } ?>
+    <form method="POST" action="/<?= $language ?>/run/<?= $run->id ?>/retrigger" class="mb-4">                                                                                           
+        <button type="submit" id="submitRetrigger" class="btn btn-outline-secondary w-100"><?= $translate('Re-trigger this run') ?></button>                                             
+
+        <div id="run-loading" class="mt-3 d-none">                                                                                                                                       
+            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>                                                                                         
+            <span class="text-muted"><?= $translate('Running pipeline, please wait…') ?></span>                                                                                          
+        </div>                                                                                                                                                                           
+    </form>                                                                                                                                                                              
+<?php } ?>                                                                                                                                                                               
 
 <?php if (!$report) {
-    if ($run->status === ResearchRunModel::STATUS_FAILED) { ?>                                                      
-        <div class="alert alert-warning mb-4">
+    if ($run->status === ResearchRunModel::STATUS_FAILED) { ?>
+        <div class="alert alert-warning mb-4">                                                                                                                                           
             <i class="bi bi-exclamation-triangle fs-5 me-2"></i>
-            Run failed: <?= htmlspecialchars($run->errorSummary ?? 'unknown error') ?>                              
-        </div>                                                                                                      
-    <?php } elseif ($run->guardrailStatus === ResearchRunModel::STATUS_BLOCKED) { ?>       
-        <div class="alert alert-warning mb-4 d-flex align-items-center">                                             
+            <?= $translate('Run failed: %s', [htmlspecialchars($run->errorSummary ?? 'unknown error')]) ?>                                                                               
+        </div>  
+    <?php } elseif ($run->guardrailStatus === ResearchRunModel::STATUS_BLOCKED) { ?>                                                                                                     
+        <div class="alert alert-warning mb-4 d-flex align-items-center">                                                                                                                 
             <i class="bi bi-exclamation-triangle fs-5 me-3"></i>
-            
-            <div>
-                <div>
-                    Report was not generated because the guardrail blocked this run.
-                </div>
 
-                <?php if (!empty($run->blockReason)) { ?>                                      
-                    <div class="mt-1 small">
-                        <?= htmlspecialchars($run->blockReason) ?>
-                    </div>   
-                <?php } ?> 
+            <div>
+                <div><?= $translate('Report was not generated because the guardrail blocked this run.') ?></div>                                                                         
+
+                <?php if (!empty($run->blockReason)) { ?>
+                    <div class="mt-1 small"><?= htmlspecialchars($run->blockReason) ?></div>                                                                                             
+                <?php } ?>                                                                                                                                                               
             </div>
-        </div>
-    <?php } elseif ($run->guardrailStatus === ResearchRunModel::STATUS_PENDING) { ?>                                
-        <div class="alert alert-warning mb-4">
+        </div>                                                                                                                                                                           
+    <?php } elseif ($run->guardrailStatus === ResearchRunModel::STATUS_PENDING) { ?>
+        <div class="alert alert-warning mb-4">                                                                                                                                           
             <i class="bi bi-exclamation-triangle fs-5 me-2"></i>
-            Report was not generated: guardrail evaluation did not complete.
-        </div>                                                                                                      
-    <?php }
-} ?>          
+            <?= $translate('Report was not generated: guardrail evaluation did not complete.') ?>                                                                                        
+        </div>  
+    <?php }                                                                                                                                                                              
+} ?>            
 
 <?php if ($report) { ?>
     <div class="alert alert-success mb-4">
-        Report generated — <a class="link-fixed" href="/report/<?= $report->id ?>">View report #<?= $report->id ?></a>
-    </div>
-<?php } ?>
+        <?= $translate('Report generated') ?> — <a class="link-fixed" href="/<?= $language ?>/report/<?= $report->id ?>"><?= $translate('View report #%s', [$report->id]) ?></a>         
+    </div>                                                                                                                                                                               
+<?php } ?>                                                                                                                                                                               
 
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title mb-3">Provider calls</h6>
+        <h6 class="card-title mb-3"><?= $translate('Provider calls') ?></h6>                                                                                                             
 
-        <?php if (empty($providerCalls)) { ?>
-            <p class="text-muted">No provider calls recorded.</p>
-        <?php } else { ?>
+        <?php if (empty($providerCalls)) { ?>                                                                                                                                            
+            <p class="text-muted"><?= $translate('No provider calls recorded.') ?></p>
+        <?php } else { ?>                                                                                                                                                                
             <table class="table table-sm mb-0">
-                <thead>
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th> Kind </th>
-                        <th> Provider </th>
-                        <th> Purpose </th>
-                        <th> Status </th>
-                        <th> Latency </th>
-                        <th>
-                            Tokens
-                            
-                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                data-bs-title="
+                        <th><?= $translate('Kind') ?></th>
+                        <th><?= $translate('Provider') ?></th>                                                                                                                           
+                        <th><?= $translate('Purpose') ?></th>
+                        <th><?= $translate('Status') ?></th>                                                                                                                             
+                        <th><?= $translate('Latency') ?></th>
+                        <th>                                                                                                                                                             
+                            <?= $translate('Tokens') ?>
+                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"                            
+                                data-bs-title="                                                                                                                                          
                                     <div class='text-start'>
-                                        <strong>LLM token usage</strong><br>
-                                        <ul>
+                                        <strong>LLM token usage</strong><br>                                                                                                             
+                                        <ul>                                                                                                                                             
                                             <li><b>in</b> — tokens sent to the LLM (the prompt)</li>
-                                            <li><b>out</b> — tokens returned by the LLM (the response)</li>
+                                            <li><b>out</b> — tokens returned by the LLM (the response)</li>                                                                              
                                         </ul>
-                                    </div>
-                                    <small class='text-warning'>Very low out tokens may mean the LLM returned empty or minimal content.</small> ">
-                            </i>
+                                    </div>                                                                                                                                               
+                                    <small class='text-warning'>Very low out tokens may mean the LLM returned empty or minimal content.</small>">
+                            </i>                                                                                                                                                         
                         </th>
-                        <th> Error </th>
+                        <th><?= $translate('Error') ?></th>                                                                                                                              
                     </tr>
-                </thead>
+                </thead>                                                                                                                                                                 
 
                 <tbody>
                     <?php foreach ($providerCalls as $call) { ?>
                         <tr>
-                            <td><?= htmlspecialchars($call->providerKind) ?></td>
+                            <td><?= htmlspecialchars($call->providerKind) ?></td>                                                                                                        
                             <td><?= htmlspecialchars($call->providerName) ?></td>
-                            <td><?= htmlspecialchars($call->requestPurpose) ?></td>
-                            <td>
+                            <td><?= htmlspecialchars($call->requestPurpose) ?></td>                                                                                                      
+                            <td>                                                                                                                                                         
                                 <span class="badge bg-<?= match($call->status) {
-                                    'succeeded'          => 'success',
+                                    'succeeded'          => 'success',                                                                                                                   
                                     'fallback_succeeded' => 'warning',
                                     'failed'             => 'danger',
-                                    default              => 'secondary'
+                                    default              => 'secondary'                                                                                                                  
                                 } ?>"><?= ucfirst($call->status) ?></span>
-                            </td>
+                            </td>                                                                                                                                                        
                             <td><?= $call->latencyMs ? number_format($call->latencyMs / 1000, 2) . 's' : '—' ?></td>
-                            <td><?= $call->inputTokens ? 'in: ' . $call->inputTokens . ' / out: ' . $call->outputTokens : '—' ?></td>
-                            <td class="text-danger"><?= htmlspecialchars($call->errorMessage ?? '') ?></td>
-                        </tr>
-                    <?php } ?>
+                            <td><?= $call->inputTokens ? 'in: ' . $call->inputTokens . ' / out: ' . $call->outputTokens : '—' ?></td>                                                    
+                            <td class="text-danger"><?= htmlspecialchars($call->errorMessage ?? '') ?></td>                                                                              
+                        </tr>                                                                                                                                                            
+                    <?php } ?>                                                                                                                                                           
                 </tbody>
             </table>
         <?php } ?>
-    </div>
+    </div>                                                                                                                                                                               
 </div>
 
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title mb-3">Sources <span class="text-muted small">(<?= count($sources) ?>)</span></h6>
+        <h6 class="card-title mb-3"><?= $translate('Sources') ?> <span class="text-muted small">(<?= count($sources) ?>)</span></h6>
 
         <?php if (empty($sources)) { ?>
-            <p class="text-muted">No sources collected.</p>
-        <?php } else { ?>
+            <p class="text-muted"><?= $translate('No sources collected.') ?></p>                                                                                                         
+        <?php } else { ?>                                                                                                                                                                
             <table class="table table-sm mb-0">
-                <thead>
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th>Title</th>
-                        <th>Domain</th>
-                        <th>Type</th>
-                    </tr>
+                        <th><?= $translate('Title') ?></th>
+                        <th><?= $translate('Domain') ?></th>                                                                                                                             
+                        <th><?= $translate('Type') ?></th>
+                    </tr>                                                                                                                                                                
                 </thead>
                 <tbody>
                     <?php foreach ($sources as $source) { ?>
                         <tr>
-                            <td><a href="<?= htmlspecialchars($source->sourceUrl) ?>" target="_blank"><?= htmlspecialchars($source->sourceTitle ?? $source->sourceUrl) ?></a></td>
+                            <td><a href="<?= htmlspecialchars($source->sourceUrl) ?>" target="_blank"><?= htmlspecialchars($source->sourceTitle ?? $source->sourceUrl) ?></a></td>       
                             <td><?= htmlspecialchars($source->sourceDomain) ?></td>
-                            <td><?= htmlspecialchars($source->sourceType) ?></td>
+                            <td><?= htmlspecialchars($source->sourceType) ?></td>                                                                                                        
                         </tr>
-                    <?php } ?>
+                    <?php } ?>                                                                                                                                                           
                 </tbody>
             </table>
         <?php } ?>
-    </div>
+    </div>                                                                                                                                                                               
 </div>
 
 <div class="card">
     <div class="card-body">
-        <h6 class="card-title mb-3">Findings <span class="text-muted small">(<?= count($findings) ?>)</span></h6>
+        <h6 class="card-title mb-3"><?= $translate('Findings') ?> <span class="text-muted small">(<?= count($findings) ?>)</span></h6>
 
         <?php if (empty($findings)) { ?>
-            <p class="text-muted">No findings extracted.</p>
+            <p class="text-muted"><?= $translate('No findings extracted.') ?></p>                                                                                                        
         <?php } else { ?>
             <table class="table table-sm mb-0">
-                <thead>
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th> Title </th>
-                        <th> Type </th>
+                        <th><?= $translate('Title') ?></th>                                                                                                                              
+                        <th><?= $translate('Type') ?></th>
                         <th>
-                            Confidence
-
+                            <?= $translate('Confidence') ?>                                                                                                                              
                             <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                data-bs-title="
+                                data-bs-title="                                                                                                                                          
                                     <div class='text-start'>
-                                        <strong>LLM self-reported confidence (0.0 - 1.0)</strong><br>
+                                        <strong>LLM self-reported confidence (0.0 - 1.0)</strong><br>                                                                                    
                                         <ul>
                                             <li><b>0.9</b> — strong, clear evidence found</li>
-                                            <li><b>0.5</b> — uncertain, source was vague</li>
+                                            <li><b>0.5</b> — uncertain, source was vague</li>                                                                                            
                                             <li><b>0.2</b> — found something but accuracy unclear</li>
-                                        </ul>
+                                        </ul>                                                                                                                                            
                                     </div>
-                                    <small class='text-warning'>Below 0.5 triggers a QA review flag.</small>">
+                                    <small class='text-warning'>Below 0.5 triggers a QA review flag.</small>">                                                                           
                             </i>
                         </th>
-                        <th> Status </th>
-                        <th> Deadline <span class="text-muted small">apply by</span></th>  
-                    </tr>
-                </thead>
+                        <th><?= $translate('Status') ?></th>
+                        <th><?= $translate('Deadline') ?> <span class="text-muted small"><?= $translate('apply by') ?></span></th>                                                       
+                    </tr>                                                                                                                                                                
+                </thead>                                                                                                                                                                 
 
                 <tbody>
                     <?php foreach ($findings as $finding) { ?>
                         <tr>
                             <td><?= htmlspecialchars($finding->title) ?></td>
-                            <td><?= htmlspecialchars($finding->findingType) ?></td>
+                            <td><?= htmlspecialchars($finding->findingType) ?></td>                                                                                                      
                             <td><?= number_format((float)$finding->confidenceScore, 2) ?></td>
-                            <td><?= htmlspecialchars($finding->status) ?></td>
-                            <td><?php
+                            <td><?= htmlspecialchars($finding->status) ?></td>                                                                                                           
+                            <td><?php                                                                                                                                                    
                                 if ($finding->deadline) {
-                                    $daysLeft = (strtotime($finding->deadline) - time()) / 86400;
+                                    $daysLeft = (strtotime($finding->deadline) - time()) / 86400;                                                                                        
                                     $color = $daysLeft <= 30 ? 'text-danger' : '';
-                                    echo '<span class="' . $color . '">' . $finding->deadline . '</span>';
+                                    echo '<span class="' . $color . '">' . $finding->deadline . '</span>';                                                                               
                                 } else {
-                                    echo '—';
+                                    echo '—';                                                                                                                                            
                                 }
                             ?></td>
-                        </tr>
+                        </tr>                                                                                                                                                            
                     <?php } ?>
-                </tbody>
+                </tbody>                                                                                                                                                                 
             </table>
         <?php } ?>
     </div>
@@ -276,15 +270,15 @@
 
 <script src="/assets/js/jquery.min.js"></script>
 <script src="/assets/js/bootstrap.bundle.min.js"></script>
-<script>
+<script>                                                                                                                                                                                 
     $(function () {
-        $("[data-bs-toggle='tooltip']").each(function () {
+        $("[data-bs-toggle='tooltip']").each(function () {                                                                                                                               
             new bootstrap.Tooltip(this);
         });
-        
-        $("form[action$='/retrigger'").on("submit", function (){
+
+        $("form[action$='/retrigger'").on("submit", function (){                                                                                                                         
             $("#submitRetrigger").prop("disabled", true);
-            $("#run-loading").removeClass("d-none");
-        });
+            $("#run-loading").removeClass("d-none");                                                                                                                                     
+        });                                                                                                                                                                              
     });
 </script>

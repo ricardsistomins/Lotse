@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use Phalcon\Mvc\Controller;
 use app\Storage\ {
     ReportStorage,
     ReportRevisionStorage,
@@ -23,7 +22,7 @@ use app\Service\{
     ReportAnalyticsService
 };
 
-class ReportController extends Controller
+class ReportController extends BaseController
 {
     /**
      * List all reports
@@ -64,18 +63,16 @@ class ReportController extends Controller
     /**
      * Show report editor with current content and revision history.
      */
-    public function viewAction(int $id): void
+    public function viewAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $view = $this->view;
         $session = $this->session;
 
         $report = (new ReportStorage())->getById($id);
 
         if (!$report) {
-            $response->redirect('/dashboard');
-            $response->send();
-
+            $this->langRedirect('/dashboard');
             return;
         }
 
@@ -117,16 +114,14 @@ class ReportController extends Controller
     /**
      * Save edited content as a new revision.
      */
-    public function saveAction(int $id): void
+    public function saveAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $request = $this->request;
         $session = $this->session;
 
         if (!$request->isPost()) {
-            $response->redirect('/report/' . $id);
-            $response->send();
-
+            $this->langRedirect('/report/' . $id);
             return;
         }
 
@@ -145,32 +140,27 @@ class ReportController extends Controller
             metadata:    ['revision_id' => $revisionId]
         );
         
-        $response->redirect('/report/' . $id);
-        $response->send();
+        $this->langRedirect('/report/' . $id);
     }
 
     /**
      * Approve or reject a report. Admin and QA only.
      */
-    public function updateStatusAction(int $id): void
+    public function updateStatusAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $request = $this->request;
         $session = $this->session;
         
         if (!$request->isPost()) {
-            $response->redirect('/report/' . $id);
-            $response->send();
-
+            $this->langRedirect('/report/' . $id);
             return;
         }
 
         $role = $session->get('userRole', 'string');
 
         if (!in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) {
-            $response->redirect('/report/' . $id);
-            $response->send();
-
+            $this->langRedirect('/report/' . $id);
             return;
         }
 
@@ -178,9 +168,7 @@ class ReportController extends Controller
         $userId = $session->get('userId', 'int');
 
         if (!in_array($status, [ReportModel::STATUS_APPROVED, ReportModel::STATUS_REJECTED])) {
-            $response->redirect('/report/' . $id);
-            $response->send();
-
+            $this->langRedirect('/report/' . $id);
             return;
         }
 
@@ -190,9 +178,7 @@ class ReportController extends Controller
             $run    = (new ResearchRunStorage())->getById($report->runId);
 
             if (($run->guardrailStatus ?? '') === ResearchRunModel::STATUS_BLOCKED) {
-                $response->redirect('/report/' . $id);
-                $response->send();
-
+                $this->langRedirect('/report/' . $id);
                 return;
             }
         }
@@ -220,8 +206,7 @@ class ReportController extends Controller
             ]
         );
 
-        $response->redirect('/report/' . $id);
-        $response->send();
+        $this->langRedirect('/report/' . $id);
     }
     
     /**
@@ -230,15 +215,13 @@ class ReportController extends Controller
      * @param int $id
      * @return void
      */
-    public function saveCustomerAction(int $id): void
+    public function saveCustomerAction(): void
     {
+        $id = (int)$this->dispatcher->getParam('id');
         $request  = $this->request;
-        $response = $this->response;
 
         if (!$request->isPost()) {
-            $response->redirect('/report/' . $id);
-            $response->send();
-
+            $this->langRedirect('/report/' . $id);
             return;
         }
 
@@ -258,8 +241,7 @@ class ReportController extends Controller
             ]
         );
 
-        $response->redirect('/report/' . $id);
-        $response->send();
+        $this->langRedirect('/report/' . $id);
     }
     
     /**
@@ -268,18 +250,16 @@ class ReportController extends Controller
      * @param int $id
      * @return void
      */
-    public function editFindingAction(int $id): void
+    public function editFindingAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $request = $this->request;
         $session = $this->session;
         
         $role = $session->get('userRole', 'string');
         
         if (!$request->isPost() || !in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) {
-            $response->redirect('/dashboard');
-            $response->send();
-            
+            $this->langRedirect('/dashboard');
             return;
         }
         
@@ -287,9 +267,7 @@ class ReportController extends Controller
         $finding = $findingStorage->getById($id);
         
         if (!$finding) {
-            $response->redirect('/dashboard');
-            $response->send();
-            
+            $this->langRedirect('/dashboard');
             return;
         }
         
@@ -324,8 +302,7 @@ class ReportController extends Controller
             metadata:    ['report_id' => $reportId]   
         );
         
-        $response->redirect('/report/' . $reportId);
-        $response->send();
+        $this->langRedirect('/report/' . $reportId);
     }
     
     /**
@@ -334,17 +311,15 @@ class ReportController extends Controller
      * @param int $id
      * @return void
      */
-    public function previewAction(int $id): void
+    public function previewAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $view = $this->view;
         
         $report = (new ReportStorage())->getById($id);
         
         if (!$report) {
-            $response->redirect('/dashboard');
-            $response->send();
-            
+            $this->langRedirect('/dashboard');
             return;
         }
         
@@ -352,9 +327,7 @@ class ReportController extends Controller
         $revision = $revisionStorage->getById($report->currentRevisionId ?? 0);
         
         if (!$revision) {
-            $response->redirect('/report/' . $id);
-            $response->send();
-            
+            $this->langRedirect('/report/' . $id);
             return;
         }
         

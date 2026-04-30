@@ -2,13 +2,11 @@
 
 namespace app\controllers;                                                    
                   
-use Phalcon\Mvc\Controller;                                                   
-
 use app\Storage\SystemSettingsStorage;                                        
 use app\Service\AuditService;
 use app\Model\UserModel;
 
-class SettingsController extends Controller                                   
+class SettingsController extends BaseController                                   
 {
     /**                                                                       
      * List all setting keys.
@@ -26,14 +24,13 @@ class SettingsController extends Controller
      * @param string $key
      * @return void                                                           
      */         
-    public function viewAction(string $key): void
+    public function viewAction(): void
     {
+        $key = (string)$this->dispatcher->getParam('key');
         $value = (new SystemSettingsStorage())->get($key);
 
         if ($value === null) {
-            $this->response->redirect('/settings');                           
-            $this->response->send();
-
+            $this->langRedirect('/settings');                           
             return;
         }     
         
@@ -53,15 +50,13 @@ class SettingsController extends Controller
      * @param string $key
      * @return void
      */
-    public function saveAction(string $key): void
-    {                                                                         
-        $response = $this->response;
+    public function saveAction(): void
+    {
+        $key = (string)$this->dispatcher->getParam('key');
         $userRole = $this->session->get('userRole');                          
 
         if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {                             
-            $response->redirect('/settings');
-            $response->send();                                                
-
+            $this->langRedirect('/settings');
             return;
         }
 

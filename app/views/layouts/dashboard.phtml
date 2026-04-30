@@ -1,57 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $language ?>">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
+
         <title>LOTSE</title>
-        
+
         <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
         <link rel="stylesheet" href="/assets/css/bootstrap-icons.min.css">
         <link rel="stylesheet" href="/assets/css/dashboard.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.bundle.min.js"></script>
     </head>
-    
+
     <body class="bg-light">
         <div class="d-flex min-vh-100">
             <!-- Sidebar -->
             <div class="sidebar-navigation d-flex flex-column flex-shrink-0 bg-dark text-white p-3 rounded-end-5">
-                <a href="/dashboard" class="text-white text-decoration-none mb-2">
+                <a href="/<?= $language ?>/dashboard" class="text-white text-decoration-none mb-2">
                     <span class="fs-5 fw-bold">LOTSE</span>
                     <hr>
                 </a>
 
-                <small class="text-uppercase fw-semibold mb-3"> General </small>
+                <small class="text-uppercase fw-semibold mb-3"><?= $translate('General') ?></small>
 
                 <?php $activeController = $this->dispatcher->getControllerName(); ?>
-                
+
                 <ul class="nav nav-pills flex-column mb-auto ms-3">
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'dashboard' ? 'selected' : '' ?>">
                         <i class="bi bi-speedometer2"></i>
-                        <a href="/dashboard" class="nav-link text-white">Dashboard</a>
+                        <a href="/<?= $language ?>/dashboard" class="nav-link text-white"><?= $translate('Dashboard') ?></a>
                     </li>
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'run' ? 'selected' : '' ?>">
                         <i class="bi bi-cpu"></i>
-                        <a href="/runs" class="nav-link text-white">Runs</a>
+                        <a href="/<?= $language ?>/runs" class="nav-link text-white"><?= $translate('Runs') ?></a>
                     </li>
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'report' ? 'selected' : '' ?>">
                         <i class="bi bi-file-text"></i>
-                        <a href="/reports" class="nav-link text-white">Reports</a>
+                        <a href="/<?= $language ?>/reports" class="nav-link text-white"><?= $translate('Reports') ?></a>
                     </li>
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'qa' ? 'selected' : '' ?>">
                         <i class="bi bi-person-raised-hand"></i>
-                        <a href="/qa" class="nav-link text-white">QA queue</a>
+                        <a href="/<?= $language ?>/qa" class="nav-link text-white"><?= $translate('QA Queue') ?></a>
                     </li>
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'customer' ? 'selected' : '' ?>">
                         <i class="bi bi-person-walking"></i>
-                        <a href="/customers" class="nav-link text-white">Customers</a>
+                        <a href="/<?= $language ?>/customers" class="nav-link text-white"><?= $translate('Customers') ?></a>
                     </li>
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'settings' ? 'selected' : '' ?>">
                         <i class="bi bi-gear"></i>
-                        <a href="/settings" class="nav-link text-white">Settings</a>
+                        <a href="/<?= $language ?>/settings" class="nav-link text-white"><?= $translate('Settings') ?></a>
                     </li>
                 </ul>
 
-                <a href="/auth/logout" class="btn btn-sm btn-outline-secondary rounded-pill">Logout</a>
+                <a href="/auth/logout" class="btn btn-sm btn-outline-secondary rounded-pill"><?= $translate('Logout') ?></a>
             </div>
 
             <!-- Main area -->
@@ -65,8 +66,17 @@
                     <span class="badge bg-dark me-3">
                         <?= htmlspecialchars($this->session->get('userRole') ?? '') ?>
                     </span>
-                    
-                    <i class="bi bi-gear"></i>
+
+                    <div class="dropdown me-2">
+                        <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none">
+                            <i class="bi bi-globe-americas me-1"></i> <?= strtoupper($language) ?>
+                        </button>
+                        
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item <?= $language === 'en' ? 'active' : '' ?>" href="/en<?= preg_replace('#^/[a-z]{2}#', '', $_SERVER['REQUEST_URI']) ?: '/dashboard' ?>">EN — English</a></li>
+                            <li><a class="dropdown-item <?= $language === 'de' ? 'active' : '' ?>" href="/de<?= preg_replace('#^/[a-z]{2}#', '', $_SERVER['REQUEST_URI']) ?: '/dashboard' ?>">DE — Deutsch</a></li>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- Page content -->

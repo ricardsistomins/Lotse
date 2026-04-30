@@ -1,323 +1,321 @@
-<?php
-    use app\Model\{
-        ReportModel,
-        ResearchRunModel,
-        QaReviewModel
-    };
+ <?php                                                                                                                                                                                    
+    use app\Model\{                                                                                                                                                                      
+        ReportModel,                                                                                                                                                                     
+        ResearchRunModel,                                                                                                                                                                
+        QaReviewModel                                                                                                                                                                    
+    };          
 ?>
 
-<style>
-    .d-contents { 
-        display: contents; 
-    }
+<style>                                                                                                                                                                                  
+    .d-contents {
+        display: contents;                                                                                                                                                               
+    }           
 </style>
 
-<div class="row g-4">
+<div class="row g-4">                                                                                                                                                                    
     <div class="col-md-8">
-        <div class="card mb-4">
+        <div class="card mb-4">                                                                                                                                                          
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h5 class="card-title mb-0">Report #<?= $report->id ?></h5>
-                        <a href="/run/<?= $run->id ?>" class="text-muted small link-fixed"><- Run #<?= $run->id ?></a>
-                    </div>
-                    
-                    <div class="d-flex align-items-center gap-2">
-                        <a href="/report/<?= $report->id ?>/preview" class="btn btn-sm btn-outline-secondary" id="preview-btn" onclick="previewLoading()">                                                                                   
-                            <span class="spinner-border spinner-border-sm d-none me-1" id="preview-spinner"></span>                                       
-                            Open Preview                                                                                                                  
-                        </a>  
-                        
+                    <div>                                                                                                                                                                
+                        <h5 class="card-title mb-0"><?= $translate('Report #%s', [$report->id]) ?></h5>
+                        <a href="/<?= $language ?>/run/<?= $run->id ?>" class="text-muted small link-fixed">&larr; <?= $translate('Run #%s', [$run->id]) ?></a>                          
+                    </div>                                                                                                                                                               
+
+                    <div class="d-flex align-items-center gap-2">                                                                                                                        
+                        <a href="/<?= $language ?>/report/<?= $report->id ?>/preview" class="btn btn-sm btn-outline-secondary" id="preview-btn" onclick="previewLoading()">              
+                            <span class="spinner-border spinner-border-sm d-none me-1" id="preview-spinner"></span>                                                                      
+                            <?= $translate('Open Preview') ?>
+                        </a>                                                                                                                                                             
+
                         <span class="badge fs-6 bg-<?= match($report->status) {
-                            ReportModel::STATUS_APPROVED => 'success',
+                            ReportModel::STATUS_APPROVED => 'success',                                                                                                                   
                             ReportModel::STATUS_REJECTED => 'danger',
-                            default    => 'secondary'
+                            default                      => 'secondary'                                                                                                                  
                         } ?>"><?= ucfirst($report->status) ?></span>
-                    </div>
+                    </div>                                                                                                                                                               
                 </div>
 
                 <table class="table table-sm mb-0">
-                    <tr>
-                        <td class="text-muted">Guardrail</td>
-                        <td>
+                    <tr>                                                                                                                                                                 
+                        <td class="text-muted"><?= $translate('Guardrail') ?></td>
+                        <td>                                                                                                                                                             
                             <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
-                                ResearchRunModel::STATUS_PASS    => 'success',
+                                ResearchRunModel::STATUS_PASS    => 'success',                                                                                                           
                                 ResearchRunModel::STATUS_REVIEW  => 'warning',
-                                ResearchRunModel::STATUS_BLOCKED => 'danger',
-                                default   => 'secondary'
-                            } ?>"><?= ucfirst($run->guardrailStatus ?? '—') ?></span>
-                        </td>
+                                ResearchRunModel::STATUS_BLOCKED => 'danger',                                                                                                            
+                                default                          => 'secondary'
+                            } ?>"><?= ucfirst($run->guardrailStatus ?? '—') ?></span>                                                                                                    
+                        </td>                                                                                                                                                            
                     </tr>
-                    <tr>
-                        <td class="text-muted">Source</td>
+                    <tr>                                                                                                                                                                 
+                        <td class="text-muted"><?= $translate('Source') ?></td>
                         <td><?= (int)$sourceCount ?></td>
-                    </tr>
+                    </tr>                                                                                                                                                                
                     <tr>
-                        <td class="text-muted">Findings</td>
+                        <td class="text-muted"><?= $translate('Findings') ?></td>                                                                                                        
                         <td><?= (int)$findingCount ?></td>
-                    </tr>
+                    </tr>                                                                                                                                                                
                 </table>
-            </div>
-        </div>
+            </div>                                                                                                                                                                       
+        </div>  
     </div>
 
     <div class="col-md-4">
         <div class="card">
-            <div class="card-body">
-                <h6 class="card-title mb-3">Assign this report to a customer</h6>
-                
-                <form method="POST" action="/report/<?= $report->id ?>/customer">
-                    <div class="d-flex gap-2 align-items-center">
-                        
+            <div class="card-body">                                                                                                                                                      
+                <h6 class="card-title mb-3"><?= $translate('Assign this report to a customer') ?></h6>
+
+                <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/customer">
+                    <div class="d-flex gap-2 align-items-center">                                                                                                                        
                         <select name="customer_id" class="form-select">
-                            <option value=""> Select customer... </option>
-                            
-                            <?php foreach ($customers as $customer) { ?>
-                                <option value="<?= $customer->id ?>" <?= $customerId === $customer->id ? 'selected' : '' ?>>
+                            <option value=""><?= $translate('Select customer...') ?></option>                                                                                            
+
+                            <?php foreach ($customers as $customer) { ?>                                                                                                                 
+                                <option value="<?= $customer->id ?>" <?= $customerId === $customer->id ? 'selected' : '' ?>>                                                             
                                     <?= htmlspecialchars($customer->companyName) ?>
-                                </option>
+                                </option>                                                                                                                                                
                             <?php } ?>
-                        </select>
-                        
-                        <button type="submit" class="btn btn-outline-success">Save</button>
-                    </div>
+                        </select>                                                                                                                                                        
+
+                        <button type="submit" class="btn btn-outline-success"><?= $translate('Save') ?></button>
+                    </div>                                                                                                                                                               
                 </form>
-            </div>
-        </div>
+            </div>                                                                                                                                                                       
+        </div>  
     </div>
 </div>
 
 <?php if (($run->guardrailStatus ?? '') === ResearchRunModel::STATUS_BLOCKED) { ?>
-    <div class="alert alert-danger mb-4">
-        <strong>Blocked:</strong> This revision cannot be approved. The run was blocked by the guardrail evaluator.
-    </div>
-<?php } ?>
+    <div class="alert alert-danger mb-4">                                                                                                                                                
+        <strong><?= $translate('Blocked:') ?></strong> <?= $translate('This revision cannot be approved. The run was blocked by the guardrail evaluator.') ?>
+    </div>                                                                                                                                                                               
+<?php } ?>      
 
 <?php if (!empty($findings)) { ?>
     <div class="card mb-4">
-        <div class="card-body">
-            <h6 class="card-title mb-3">Findings</h6>
+        <div class="card-body">                                                                                                                                                          
+            <h6 class="card-title mb-3"><?= $translate('Findings') ?></h6>
 
             <table class="table table-sm mb-0">
                 <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Type</th>
-                        <th>Deadline</th>
-                        <th>Confidence</th>
-                        <?php if ($canAct) { ?>
+                    <tr>                                                                                                                                                                 
+                        <th><?= $translate('Title') ?></th>
+                        <th><?= $translate('Type') ?></th>                                                                                                                               
+                        <th><?= $translate('Deadline') ?></th>
+                        <th><?= $translate('Confidence') ?></th>
+                        <?php if ($canAct) { ?>                                                                                                                                          
                             <th></th>
-                        <?php } ?>
+                        <?php } ?>                                                                                                                                                       
                     </tr>
-                </thead>
-                
-                <tbody>
+                </thead>                                                                                                                                                                 
+
+                <tbody>                                                                                                                                                                  
                     <?php foreach ($findings as $finding) { ?>
                         <?php $edited = $finding->updatedAt > $finding->createdAt; ?>
-                        <tr>
+                        <tr>                                                                                                                                                             
                             <?php if ($canAct) { ?>
-                                <form method="POST" action="/finding/<?= $finding->id ?>/edit" class="d-contents">
-                                    <input type="hidden" name="report_id" value="<?= $report->id ?>">
+                                <form method="POST" action="/<?= $language ?>/finding/<?= $finding->id ?>/edit" class="d-contents">                                                      
+                                    <input type="hidden" name="report_id" value="<?= $report->id ?>">                                                                                    
                                     <td>
-                                        <input type="text" name="title" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->title) ?>">
-                                    </td>
+                                        <input type="text" name="title" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->title) ?>">                           
+                                    </td>                                                                                                                                                
                                     <td>
-                                        <input type="text" name="finding_type" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->findingType) ?>">
-                                    </td>
+                                        <input type="text" name="finding_type" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->findingType) ?>">              
+                                    </td>                                                                                                                                                
                                     <td class="pe-3">
-                                        <input type="date" name="deadline" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->deadline ?? '') ?>">
+                                        <input type="date" name="deadline" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->deadline ?? '') ?>">               
                                     </td>
-                                    <td><?= number_format($finding->confidenceScore, 2) ?></td>
+                                    <td><?= number_format($finding->confidenceScore, 2) ?></td>                                                                                          
                                     <td class="d-flex">
-                                        <button type="submit" class="btn btn-sm btn-outline-success">Save</button>
-                                        
-                                        <?php if ($edited) { ?>
-                                            <div class="text-end ms-auto">
-                                                <span class="badge bg-warning text-dark ms-3">Edited</span>
-                                            </div>
+                                        <button type="submit" class="btn btn-sm btn-outline-success"><?= $translate('Save') ?></button>                                                  
+
+                                        <?php if ($edited) { ?>                                                                                                                          
+                                            <div class="text-end ms-auto">                                                                                                               
+                                                <span class="badge bg-warning text-dark ms-3"><?= $translate('Edited') ?></span>
+                                            </div>                                                                                                                                       
                                         <?php } ?>
-                                    </td>
+                                    </td>                                                                                                                                                
                                 </form>
                             <?php } else { ?>
-                                <td>
+                                <td>                                                                                                                                                     
                                     <?= htmlspecialchars($finding->title) ?>
-                                    <?php if ($edited) { ?>
-                                        <span class="badge bg-warning text-dark ms-1">Edited</span>
-                                    <?php } ?>
+                                    <?php if ($edited) { ?>                                                                                                                              
+                                        <span class="badge bg-warning text-dark ms-1"><?= $translate('Edited') ?></span>
+                                    <?php } ?>                                                                                                                                           
                                 </td>
-                                <td><?= htmlspecialchars($finding->findingType) ?></td>
+                                <td><?= htmlspecialchars($finding->findingType) ?></td>                                                                                                  
                                 <td><?= htmlspecialchars($finding->deadline ?? '—') ?></td>
-                                <td><?= number_format($finding->confidenceScore, 2) ?></td>
+                                <td><?= number_format($finding->confidenceScore, 2) ?></td>                                                                                              
                             <?php } ?>
-                        </tr>
-                    <?php } ?>
+                        </tr>                                                                                                                                                            
+                    <?php } ?>                                                                                                                                                           
                 </tbody>
-            </table>
-        </div>
+            </table>                                                                                                                                                                     
+        </div>  
     </div>
 <?php } ?>
 
 <div class="card my-4">
     <div class="card-body">
-        <h6 class="card-title mb-3">Run summary</h6>
-        
+        <h6 class="card-title mb-3"><?= $translate('Run summary') ?></h6>
+
         <table class="table table-sm mb-0">
-            <tr>
-                <td class="text-muted">Sources collected</td>
-                <td><?= $sourceCount ?></td>
+            <tr>                                                                                                                                                                         
+                <td class="text-muted"><?= $translate('Sources collected') ?></td>
+                <td><?= $sourceCount ?></td>                                                                                                                                             
             </tr>
-            <tr>
-                <td class="text-muted">Findings extracted</td>
-                <td><?= $findingCount ?></td>
+            <tr>                                                                                                                                                                         
+                <td class="text-muted"><?= $translate('Findings extracted') ?></td>
+                <td><?= $findingCount ?></td>                                                                                                                                            
             </tr>
-            <?php if ($run) { ?>
+            <?php if ($run) { ?>                                                                                                                                                         
                 <tr>
-                    <td class="text-muted">Guardrail</td>
-                    <td>
+                    <td class="text-muted"><?= $translate('Guardrail') ?></td>
+                    <td>                                                                                                                                                                 
                         <span class="badge bg-<?= match($run->guardrailStatus ?? ResearchRunModel::STATUS_PENDING) {
-                            ResearchRunModel::STATUS_PASS    => 'success',
-                            ResearchRunModel::STATUS_REVIEW  => 'warning',
+                            ResearchRunModel::STATUS_PASS    => 'success',                                                                                                               
+                            ResearchRunModel::STATUS_REVIEW  => 'warning',                                                                                                               
                             ResearchRunModel::STATUS_BLOCKED => 'danger',
-                            default                          => 'secondary'
+                            default                          => 'secondary'                                                                                                              
                         } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
-                    </td>
+                    </td>                                                                                                                                                                
                 </tr>
-                <tr>
-                    <td class="text-muted">Run</td>
-                    <td><a href="/run/<?= $run->id ?>">Run #<?= $run->id ?></a></td>
+                <tr>                                                                                                                                                                     
+                    <td class="text-muted"><?= $translate('Run') ?></td>
+                    <td><a href="/<?= $language ?>/run/<?= $run->id ?>"><?= $translate('Run #%s', [$run->id]) ?></a></td>                                                                
                 </tr>
-                <tr>
-                    <td class="text-muted">Query text</td>
+                <tr>                                                                                                                                                                     
+                    <td class="text-muted"><?= $translate('Query text') ?></td>                                                                                                          
                     <td><?= $run->query ?></td>
-                </tr>
+                </tr>                                                                                                                                                                    
             <?php } ?>
         </table>
-    </div>
+    </div>                                                                                                                                                                               
 </div>
-
 
 <div class="card mb-4">
     <div class="card-body">
-        <h6 class="card-title mb-3">Report text</h6>
+        <h6 class="card-title mb-3"><?= $translate('Report text') ?></h6>
 
-        <form method="POST" action="/report/<?= $report->id ?>/save">
-            <div class="mb-3">
+        <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/save">
+            <div class="mb-3">                                                                                                                                                           
                 <textarea name="final_markdown" class="form-control" rows="20"><?= htmlspecialchars($finalMarkdown) ?></textarea>
-            </div>
+            </div>                                                                                                                                                                       
 
-            <button type="submit" class="btn btn-success">Save revision</button>
-        </form>
+            <button type="submit" class="btn btn-success"><?= $translate('Save revision') ?></button>                                                                                    
+        </form> 
     </div>
 </div>
 
 <div class="card mb-4">
-    <div class="card-body">
-        <h6 class="card-title mb-3">Preview</h6>
+    <div class="card-body">                                                                                                                                                              
+        <h6 class="card-title mb-3"><?= $translate('Preview') ?></h6>
 
         <div class="border rounded p-3 bg-light">
-            <?= $renderedHtml ?>
+            <?= $renderedHtml ?>                                                                                                                                                         
         </div>
-    </div>
-</div>
+    </div>                                                                                                                                                                               
+</div>          
 
 <?php if ($canAct && !in_array($report->status, [ReportModel::STATUS_APPROVED, ReportModel::STATUS_REJECTED]) && ($run->guardrailStatus ?? '') !== ResearchRunModel::STATUS_BLOCKED) { ?>
-    <div class="card mb-4">
+    <div class="card mb-4">                                                                                                                                                              
         <div class="card-body">
-            <h6 class="card-title mb-3">Actions</h6>
+            <h6 class="card-title mb-3"><?= $translate('Actions') ?></h6>                                                                                                                
 
-            <form method="POST" action="/report/<?= $report->id ?>/status" class="d-inline">
-                <input type="hidden" name="status" value="approved">
-                <button type="submit" class="btn btn-success me-2">Approve</button>
-            </form>
+            <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/status" class="d-inline">
+                <input type="hidden" name="status" value="approved">                                                                                                                     
+                <button type="submit" class="btn btn-success me-2"><?= $translate('Approve') ?></button>
+            </form>                                                                                                                                                                      
 
-            <form method="POST" action="/report/<?= $report->id ?>/status" class="d-inline">
+            <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/status" class="d-inline">                                                                            
                 <input type="hidden" name="status" value="rejected">
-                <button type="submit" class="btn btn-danger">Reject</button>
+                <button type="submit" class="btn btn-danger"><?= $translate('Reject') ?></button>                                                                                        
             </form>
-        </div>
-    </div>
+        </div>                                                                                                                                                                           
+    </div>      
 <?php } ?>
 
 <div class="card">
-    <div class="card-body">
-        <h6 class="card-title mb-3">Revision history</h6>
+    <div class="card-body">                                                                                                                                                              
+        <h6 class="card-title mb-3"><?= $translate('Revision history') ?></h6>
 
         <?php if (empty($revisions)) { ?>
-            <p class="text-muted">No revisions yet.</p>
-        <?php } else { ?>
+            <p class="text-muted"><?= $translate('No revisions yet.') ?></p>
+        <?php } else { ?>                                                                                                                                                                
             <table class="table table-sm">
-                <thead>
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th> # </th>
-                        <th> Saved by </th>
-                        <th> Date </th>
-                        <th> QA Decision </th>
-                        <th> Decided by </th>
-                        <th> Decided at </th>
-                    </tr>
+                        <th><?= $translate('#') ?></th>
+                        <th><?= $translate('Saved by') ?></th>                                                                                                                           
+                        <th><?= $translate('Date') ?></th>
+                        <th><?= $translate('QA Decision') ?></th>                                                                                                                        
+                        <th><?= $translate('Decided by') ?></th>                                                                                                                         
+                        <th><?= $translate('Decided at') ?></th>
+                    </tr>                                                                                                                                                                
                 </thead>
                 <tbody>
                     <?php foreach ($revisions as $rev) { ?>
-                        <tr>
+                        <tr>                                                                                                                                                             
                             <td><?= $rev->id ?></td>
-                            <td><?= htmlspecialchars($rev->username ?? 'system') ?></td>
-                            <td><?= $rev->createdAt ?></td>
+                            <td><?= htmlspecialchars($rev->username ?? $translate('system')) ?></td>                                                                                     
+                            <td><?= $rev->createdAt ?></td>                                                                                                                              
                             <td>
-                                <?php if (!empty($rev->decisionStatus)) { ?>
+                                <?php if (!empty($rev->decisionStatus)) { ?>                                                                                                             
                                     <span class="badge bg-<?= match($rev->decisionStatus) {
-                                        QaReviewModel::STATUS_APPROVED => 'success',
+                                        QaReviewModel::STATUS_APPROVED => 'success',                                                                                                     
                                         QaReviewModel::STATUS_REJECTED => 'danger',
-                                        default                        => 'secondary'
+                                        default                        => 'secondary'                                                                                                    
                                     } ?>"><?= ucfirst($rev->decisionStatus) ?></span>
-                                <?php } else { ?>
+                                <?php } else { ?>                                                                                                                                        
                                     <span class="text-muted">—</span>
-                                <?php } ?>
+                                <?php } ?>                                                                                                                                               
                             </td>
                             <td><?= htmlspecialchars($rev->reviewedByUsername ?? '—') ?></td>
-                            <td><?= $rev->decidedAt ?? '—' ?></td>
+                            <td><?= $rev->decidedAt ?? '—' ?></td>                                                                                                                       
                         </tr>
-                    <?php } ?>
+                    <?php } ?>                                                                                                                                                           
                 </tbody>
             </table>
-        <?php } ?>
+        <?php } ?>                                                                                                                                                                       
     </div>
-</div>
+</div>                                                                                                                                                                                   
 
-<div class="card mt-4">                                                                                                                                                         
+<div class="card mt-4">
     <div class="card-body">
-        <h6 class="card-title mb-3">Audit history</h6>
+        <h6 class="card-title mb-3"><?= $translate('Audit history') ?></h6>
 
         <?php if (empty($auditLog)) { ?>
-            <p class="text-muted">No audit entries found.</p>                                                                                                                   
-        <?php } else { ?>                                                                                                                                                       
+            <p class="text-muted"><?= $translate('No audit entries found.') ?></p>                                                                                                       
+        <?php } else { ?>
             <table class="table table-sm mb-0">
-                <thead>                                                                                                                                                         
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th>Action</th>
-                        <th>Actor</th>                                                                                                                                          
-                        <th>Details</th>
-                        <th>Date</th>                                                                                                                                           
+                        <th><?= $translate('Action') ?></th>                                                                                                                             
+                        <th><?= $translate('Actor') ?></th>
+                        <th><?= $translate('Details') ?></th>
+                        <th><?= $translate('Date') ?></th>                                                                                                                               
                     </tr>
-                </thead>
+                </thead>                                                                                                                                                                 
                 <tbody>
                     <?php foreach ($auditLog as $entry) { ?>
-                        <tr>                                                                                                                                                    
+                        <tr>
                             <td><code><?= htmlspecialchars($entry->action) ?></code></td>
-                            <td><?= $entry->actorUserId ? 'User #' . $entry->actorUserId : 'System' ?></td>                                                                     
-                            <td class="text-muted small"><?= htmlspecialchars($entry->metadataJson ?? '') ?></td>
-                            <td><?= $entry->createdAt ?></td>                                                                                                                   
-                        </tr>                                                                                                                                                   
-                    <?php } ?>                                                                                                                                                  
-                </tbody>                                                                                                                                                        
+                            <td><?= $entry->actorUserId ? $translate('User #%s', [$entry->actorUserId]) : $translate('System') ?></td>                                                   
+                            <td class="text-muted small"><?= htmlspecialchars($entry->metadataJson ?? '') ?></td>                                                                        
+                            <td><?= $entry->createdAt ?></td>                                                                                                                            
+                        </tr>                                                                                                                                                            
+                    <?php } ?>
+                </tbody>                                                                                                                                                                 
             </table>
         <?php } ?>
     </div>
 </div>
 
-<script>        
+<script>
     function previewLoading() {
         $("#preview-btn").addClass("disabled");
-        document.getElementById('preview-spinner').classList.remove('d-none');
+        document.getElementById('preview-spinner').classList.remove('d-none');                                                                                                           
         setTimeout(() => document.getElementById('preview-spinner').classList.add('d-none'), 10000);
-    }                                                                                                                                 
-</script>
+    }                                                                                                                                                                                    
+</script>       

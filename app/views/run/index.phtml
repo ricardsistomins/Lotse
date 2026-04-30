@@ -1,181 +1,180 @@
-<?php 
-    use app\Model\{ 
-        ReportModel,
+<?php                                                                                                                                                                                    
+    use app\Model\{                                                                                                                                                                      
+        ReportModel,                                                                                                                                                                     
         ResearchRunModel
-    }; 
-?>
+    };                                                                                                                                                                                   
+?>              
 
-<div class="mb-4 d-flex justify-content-between align-items-center">
+<div class="mb-4 d-flex justify-content-between align-items-center">                                                                                                                     
     <div>
-        <h2 class="text-success">Runs</h2>
-        <span class="text-muted fs-5"> Every research run, source sync, and pipeline execution. Filter by status, trigger, or guardrail outcome. </span> 
-    </div>
-    
-    <div class="badge ps-0 mb-1">
-        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
-            <i class="bi bi-dot text-success fs-3"></i> Live · <?= count($runs) ?> of <?= $runStatusCount['total_runs'] ?> runs 
-        </span>
-    </div>
-</div>
+        <h2 class="text-success"><?= $translate('Runs') ?></h2>                                                                                                                          
+        <span class="text-muted fs-5"><?= $translate('Every research run, source sync, and pipeline execution. Filter by status, trigger, or guardrail outcome.') ?></span>              
+    </div>                                                                                                                                                                               
+
+    <div class="badge ps-0 mb-1">                                                                                                                                                        
+        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center">                                                                                               
+            <i class="bi bi-dot text-success fs-3"></i> <?= $translate('Live · %s of %s runs', [count($runs), $runStatusCount['total_runs']]) ?>                                         
+        </span>                                                                                                                                                                          
+    </div>                                                                                                                                                                               
+</div>                                                                                                                                                                                   
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card rounded-4 text-center">
+        <div class="card rounded-4 text-center">                                                                                                                                         
             <div class="card-body">
-                <div class="fs-2 fw-bold"> <i class="bi bi-cpu"></i> <?= $runStatusCount['total_runs'] ?></div>
-                <div class="text-muted small">Total runs</div>
+                <div class="fs-2 fw-bold"> <i class="bi bi-cpu"></i> <?= $runStatusCount['total_runs'] ?></div>                                                                          
+                <div class="text-muted small"><?= $translate('Total runs') ?></div>                                                                                                      
             </div>
-        </div>
-    </div>
-    
+        </div>                                                                                                                                                                           
+    </div>      
+
     <div class="col-md-3">
-        <div class="card rounded-4 text-center">
+        <div class="card rounded-4 text-center">                                                                                                                                         
             <div class="card-body">
-                <div class="fs-2 fw-bold text-success"> <i class="bi bi-bookmark-check"></i> <?= $runStatusCount['completed'] ?></div>
-                <div class="text-muted small">Completed</div>
+                <div class="fs-2 fw-bold text-success"> <i class="bi bi-bookmark-check"></i> <?= $runStatusCount['completed'] ?></div>                                                   
+                <div class="text-muted small"><?= $translate('Completed') ?></div>                                                                                                       
             </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
+    <div class="col-md-3">                                                                                                                                                               
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-danger"> <i class="bi bi-ban"></i> <?= $runStatusCount['blocked'] ?></div>
-                <div class="text-muted small">Blocked runs</div>
+                <div class="text-muted small"><?= $translate('Blocked runs') ?></div>                                                                                                    
             </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
+    <div class="col-md-3">                                                                                                                                                               
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-warning"> <i class="bi bi-clock"></i> <?= $runStatusCount['waiting_review'] ?></div>
-                <div class="text-muted small">Awaiting review</div>
+                <div class="text-muted small"><?= $translate('Awaiting review') ?></div>                                                                                                 
             </div>
-        </div>
-    </div>
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
 </div>
 
-<form method="GET" action="/runs" class="row g-2 mb-3">
+<form method="GET" action="/<?= $language ?>/runs" class="row g-2 mb-3">
     <div class="col-auto">
-        <select name="status" class="form-select form-select-sm">
-            <option value="">All statuses</option>
-            <option value="completed" <?= $filterStatus === 'completed' ? 'selected' : '' ?>> Completed </option>
-            <option value="failed"    <?= $filterStatus === 'failed'    ? 'selected' : '' ?>> Failed </option>
-            <option value="running"   <?= $filterStatus === 'running'   ? 'selected' : '' ?>> Running </option>
-            <option value="blocked"   <?= $filterStatus === 'blocked'   ? 'selected' : '' ?>> Blocked </option>
-        </select>
-    </div>
-    
+        <select name="status" class="form-select form-select-sm">                                                                                                                        
+            <option value=""><?= $translate('All statuses') ?></option>
+            <option value="completed" <?= $filterStatus === 'completed' ? 'selected' : '' ?>><?= $translate('Completed') ?></option>                                                     
+            <option value="failed"    <?= $filterStatus === 'failed'    ? 'selected' : '' ?>><?= $translate('Failed') ?></option>                                                        
+            <option value="running"   <?= $filterStatus === 'running'   ? 'selected' : '' ?>><?= $translate('Running') ?></option>                                                       
+            <option value="blocked"   <?= $filterStatus === 'blocked'   ? 'selected' : '' ?>><?= $translate('Blocked') ?></option>                                                       
+        </select>                                                                                                                                                                        
+    </div>      
+
     <div class="col-auto">
         <select name="trigger" class="form-select form-select-sm">
-            <option value="">All triggers</option>
-            <option value="dashboard_admin" <?= $filterTrigger === 'dashboard_admin' ? 'selected' : '' ?>> Dashboard (admin) </option>
-            <option value="dashboard_dev"   <?= $filterTrigger === 'dashboard_dev'   ? 'selected' : '' ?>> Dashboard (dev) </option>
-            <option value="cron"            <?= $filterTrigger === 'cron'            ? 'selected' : '' ?>> Cron </option>
-        </select>
-    </div>
-    
-    <div class="col-auto">
-        <button type="submit" class="btn btn-sm btn-success">Filter</button>
-        <a href="/runs" class="btn btn-sm btn-outline-secondary">Reset</a>
-    </div>
-</form>
+            <option value=""><?= $translate('All triggers') ?></option>
+            <option value="dashboard_admin" <?= $filterTrigger === 'dashboard_admin' ? 'selected' : '' ?>><?= $translate('Dashboard (admin)') ?></option>                                
+            <option value="dashboard_dev"   <?= $filterTrigger === 'dashboard_dev'   ? 'selected' : '' ?>><?= $translate('Dashboard (dev)') ?></option>
+            <option value="cron"            <?= $filterTrigger === 'cron'            ? 'selected' : '' ?>><?= $translate('Cron') ?></option>                                             
+        </select>                                                                                                                                                                        
+    </div>                                                                                                                                                                               
 
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-success"><?= $translate('Filter') ?></button>
+        <a href="/<?= $language ?>/runs" class="btn btn-sm btn-outline-secondary"><?= $translate('Reset') ?></a>                                                                         
+    </div>
+</form>                                                                                                                                                                                  
 
 <div class="card rounded-4">
-    <div class="card-body">
+    <div class="card-body">                                                                                                                                                              
         <div class="mb-4">
-            <h5 class="card-title mb-0">Runs</h5>
-            
-            <span class="text-muted small">                                                                                                               
-                <?= count($runs) ?> run<?= $total !== 1 ? 's' : '' ?>  
-                
-                <?php if ($filterStatus || $filterTrigger) { ?>                                                                                           
-                    · filtered by&nbsp                                                                                                                         
-                    <?= $filterStatus ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus) . '</span>' : '' ?>                    
-                    <?= $filterTrigger ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterTrigger) . '</span>' : '' ?>                  
-                <?php } ?>                                                                                                                     
-            </span>            
-        </div>
-            
+            <h5 class="card-title mb-0"><?= $translate('Runs') ?></h5>                                                                                                                   
+
+            <span class="text-muted small">
+                <?= $translate('%s runs', [$total]) ?>                                                                                                                                   
+
+                <?php if ($filterStatus || $filterTrigger) { ?>                                                                                                                          
+                    · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             
+                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)  . '</span>' : '' ?>
+                    <?= $filterTrigger ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterTrigger) . '</span>' : '' ?>                                                      
+                <?php } ?>                                                                                                                                                               
+            </span>                                                                                                                                                                      
+        </div>                                                                                                                                                                           
+
         <?php if (empty($runs)) { ?>
-            <p class="text-muted">No runs yet.</p>
-        <?php } else { ?>
+            <p class="text-muted"><?= $translate('No runs yet.') ?></p>
+        <?php } else { ?>                                                                                                                                                                
             <table class="table table-hover table-striped">
-                <thead>
+                <thead>                                                                                                                                                                  
                     <tr>
-                        <th> # </th>
-                        <th> Type </th>
-                        <th> Trigger </th>
-                        <th> Status </th>
-                        <th> Guardrail </th>
-                        <th> Provider </th>
-                        <th> Started </th>
-                        <th></th>
+                        <th><?= $translate('#') ?></th>
+                        <th><?= $translate('Type') ?></th>
+                        <th><?= $translate('Trigger') ?></th>                                                                                                                            
+                        <th><?= $translate('Status') ?></th>
+                        <th><?= $translate('Guardrail') ?></th>                                                                                                                          
+                        <th><?= $translate('Provider') ?></th>                                                                                                                           
+                        <th><?= $translate('Started') ?></th>
+                        <th></th>                                                                                                                                                        
                     </tr>
                 </thead>
 
                 <tbody>
                     <?php foreach ($runs as $run) { ?>
-                        <tr>
+                        <tr>                                                                                                                                                             
                             <td class="text-muted"><?= $run->id ?></td>
-                            <td>
+                            <td>                                                                                                                                                         
                                 <small class="font-monospace"><?= htmlspecialchars($run->runType) ?></small>
-                            </td>
+                            </td>                                                                                                                                                        
                             <td>
-                                <small class="font-monospace"><?= htmlspecialchars($run->triggerSource) ?></small>
+                                <small class="font-monospace"><?= htmlspecialchars($run->triggerSource) ?></small>                                                                       
                             </td>
                             <td>
                                 <span class="badge bg-<?= match($run->status) {
-                                    ResearchRunModel::STATUS_COMPLETED => 'success',
+                                    ResearchRunModel::STATUS_COMPLETED => 'success',                                                                                                     
                                     ResearchRunModel::STATUS_FAILED    => 'danger',
-                                    ResearchRunModel::STATUS_BLOCKED   => 'warning',
-                                    ResearchRunModel::STATUS_RUNNING   => 'info',
-                                    default     => 'secondary'
-                                } ?>"><?= ucfirst($run->status) ?></span>
-                            </td>
+                                    ResearchRunModel::STATUS_BLOCKED   => 'warning',                                                                                                     
+                                    ResearchRunModel::STATUS_RUNNING   => 'info',                                                                                                        
+                                    default                            => 'secondary'
+                                } ?>"><?= $translate(ucfirst($run->status)) ?></span>                                                                                                                
+                            </td>                                                                                                                                                        
                             <td>
-                                <span class="badge bg-<?= match($run->guardrailStatus ?? 'pending') {
+                                <span class="badge bg-<?= match($run->guardrailStatus ?? 'Pending') {                                                                                    
                                     ResearchRunModel::STATUS_PASS    => 'success',
-                                    ResearchRunModel::STATUS_REVIEW  => 'warning',
+                                    ResearchRunModel::STATUS_REVIEW  => 'warning',                                                                                                       
                                     ResearchRunModel::STATUS_BLOCKED => 'danger',
-                                    default   => 'secondary'
-                                } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
-                            </td>
+                                    default                          => 'secondary'                                                                                                      
+                                } ?>"><?= $translate(ucfirst($run->guardrailStatus ?? 'Pending')) ?></span>
+                            </td>                                                                                                                                                        
                             <td><?= htmlspecialchars($run->llmProviderName) ?></td>
-                            <td>
+                            <td>                                                                                                                                                         
                                 <small class="text-muted"><?= $run->startedAt ?></small>
-                            </td>
+                            </td>                                                                                                                                                        
                             <td>
-                                <a href="/run/<?= $run->id ?>" class="btn btn-sm btn-outline-success rounded-3">Details <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>
+                                <a href="/<?= $language ?>/run/<?= $run->id ?>" class="btn btn-sm btn-outline-success rounded-3"><?= $translate('Details') ?> <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>                                                                                                                                                 
                             </td>
-                        </tr>
+                        </tr>                                                                                                                                                            
                     <?php } ?>
-                </tbody>
+                </tbody>                                                                                                                                                                 
             </table>
-            
-            <?php if ($totalPages > 1) { ?>                                               
-                <?php $baseQuery = array_filter(['status' => $filterStatus, 'trigger' => $filterTrigger]); ?>              
-            
+
+            <?php if ($totalPages > 1) { ?>
+                <?php $baseQuery = array_filter(['status' => $filterStatus, 'trigger' => $filterTrigger]); ?>
+
                 <nav class="mt-4">
-                    <ul class="pagination justify-content-center mb-0">     
+                    <ul class="pagination justify-content-center mb-0">                                                                                                                  
                         <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                            <a class="page-link" href="/runs?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">&laquo;</a>                
-                        </li>                                                             
+                            <a class="page-link" href="/<?= $language ?>/runs?<?= http_build_query($baseQuery + ['page' => $page - 1]) ?>">&laquo;</a>                                   
+                        </li>
 
                         <?php for ($p = 1; $p <= $totalPages; $p++) { ?>
-                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">    
-                                <a class="page-link" href="/runs?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>               
-                            </li>
-                        <?php } ?>                                                        
+                            <li class="page-item <?= $p === $page ? 'active' : '' ?>">                                                                                                   
+                                <a class="page-link" href="/<?= $language ?>/runs?<?= http_build_query($baseQuery + ['page' => $p]) ?>"><?= $p ?></a>
+                            </li>                                                                                                                                                        
+                        <?php } ?>
 
                         <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                            <a class="page-link" href="/runs?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">&raquo;</a>                
+                            <a class="page-link" href="/<?= $language ?>/runs?<?= http_build_query($baseQuery + ['page' => $page + 1]) ?>">&raquo;</a>                                   
                         </li>
-                    </ul>   
+                    </ul>                                                                                                                                                                
                 </nav>
-            <?php } ?>                       
+            <?php } ?>                                                                                                                                                                   
         <?php } ?>
     </div>
 </div>

@@ -2,13 +2,14 @@
 
 namespace app\controllers;
 
-use Phalcon\Mvc\Controller;
-
 use app\Storage\CustomerStorage;
-use app\Model\CustomerModel;
+use app\Model\{
+    CustomerModel,
+    UserModel
+};
 use app\Service\AuditService;
 
-class CustomerController extends Controller
+class CustomerController extends BaseController
 {
     /**
      * List all customers.
@@ -45,16 +46,14 @@ class CustomerController extends Controller
      * @param int $id
      * @return void
      */
-    public function viewAction(int $id): void
+    public function viewAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $customerStorage  = new CustomerStorage();
         $customer = $customerStorage->getById($id);
 
         if (!$customer) {
-            $response->redirect('/customers');
-            $response->send();
-
+            $this->langRedirect('/customers');
             return;
         }
 
@@ -72,15 +71,13 @@ class CustomerController extends Controller
      * @param int $id
      * @return void
      */
-    public function saveAction(int $id): void
+    public function saveAction(): void
     {
-        $response = $this->response;
+        $id = (int)$this->dispatcher->getParam('id');
         $userRole = $this->session->get('userRole');
 
         if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {
-            $response->redirect('/customer/' . $id);
-            $response->send();
-
+            $this->langRedirect('/customer/' . $id);
             return;
         }
 
@@ -109,7 +106,6 @@ class CustomerController extends Controller
             metadata:    []
         );
  
-        $response->redirect('/customer/' . $id);
-        $response->send();
+        $this->langRedirect('/customer/' . $id);
     }
 }
