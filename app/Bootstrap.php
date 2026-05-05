@@ -10,7 +10,10 @@ use Phalcon\Session\Adapter\Redis as SessionAdapterRedis;
 use Phalcon\Storage\AdapterFactory;
 use Phalcon\Storage\SerializerFactory;
 use Phalcon\Autoload\Loader; 
-use app\Plugin\AuthGuard;
+use app\Plugin\{
+    AuthGuard,
+    LanguagePlugin
+};
 
 /**
  * Class Bootstrap
@@ -55,6 +58,7 @@ class Bootstrap
         $this->_di->setShared('dispatcher', function (): Dispatcher {
             $eventsManager = new EventsManager();
 
+            $eventsManager->attach('dispatch', new LanguagePlugin()); 
             $eventsManager->attach('dispatch', new AuthGuard());
             
             $eventsManager->attach('dispatch:beforeException', function ($event, $dispatcher, $exception) {

@@ -1,181 +1,162 @@
-<?php
+ <?php                                                                         
+                  
+use Phalcon\Mvc\Router;                                                       
 
-use Phalcon\Mvc\Router;
-
-/** @var \Phalcon\Di\FactoryDefault $container */
+/** @var \Phalcon\Di\FactoryDefault $container */                             
 $router = new Router();
 
-$router->add('/', array(
-    'controller'  => 'index',
-    'action'      => 'index'
-));
+$router->add('/', [
+    'controller' => 'index',                                                  
+    'action'     => 'index'
+]);
+
+$router->notFound([                                                           
+    'controller' => 'error',
+    'action'     => 'notFound',                                               
+]);             
 
 
 /******************************
- * 
- * Error page
- * 
+ * Authentification                                                           
  *****************************/
-$router->notFound([
-    'controller' => 'error',
-    'action'     => 'notFound',
+$router->add('/auth/login', [
+    'controller' => 'auth',
+    'action'     => 'login'                                                   
+]);
+
+$router->add('/auth/logout', [
+    'controller' => 'auth',
+    'action'     => 'logout'
 ]);
 
 
 /******************************
- * 
- * Authentification
- *
- *****************************/
-$router->add('/auth/login', array(
-    'controller' => 'auth',
-    'action'     => 'login'
-));
-
-$router->add('/auth/logout', array(
-    'controller' => 'auth',
-    'action'     => 'logout'
-));
-
-
-/******************************
- * 
  * Dashboard
- * 
- *****************************/
-$router->add('/dashboard', array(
-    'controller' => 'dashboard',
+ *****************************/                                               
+$router->add('/{lang:[a-z]{2}}/dashboard', [
+    'controller' => 'dashboard',                                              
     'action'     => 'index'
-));
+]);
 
-$router->add('/dashboard/trigger', array(
+$router->add('/{lang:[a-z]{2}}/dashboard/trigger', [                          
     'controller' => 'dashboard',
-    'action'     => 'trigger',
-));
+    'action'     => 'trigger',                                                
+]);             
 
 
 /******************************
- * 
  * Report
- * 
  *****************************/
-$router->add('/reports', array(
-    'controller' => 'report', 
-    'action'     => 'index'
-));  
-
-$router->add('/report/{id:[0-9]+}', array(
-    'controller' => 'report', 
-    'action'     =>'view'
-));
-
-$router->add('/report/{id:[0-9]+}/save', array(
-    'controller' => 'report', 
-    'action'     => 'save'
-));
-
-$router->add('/report/{id:[0-9]+}/status', array(
-    'controller' => 'report', 
-    'action'     => 'updateStatus'
-));   
-
-$router->add('/report/{id:[0-9]+}/customer', array(
-    'controller' => 'report', 
-    'action'     => 'saveCustomer'
-));   
-
-$router->add('/report/{id:[0-9]+}/preview', [                                 
+$router->add('/{lang:[a-z]{2}}/reports', [
     'controller' => 'report',                                                 
-    'action'     => 'preview'           
-]); 
-  
-$router->add('/finding/{id:[0-9]+}/edit', array(
-    'controller' => 'report', 
-    'action'     => 'editFinding'
-)); 
+    'action'     => 'index'
+]);                                                                           
+
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}', [                         
+    'controller' => 'report',
+    'action'     => 'view'                                                    
+]);             
+
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/save', [
+    'controller' => 'report',                                                 
+    'action'     => 'save'
+]);
+
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/status', [                  
+    'controller' => 'report',
+    'action'     => 'updateStatus'                                            
+]);             
+
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/customer', [                
+    'controller' => 'report',
+    'action'     => 'saveCustomer'                                            
+]);             
+
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/preview', [                 
+    'controller' => 'report',
+    'action'     => 'preview'                                                 
+]);             
+
+$router->add('/{lang:[a-z]{2}}/finding/{id:[0-9]+}/edit', [                   
+    'controller' => 'report',
+    'action'     => 'editFinding'                                             
+]);             
+
 
 /******************************
-*
-* Runs
-*
-*****************************/
-$router->add('/runs', array(
-    'controller' => 'run',
+ * Runs
+ *****************************/
+$router->add('/{lang:[a-z]{2}}/runs', [
+    'controller' => 'run',                                                    
     'action'     => 'index'
-));
+]);                                                                           
 
-$router->add('/run/{id:[0-9]+}', array(
+$router->add('/{lang:[a-z]{2}}/run/{id:[0-9]+}', [                            
     'controller' => 'run',
-    'action'     => 'view'
-));
+    'action'     => 'view'                                                    
+]);             
 
-$router->add('/run/{id:[0-9]+}/retrigger', array(
+$router->add('/{lang:[a-z]{2}}/run/{id:[0-9]+}/retrigger', [                  
     'controller' => 'run',
-    'action'     => 'retrigger'
-));
+    'action'     => 'retrigger'                                               
+]);             
 
 
-/******************************                                               
-*                                                                             
-* QA
-*                                                                             
-******************************/                           
-$router->add('/qa', [
+/******************************
+ * QA
+ *****************************/
+$router->add('/{lang:[a-z]{2}}/qa', [
     'controller' => 'qa',                                                     
     'action'     => 'index'
 ]);                                                                           
 
-$router->add('/qa/{revisionId:[0-9]+}/approve', [                             
+$router->add('/{lang:[a-z]{2}}/qa/{revisionId:[0-9]+}/approve', [             
     'controller' => 'qa',
     'action'     => 'approve'                                                 
-]);                                                                           
+]);             
 
-$router->add('/qa/{revisionId:[0-9]+}/reject', [                              
-    'controller' => 'qa',                                 
+$router->add('/{lang:[a-z]{2}}/qa/{revisionId:[0-9]+}/reject', [              
+    'controller' => 'qa',
     'action'     => 'reject'                                                  
-]);  
+]);             
 
 
 /******************************
-*                                                                             
-* Settings
-*                                                                             
-******************************/
-$router->add('/settings', [
+ * Settings
+ *****************************/
+$router->add('/{lang:[a-z]{2}}/settings', [
     'controller' => 'settings',
-    'action'     => 'index'
-]);                                                                           
+    'action'     => 'index'                                                   
+]);
 
-$router->add('/settings/{key:[a-z_]+}', [                                     
+$router->add('/{lang:[a-z]{2}}/settings/{key:[a-z_]+}', [
     'controller' => 'settings',
     'action'     => 'view'
 ]);                                                                           
 
-$router->add('/settings/{key:[a-z_]+}/save', [                                
+$router->add('/{lang:[a-z]{2}}/settings/{key:[a-z_]+}/save', [                
     'controller' => 'settings',
     'action'     => 'save'
-]);
+]);                                                                           
 
 
 /******************************
-*
-* Customers
-*
-******************************/
-$router->add('/customers', [
+ * Customers
+ *****************************/
+$router->add('/{lang:[a-z]{2}}/customers', [
     'controller' => 'customer',
     'action'     => 'index'
 ]);
 
-$router->add('/customer/{id:[0-9]+}', [
-    'controller' => 'customer',
+$router->add('/{lang:[a-z]{2}}/customer/{id:[0-9]+}', [
+    'controller' => 'customer',                                               
     'action'     => 'view'
 ]);
 
-$router->add('/customer/{id:[0-9]+}/save', [
+$router->add('/{lang:[a-z]{2}}/customer/{id:[0-9]+}/save', [                  
     'controller' => 'customer',
-    'action'     => 'save'
-]);
+    'action'     => 'save'                                                    
+]);             
 
-  
+
 $container->setShared('router', $router);

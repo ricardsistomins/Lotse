@@ -2,8 +2,6 @@
 
 namespace app\controllers;
 
-use Phalcon\Mvc\Controller;
-
 use app\Storage\ {
     ReportStorage,
     ReportRevisionStorage,
@@ -16,7 +14,7 @@ use app\Model\{
 };
 use app\Service\AuditService;   
 
-class QaController extends Controller
+class QaController extends BaseController
 {
     /**
      * List last 50 reports in the QA queue.                                      
@@ -50,8 +48,9 @@ class QaController extends Controller
      *                                                                        
      * @param int $revisionId                             
      */                                                                       
-    public function approveAction(int $revisionId): void  
-    {                                                                         
+    public function approveAction(): void
+    {
+        $revisionId = (int)$this->dispatcher->getParam('revisionId');
         $this->handleDecision($revisionId, QaReviewModel::STATUS_APPROVED);
     }                                                                         
 
@@ -60,8 +59,9 @@ class QaController extends Controller
      *                                                                        
      * @param int $revisionId
      */                                                                       
-    public function rejectAction(int $revisionId): void                       
-    {                                                                         
+    public function rejectAction(): void
+    {
+        $revisionId = (int)$this->dispatcher->getParam('revisionId');
         $this->handleDecision($revisionId, QaReviewModel::STATUS_REJECTED);                       
     }                                                                         
 
@@ -77,18 +77,14 @@ class QaController extends Controller
         $role   = $this->session->get('userRole');                            
 
         if (!in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA])) {                              
-            $this->response->redirect('/qa');                                 
-            $this->response->send();  
-            
+            $this->langRedirect('/qa');                                  
             return;                                                           
         }                                                                     
                        
         $revision = (new ReportRevisionStorage())->getById($revisionId);
 
         if (!$revision) {                                                     
-            $this->response->redirect('/qa');                                 
-            $this->response->send();       
-            
+            $this->langRedirect('/qa');                                 
             return;                                       
         }                                                                     
 
@@ -96,9 +92,7 @@ class QaController extends Controller
         $qaReview = $qaReviewStorage->getByRevisionId($revisionId);
 
         if (!$qaReview || $qaReview->decisionStatus !== QaReviewModel::STATUS_PENDING) {
-            $this->response->redirect('/qa');
-            $this->response->send();
-
+            $this->langRedirect('/qa');
             return;
         }
 
@@ -124,8 +118,7 @@ class QaController extends Controller
             ]
         );                                                
 
-        $this->response->redirect('/qa');                 
-        $this->response->send();
+        $this->langRedirect('/qa');                 
     }
 }
 

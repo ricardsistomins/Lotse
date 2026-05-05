@@ -2,15 +2,17 @@
 
 namespace app\controllers;
 
-use Phalcon\Mvc\Controller;
-
-class IndexController extends Controller
+class IndexController extends BaseController
 {
+    /**
+     * Redirect to the default language dashboard.
+     *
+     * @return void
+     */
     public function indexAction(): void
     {
-        $this->response->redirect('/dashboard');
-        $this->response->send();   
+        $this->langRedirect('/dashboard');
 
-        return;  
+        return;
     }
 }

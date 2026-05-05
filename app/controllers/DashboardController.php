@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use Phalcon\Mvc\Controller;
 use app\Service\DuplicateRunException;
 use app\Storage\ {
     ReportStorage,
@@ -13,7 +12,7 @@ use app\Model\{
     ResearchRunModel
 };
 
-class DashboardController extends Controller
+class DashboardController extends BaseController
 {
     public function indexAction(): void
     {
@@ -38,13 +37,10 @@ class DashboardController extends Controller
     public function triggerAction() 
     {
         $request = $this->request;
-        $response = $this->response;
         $session = $this->session;
         
         if (!$request->isPost()) {
-            $response->redirect('/dashboard');
-            $response->send();
-            
+            $this->langRedirect('/dashboard');      
             return;
         }
         
@@ -62,9 +58,7 @@ class DashboardController extends Controller
         try {                                                                                    
             $runId = $this->orchestrator->run($triggerSource, $query, $userId, $this->db);
         } catch (DuplicateRunException $e) {                                                     
-            $response->redirect('/run/' . $e->existingRunId . '?retrigger=1');
-            $response->send();
-      
+            $this->langRedirect('/run/' . $e->existingRunId . '?retrigger=1');
             return;                                                                              
         }        
                        
@@ -77,7 +71,6 @@ class DashboardController extends Controller
             $url .= '&reportId=' . $reportId;                                                        
         }  
         
-        $response->redirect($url);
-        $response->send();
+        $this->langRedirect($url);
     }
 }

@@ -1,212 +1,209 @@
-<?php
+<?php                                                                                                                                                                                    
     $request = $this->request;
 
-    $runId = $request->getQuery('runId', 'int');
+    $runId = $request->getQuery('runId', 'int');                                                                                                                                         
     $reportId = $request->getQuery('reportId', 'int');
-?>
+ ?>                                                                                                                                                                                      
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
-    <div>
-        <h2 class="text-success">Operations overview</h2>
-        <span class="text-muted fs-5"> Pipeline health, in-flight research runs, and guardrail activity across the last 24 hours. </span> 
-    </div>
-    
-    <div class="badge ps-0 mb-1">
-        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center"> 
-            <i class="bi bi-dot text-success fs-3"></i> Live
-        </span>
-    </div>
-</div>
+    <div>                                                                                                                                                                                
+        <h2 class="text-success"><?= $translate('Operations overview') ?></h2>
+        <span class="text-muted fs-5"><?= $translate('Pipeline health, in-flight research runs, and guardrail activity across the last 24 hours.') ?></span>                             
+    </div>                                                                                                                                                                               
+
+    <div class="badge ps-0 mb-1">                                                                                                                                                        
+        <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center">                                                                                               
+            <i class="bi bi-dot text-success fs-3"></i> <?= $translate('Live') ?>                                                                                                        
+        </span>                                                                                                                                                                          
+    </div>                                                                                                                                                                               
+</div>                                                                                                                                                                                   
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card rounded-4 text-center">
+        <div class="card rounded-4 text-center">                                                                                                                                         
             <div class="card-body">
-                <div class="fs-2 fw-bold"> <i class="bi bi-people"></i> <?= $activeCustomers ?></div>
-                <div class="text-muted small">Active customers</div>
-            </div>
-        </div>
-    </div>
-    
+                <div class="fs-2 fw-bold"> <i class="bi bi-people"></i> <?= $activeCustomers ?></div>                                                                                    
+                <div class="text-muted small"><?= $translate('Active customers') ?></div>                                                                                                
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-primary"> <i class="bi bi-cpu"></i> <?= $runsInProgress ?></div>
-                <div class="text-muted small">Runs in progress</div>
-            </div>
-        </div>
-    </div>
-    
+                <div class="text-muted small"><?= $translate('Runs in progress') ?></div>                                                                                                
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
-            <div class="card-body">
+            <div class="card-body">                                                                                                                                                      
                 <div class="fs-2 fw-bold text-danger"> <i class="bi bi-cpu"></i> <?= $blockedRuns ?></div>
-                <div class="text-muted small">Blocked runs</div>
+                <div class="text-muted small"><?= $translate('Blocked runs') ?></div>                                                                                                    
             </div>
-        </div>
-    </div>
-    
+        </div>                                                                                                                                                                           
+    </div>      
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
-            <div class="card-body">
+            <div class="card-body">                                                                                                                                                      
                 <div class="fs-2 fw-bold text-info"> <i class="bi bi-journals"></i> <?= $reportsAwaitingQa ?></div>
-                <div class="text-muted small">Reports awaiting QA</div>
+                <div class="text-muted small"><?= $translate('Reports awaiting QA') ?></div>                                                                                             
             </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
+    <div class="col-md-3">                                                                                                                                                               
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold text-success"> <i class="bi bi-card-checklist"></i> <?= $approvedReports ?></div>
-                <div class="text-muted small">Approved reports</div>
-            </div>
-        </div>
-    </div>
-    
+                <div class="text-muted small"><?= $translate('Approved reports') ?></div>                                                                                                
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
     <div class="col-md-3">
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold <?= $providerFailures24h > 0 ? 'text-danger' : 'text-success' ?>"> <i class="bi bi-bug"></i> <?= $providerFailures24h ?></div>
-                <div class="text-muted small">Provider failures (24h)</div>
+                <div class="text-muted small"><?= $translate('Provider failures (24h)') ?></div>                                                                                         
             </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+
+    <div class="col-md-3">                                                                                                                                                               
         <div class="card rounded-4 text-center">
             <div class="card-body">
                 <div class="fs-2 fw-bold <?= $guardrailBlocks24h > 0 ? 'text-danger' : 'text-success' ?>"> <i class="bi bi-ban"></i> <?= $guardrailBlocks24h ?></div>
-                <div class="text-muted small">Guardrail blocks (24h)</div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="text-muted small"><?= $translate('Guardrail blocks (24h)') ?></div>                                                                                          
+            </div>                                                                                                                                                                       
+        </div>                                                                                                                                                                           
+    </div>                                                                                                                                                                               
+</div>          
 
-<?php if ($this->request->getQuery('duplicate', 'int')) { ?>
-    <div class="alert alert-warning">
-        A run for this query was already started less than a minute ago (run #<?= $this->request->getQuery('runId', 'int') ?>). <b>No new run was created.</b>
-    </div>
-<?php } ?>  
+<?php if ($request->getQuery('duplicate', 'int')) { ?>
+    <div class="alert alert-warning">                                                                                                                                                    
+        <?= $translate('A run for this query was already started less than a minute ago (run #%s). No new run was created.', [$request->getQuery('runId', 'int')]) ?>
+    </div>                                                                                                                                                                               
+<?php } ?>      
 
-<?php if ($runId) { ?>                                                                       
-      <div class="alert alert-success d-flex justify-content-between align-items-center">
-          <span>Run #<?= $runId ?> completed successfully.</span>          
-          
-          <?php if ($reportId) { ?>                                                            
-              <a href="/report/<?= $reportId ?>" class="btn btn-sm btn-outline-success">View report</a>                                                                                   
-          <?php } else { ?>
-              <span class="text-muted small">No report generated (guardrail blocked)</span>    
-          <?php } ?>                                                                           
-      </div>
-<?php } ?>   
+<?php if ($runId) { ?>
+    <div class="alert alert-success d-flex justify-content-between align-items-center">
+        <span><?= $translate('Run #%s completed successfully.', [$runId]) ?></span>
 
-<div class="row">
+        <?php if ($reportId) { ?>
+            <a href="/<?= $language ?>/report/<?= $reportId ?>" class="btn btn-sm btn-outline-success"><?= $translate('View report') ?></a>                                              
+        <?php } else { ?>                                                                                                                                                                
+            <span class="text-muted small"><?= $translate('No report generated (guardrail blocked)') ?></span>
+        <?php } ?>                                                                                                                                                                       
+    </div>      
+<?php } ?>                                                                                                                                                                               
+
+<div class="row">                                                                                                                                                                        
     <div class="col-6 pe-2">
         <div class="card rounded-4 mb-4">
             <div class="card-body">
                 <div class="mb-3">
-                    <h5 class="card-title mb-0">Trigger Research Run</h5>
-                    <span class="text-muted">Queue a new research job</span>
-                </div>
-                    
-                <form method="POST" action="/dashboard/trigger">
-                    <div class="mb-3">
-                        <label for="query" class="form-label">Search query</label>
-                        <input type="text" id="query" name="query" class="form-control" placeholder="e.g. AI funding Germany 2026..." required>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button type="submit" class="btn btn-success rounded-pill" id="run-btn"><i class="bi bi-play"></i> Run</button>
-                        <span class="text-muted opacity-50 fst-italic">Avg. completion time: ~20s</span>
-                    </div>
-                        
-                    <div id="run-loading" class="mt-3 d-none">                                    
+                    <h5 class="card-title mb-0"><?= $translate('Trigger Research Run') ?></h5>                                                                                           
+                    <span class="text-muted"><?= $translate('Queue a new research job') ?></span>
+                </div>                                                                                                                                                                   
+
+                <form method="POST" action="/<?= $language ?>/dashboard/trigger">
+                    <div class="mb-3">                                                                                                                                                   
+                        <label for="query" class="form-label"><?= $translate('Search query') ?></label>
+                        <input type="text" id="query" name="query" class="form-control" placeholder="<?= $translate('e.g. AI funding Germany 2026...') ?>" required>                     
+                    </div>                                                                                                                                                               
+
+                    <div class="d-flex justify-content-between align-items-center">                                                                                                      
+                        <button type="submit" class="btn btn-success rounded-pill" id="run-btn"><i class="bi bi-play"></i> <?= $translate('Start') ?></button>                           
+                        <span class="text-muted opacity-50 fst-italic"><?= $translate('Avg. completion time: ~20s') ?></span>
+                    </div>                                                                                                                                                               
+
+                    <div id="run-loading" class="mt-3 d-none">                                                                                                                           
                         <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                        <span class="text-muted">Running pipeline, please wait…</span>            
+                        <span class="text-muted"><?= $translate('Running pipeline, please wait…') ?></span>                                                                              
                     </div>
-                </form>
+                </form>                                                                                                                                                                  
             </div>
         </div>
 
         <div class="card rounded-4 mb-4">
-            <div class="card-body">
+            <div class="card-body">                                                                                                                                                      
                 <div class="mb-3">
-                    <h5 class="card-title mb-0">Provider failures (last 24h)</h5>
-                    <span class="text-muted">Last 24h · <?= count($providerFailureRows); ?> errors across upstream providers</span>
+                    <h5 class="card-title mb-0"><?= $translate('Provider failures (last 24h)') ?></h5>                                                                                   
+                    <span class="text-muted"><?= $translate('Last 24h · %s errors across upstream providers', [count($providerFailureRows)]) ?></span>                                   
                 </div>
-                
-                <?php if (empty($providerFailureRows)) { ?>
-                    <p class="text-muted">No records in the last 24 hours.</p>
-                <?php } else { ?>
-                    <table class="table table-sm table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Run</th>
-                                <th>Provider</th>
-                                <th>Purpose</th>
-                                <th>Error</th>
-                            </tr>
-                        </thead>
 
+                <?php if (empty($providerFailureRows)) { ?>
+                    <p class="text-muted"><?= $translate('No records in the last 24 hours.') ?></p>                                                                                      
+                <?php } else { ?>
+                    <table class="table table-sm table-hover mb-0">                                                                                                                      
+                        <thead>
+                            <tr>                                                                                                                                                         
+                                <th><?= $translate('Time') ?></th>
+                                <th><?= $translate('Run') ?></th>                                                                                                                        
+                                <th><?= $translate('Provider') ?></th>
+                                <th><?= $translate('Purpose') ?></th>
+                                <th><?= $translate('Error') ?></th>                                                                                                                      
+                            </tr>
+                        </thead>                                                                                                                                                         
                         <tbody>
                             <?php foreach ($providerFailureRows as $row) { ?>
                                 <tr>
-                                    <td class="text-muted small"><?= $row->created_at ?></td>
-                                    <td><a href="/run/<?= $row->run_id ?>">#<?= $row->run_id ?></a></td>
-                                    <td><?= htmlspecialchars($row->provider_name) ?></td>
+                                    <td class="text-muted small"><?= $row->created_at ?></td>                                                                                            
+                                    <td><a href="/<?= $language ?>/run/<?= $row->run_id ?>">#<?= $row->run_id ?></a></td>
+                                    <td><?= htmlspecialchars($row->provider_name) ?></td>                                                                                                
                                     <td><?= htmlspecialchars($row->request_purpose) ?></td>
-                                    <td class="small">
-                                        <span class="text-danger"><?= htmlspecialchars($row->error_code) ?></span>
-
+                                    <td class="small">                                                                                                                                   
+                                        <span class="text-danger"><?= htmlspecialchars($row->error_code) ?></span>                                                                       
                                         <?php if ($row->error_message) { ?>
-                                            — <?= htmlspecialchars(mb_strimwidth($row->error_message, 0, 80, '…')) ?>
-                                        <?php } ?>
+                                            — <?= htmlspecialchars(mb_strimwidth($row->error_message, 0, 80, '…')) ?>                                                                    
+                                        <?php } ?>                                                                                                                                       
                                     </td>
-                                </tr>
+                                </tr>                                                                                                                                                    
                             <?php } ?>
                         </tbody>
                     </table>
                 <?php } ?>
-            </div>
+            </div>                                                                                                                                                                       
         </div>
-    </div>
-    
+    </div>                                                                                                                                                                               
+
     <div class="col-6">
         <div class="card rounded-4 mb-4">
             <div class="card-body">
                 <div class="mb-3">
-                    <h5 class="card-title mb-0">Guardrail blocks</h5>
-                    <span class="text-muted">Last 24h · <?= count($guardrailBlockRows); ?> blocked runs</span>
-                </div>
-                
-                <?php if (empty($guardrailBlockRows)) { ?>
-                    <p class="text-muted">No records in the last 24 hours.</p>
+                    <h5 class="card-title mb-0"><?= $translate('Guardrail blocks') ?></h5>
+                    <span class="text-muted"><?= $translate('Last 24h · %s blocked runs', [count($guardrailBlockRows)]) ?></span>                                                        
+                </div>                                                                                                                                                                   
+
+                <?php if (empty($guardrailBlockRows)) { ?>                                                                                                                               
+                    <p class="text-muted"><?= $translate('No records in the last 24 hours.') ?></p>
                 <?php } else { ?>
-                    <table class="table table-sm table-hover mb-0">
+                    <table class="table table-sm table-hover mb-0">                                                                                                                      
                         <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Run</th>
-                                <th>Customer</th>
-                                <th>Query</th>
-                                <th>Block reason</th>
+                            <tr>                                                                                                                                                         
+                                <th><?= $translate('Time') ?></th>
+                                <th><?= $translate('Run') ?></th>
+                                <th><?= $translate('Customer') ?></th>                                                                                                                   
+                                <th><?= $translate('Query') ?></th>
+                                <th><?= $translate('Block reason') ?></th>                                                                                                               
                             </tr>
                         </thead>
-
-                        <tbody>
+                        <tbody>                                                                                                                                                          
                             <?php foreach ($guardrailBlockRows as $row) { ?>
-                                <tr>
+                                <tr>                                                                                                                                                     
                                     <td class="text-muted small"><?= $row->created_at ?></td>
-                                    <td><a href="/run/<?= $row->id ?>">#<?= $row->id ?></a></td>
-                                    <td><?= htmlspecialchars($row->company_name ?? '—') ?></td>
+                                    <td><a href="/<?= $language ?>/run/<?= $row->id ?>">#<?= $row->id ?></a></td>
+                                    <td><?= htmlspecialchars($row->company_name ?? '—') ?></td>                                                                                          
                                     <td class="small"><?= htmlspecialchars(mb_strimwidth($row->query, 0, 60, '…')) ?></td>
-                                    <td class="small"><?= htmlspecialchars($row->block_reason) ?></td>
+                                    <td class="small"><?= htmlspecialchars($row->block_reason) ?></td>                                                                                   
                                 </tr>
-                            <?php } ?>
+                            <?php } ?>                                                                                                                                                   
                         </tbody>
-                    </table>
+                    </table>                                                                                                                                                             
                 <?php } ?>
             </div>
         </div>
@@ -214,9 +211,9 @@
 </div>
 
 <script src="/assets/js/jquery.min.js"></script>
-<script>
+<script>                                                                                                                                                                                 
     $('form').on('submit', function (){
-        $('#run-btn').prop('disabled', true);
+        $('#run-btn').prop('disabled', true);                                                                                                                                            
         $('#run-loading').removeClass('d-none');
     });
 </script>
