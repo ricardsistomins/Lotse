@@ -50,7 +50,7 @@
                             <tr>
                                 <td>
                                     <span class="font-monospace"><?= htmlspecialchars($setting['setting_key']) ?></span>
-                                    <p><small class="text-muted"><?= htmlspecialchars($setting['description'] ?? '—') ?></small></p>                                                     
+                                    <p><small class="text-muted"><?= $translate(htmlspecialchars($setting['description'] ?? '—')) ?></small></p>                                                     
                                 </td>
                                 <td>                                                                                                                                                     
                                     <small><?= $setting['updated_at'] ?? '—' ?></small>

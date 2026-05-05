@@ -17,7 +17,7 @@
                 ResearchRunModel::STATUS_BLOCKED   => 'warning',                                                                                                                         
                 ResearchRunModel::STATUS_RUNNING   => 'info',
                 default                            => 'secondary'                                                                                                                        
-            } ?>"><?= ucfirst($run->status) ?></span>
+            } ?>"><?= $translate(ucfirst($run->status)) ?></span>
         </div>                                                                                                                                                                           
 
         <table class="table table-sm mb-0">
@@ -41,7 +41,7 @@
                         ResearchRunModel::STATUS_REVIEW  => 'warning',                                                                                                                   
                         ResearchRunModel::STATUS_BLOCKED => 'danger',
                         default                          => 'secondary'                                                                                                                  
-                    } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
+                    } ?>"><?= $translate(ucfirst($run->guardrailStatus ?? 'pending')) ?></span>
                 </td>                                                                                                                                                                    
             </tr>
             <tr>                                                                                                                                                                         
@@ -140,19 +140,17 @@
                         <th><?= $translate('Purpose') ?></th>
                         <th><?= $translate('Status') ?></th>                                                                                                                             
                         <th><?= $translate('Latency') ?></th>
-                        <th>                                                                                                                                                             
+                        <th>
                             <?= $translate('Tokens') ?>
-                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"                            
-                                data-bs-title="                                                                                                                                          
-                                    <div class='text-start'>
-                                        <strong>LLM token usage</strong><br>                                                                                                             
-                                        <ul>                                                                                                                                             
-                                            <li><b>in</b> — tokens sent to the LLM (the prompt)</li>
-                                            <li><b>out</b> — tokens returned by the LLM (the response)</li>                                                                              
-                                        </ul>
-                                    </div>                                                                                                                                               
-                                    <small class='text-warning'>Very low out tokens may mean the LLM returned empty or minimal content.</small>">
-                            </i>                                                                                                                                                         
+                            
+                            <?php
+                                $tokensTooltip = "<div class='text-start'><strong>" . $translate('LLM token usage') . "</strong><br><ul>" .
+                                    "<li><b>in</b> — " . $translate('tokens sent to the LLM (the prompt)') . "</li>" .
+                                    "<li><b>out</b> — " . $translate('tokens returned by the LLM (the response)') . "</li>" .
+                                    "</ul></div><small class='text-warning'>" . $translate('Very low out tokens may mean the LLM returned empty or minimal content.') . "</small>";
+                            ?>
+                            
+                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="<?= htmlspecialchars($tokensTooltip) ?>"></i>
                         </th>
                         <th><?= $translate('Error') ?></th>                                                                                                                              
                     </tr>
@@ -170,7 +168,7 @@
                                     'fallback_succeeded' => 'warning',
                                     'failed'             => 'danger',
                                     default              => 'secondary'                                                                                                                  
-                                } ?>"><?= ucfirst($call->status) ?></span>
+                                } ?>"><?= $translate(ucfirst($call->status)) ?></span>
                             </td>                                                                                                                                                        
                             <td><?= $call->latencyMs ? number_format($call->latencyMs / 1000, 2) . 's' : '—' ?></td>
                             <td><?= $call->inputTokens ? 'in: ' . $call->inputTokens . ' / out: ' . $call->outputTokens : '—' ?></td>                                                    
@@ -225,19 +223,17 @@
                         <th><?= $translate('Title') ?></th>                                                                                                                              
                         <th><?= $translate('Type') ?></th>
                         <th>
-                            <?= $translate('Confidence') ?>                                                                                                                              
-                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                data-bs-title="                                                                                                                                          
-                                    <div class='text-start'>
-                                        <strong>LLM self-reported confidence (0.0 - 1.0)</strong><br>                                                                                    
-                                        <ul>
-                                            <li><b>0.9</b> — strong, clear evidence found</li>
-                                            <li><b>0.5</b> — uncertain, source was vague</li>                                                                                            
-                                            <li><b>0.2</b> — found something but accuracy unclear</li>
-                                        </ul>                                                                                                                                            
-                                    </div>
-                                    <small class='text-warning'>Below 0.5 triggers a QA review flag.</small>">                                                                           
-                            </i>
+                            <?= $translate('Confidence') ?>  
+                            
+                            <?php
+                                $confidenceTooltip = "<div class='text-start'><strong>" . $translate('LLM self-reported confidence (0.0 - 1.0)') . "</strong><br><ul>" .
+                                    "<li><b>0.9</b> — " . $translate('strong, clear evidence found') . "</li>" .
+                                    "<li><b>0.5</b> — " . $translate('uncertain, source was vague') . "</li>" .
+                                    "<li><b>0.2</b> — " . $translate('found something but accuracy unclear') . "</li>" .
+                                    "</ul></div><small class='text-warning'>" . $translate('Below 0.5 triggers a QA review flag.') . "</small>";
+                            ?>
+
+                            <i class="bi bi-info-circle fs-sm text-muted cursor-pointer" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="<?= htmlspecialchars($confidenceTooltip) ?>"></i>
                         </th>
                         <th><?= $translate('Status') ?></th>
                         <th><?= $translate('Deadline') ?> <span class="text-muted small"><?= $translate('apply by') ?></span></th>                                                       

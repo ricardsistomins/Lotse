@@ -82,7 +82,7 @@
 
                 <?php if ($filterStatus || $filterCountry) { ?>
                     · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             
-                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)  . '</span>' : '' ?>
+                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . $translate(ucfirst(str_replace('_', ' ', $filterStatus)))  . '</span>' : '' ?>
                     <?= $filterCountry ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterCountry) . '</span>' : '' ?>                                                      
                 <?php } ?>                                                                                                                                                               
             </span>                                                                                                                                                                      
@@ -127,7 +127,7 @@
                                     CustomerModel::STATUS_PAUSED   => 'warning',
                                     CustomerModel::STATUS_ARCHIVED => 'secondary',                                                                                                       
                                     default                        => 'secondary'
-                                } ?>"><?= ucfirst($customer->status) ?></span>                                                                                                           
+                                } ?>"><?= $translate(ucfirst($customer->status)) ?></span>                                                                                                           
                             </td>
                             <td>                                                                                                                                                         
                                 <a href="/<?= $language ?>/customer/<?= $customer->id ?>" class="btn btn-sm btn-outline-success rounded-3"><?= $translate('View') ?> <small><i class="bi bi-arrow-up-right ms-1"></i></small></a>                                                                                                                                                 

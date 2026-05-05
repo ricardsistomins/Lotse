@@ -23,7 +23,7 @@
                     </div>                                                                                                                                                               
 
                     <div class="d-flex align-items-center gap-2">                                                                                                                        
-                        <a href="/<?= $language ?>/report/<?= $report->id ?>/preview" class="btn btn-sm btn-outline-secondary" id="preview-btn" onclick="previewLoading()">              
+                        <a href="/<?= $language ?>/report/<?= $report->id ?>/preview" class="btn btn-sm btn-outline-secondary rounded-3" id="preview-btn" onclick="previewLoading()">              
                             <span class="spinner-border spinner-border-sm d-none me-1" id="preview-spinner"></span>                                                                      
                             <?= $translate('Open Preview') ?>
                         </a>                                                                                                                                                             
@@ -32,7 +32,7 @@
                             ReportModel::STATUS_APPROVED => 'success',                                                                                                                   
                             ReportModel::STATUS_REJECTED => 'danger',
                             default                      => 'secondary'                                                                                                                  
-                        } ?>"><?= ucfirst($report->status) ?></span>
+                        } ?>"><?= $translate(ucfirst(str_replace('_', ' ', $report->status))) ?></span>
                     </div>                                                                                                                                                               
                 </div>
 
@@ -45,7 +45,7 @@
                                 ResearchRunModel::STATUS_REVIEW  => 'warning',
                                 ResearchRunModel::STATUS_BLOCKED => 'danger',                                                                                                            
                                 default                          => 'secondary'
-                            } ?>"><?= ucfirst($run->guardrailStatus ?? '—') ?></span>                                                                                                    
+                            } ?>"><?= $translate(ucfirst($run->guardrailStatus ?? '—')) ?></span>                                                                                                    
                         </td>                                                                                                                                                            
                     </tr>
                     <tr>                                                                                                                                                                 
@@ -178,7 +178,7 @@
                             ResearchRunModel::STATUS_REVIEW  => 'warning',                                                                                                               
                             ResearchRunModel::STATUS_BLOCKED => 'danger',
                             default                          => 'secondary'                                                                                                              
-                        } ?>"><?= ucfirst($run->guardrailStatus ?? 'pending') ?></span>
+                        } ?>"><?= $translate(ucfirst($run->guardrailStatus ?? 'pending')) ?></span>
                     </td>                                                                                                                                                                
                 </tr>
                 <tr>                                                                                                                                                                     
@@ -266,7 +266,7 @@
                                         QaReviewModel::STATUS_APPROVED => 'success',                                                                                                     
                                         QaReviewModel::STATUS_REJECTED => 'danger',
                                         default                        => 'secondary'                                                                                                    
-                                    } ?>"><?= ucfirst($rev->decisionStatus) ?></span>
+                                    } ?>"><?= $translate(ucfirst($rev->decisionStatus)) ?></span>
                                 <?php } else { ?>                                                                                                                                        
                                     <span class="text-muted">—</span>
                                 <?php } ?>                                                                                                                                               

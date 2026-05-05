@@ -13,7 +13,7 @@
 
     <div class="badge ps-0 mb-1">                                                                                                                                                        
         <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center">                                                                                               
-            <i class="bi bi-dot text-success fs-3"></i> <?= $translate('Live · %s of %s runs', [count($runs), $runStatusCount['total_runs']]) ?>                                         
+            <i class="bi bi-dot text-success fs-3"></i> <?= $translate('%s of %s runs', [count($runs), $runStatusCount['total_runs']]) ?>                                         
         </span>                                                                                                                                                                          
     </div>                                                                                                                                                                               
 </div>                                                                                                                                                                                   
@@ -88,12 +88,12 @@
             <h5 class="card-title mb-0"><?= $translate('Runs') ?></h5>                                                                                                                   
 
             <span class="text-muted small">
-                <?= $translate('%s runs', [$total]) ?>                                                                                                                                   
+                <?= $translate('%s runs', [count($runs)]) ?>                                                                                                                                   
 
                 <?php if ($filterStatus || $filterTrigger) { ?>                                                                                                                          
                     · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             
-                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterStatus)  . '</span>' : '' ?>
-                    <?= $filterTrigger ? '<span class="badge text-bg-dark">' . htmlspecialchars($filterTrigger) . '</span>' : '' ?>                                                      
+                    <?= $filterStatus  ? '<span class="badge text-bg-dark">' . $translate(ucfirst(str_replace('_', ' ', $filterStatus)))  . '</span>' : '' ?>
+                    <?= $filterTrigger ? '<span class="badge text-bg-dark">' . $translate(ucfirst(str_replace('_', ' ', $filterTrigger))) . '</span>' : '' ?>                                                      
                 <?php } ?>                                                                                                                                                               
             </span>                                                                                                                                                                      
         </div>                                                                                                                                                                           
