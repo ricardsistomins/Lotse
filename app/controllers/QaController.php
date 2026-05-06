@@ -5,14 +5,20 @@ namespace app\controllers;
 use app\Storage\ {
     ReportStorage,
     ReportRevisionStorage,
-    QaReviewStorage    
+    QaReviewStorage,
+    ResearchRunStorage
 };
 use app\Model\{
     QaReviewModel,
     ReportModel,
-    UserModel
+    UserModel,
+    ResearchRunModel,
 };
-use app\Service\AuditService;   
+
+use app\Service\{
+    AuditService,
+    DuplicateRunException
+ };  
 
 class QaController extends BaseController
 {
@@ -65,6 +71,52 @@ class QaController extends BaseController
         $this->handleDecision($revisionId, QaReviewModel::STATUS_REJECTED);                       
     }                                                                         
 
+    /**
+     * Retrigger run from qa page
+     */
+    public function retriggerAction(): void
+    {
+        $session = $this->session;
+        
+        $id = $this->dispatcher->getParam('id');
+        $userId = $session->get('userId');
+        $role = $session->get('userRole');
+        
+        if (!in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA, UserModel::ROLE_DEV])) {
+            $this->langRedirect('/qa');
+            return;
+        }
+        
+        $report = (new ReportStorage())->getById($id);
+        
+        if (!$report) {
+            $this->langRedirect('/qa');
+            return;
+        }
+        
+        $run = (new ResearchRunStorage())->getById($report->runId);
+        
+        if (!$run || empty($run->query)) {
+            $this->langRedirect('/qa');
+            return;
+        }
+        
+        $triggerSource = match($role) {
+            UserModel::ROLE_ADMIN => ResearchRunModel::TRIGGER_DASHBOARD_ADMIN,
+            UserModel::ROLE_DEV   => ResearchRunModel::TRIGGER_DASHBOARD_DEV,
+            default               => ResearchRunModel::TRIGGER_DASHBOARD_QA
+        };
+        
+        try {
+            $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db);
+        } catch (DuplicateRunException $ex) {
+            $this->langRedirect('/qa?duplicate=1');
+            return;
+        }
+        
+        $this->langRedirect('/qa?retrigger=1&run_id=' . $newRunId);
+    }
+    
     /**                                                                       
      * Process an approve or reject decision for a revision.
      *                                                                        

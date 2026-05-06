@@ -59,3 +59,12 @@ body {
     background-color: var(--bs-primary) !important;
     color: #fff !important;
 }
+
+[data-bs-theme="dark"] #report-preview-text {
+    background-color: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+[data-bs-theme="dark"] .gray-background {
+    background-color: var(--bs-secondary) !important;
+}

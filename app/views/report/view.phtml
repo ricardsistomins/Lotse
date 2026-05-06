@@ -212,7 +212,7 @@
     <div class="card-body">                                                                                                                                                              
         <h6 class="card-title mb-3"><?= $translate('Preview') ?></h6>
 
-        <div class="border rounded p-3 bg-light">
+        <div class="border rounded p-3 bg-light" id="report-preview-text">
             <?= $renderedHtml ?>                                                                                                                                                         
         </div>
     </div>                                                                                                                                                                               
@@ -314,8 +314,9 @@
 
 <script>
     function previewLoading() {
-        $("#preview-btn").addClass("disabled");
-        document.getElementById('preview-spinner').classList.remove('d-none');                                                                                                           
-        setTimeout(() => document.getElementById('preview-spinner').classList.add('d-none'), 10000);
+        $('#preview-btn').addClass('disabled');                                                
+        $('#preview-spinner').removeClass('d-none');
+        
+        setTimeout(() => $('#preview-spinner').addClass('d-none'), 15000);
     }                                                                                                                                                                                    
 </script>       
