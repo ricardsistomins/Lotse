@@ -124,6 +124,10 @@ $router->add('/{lang:[a-z]{2}}/qa/{revisionId:[0-9]+}/reject', [
     'action'     => 'reject'                                                  
 ]);             
 
+$router->add('/{lang:[a-z]{2}}/qa/{id:[0-9]+}/retrigger', [                              
+    'controller' => 'qa',                                                                  
+    'action'     => 'retrigger'                                                      
+]); 
 
 /******************************
  * Settings
