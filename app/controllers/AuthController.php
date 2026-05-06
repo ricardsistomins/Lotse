@@ -68,6 +68,7 @@ class AuthController extends BaseController
         $session->set('userId', $user->userId);
         $session->set('userRole', $user->role);
         $session->set('userName', $user->name);
+        $session->set('isDark', (bool)$user->isDark);
         
         (new AuditService($this->db))->log(
             actorType:   'user',
@@ -105,5 +106,29 @@ class AuthController extends BaseController
         $this->response->send();
         
         return;
+    }
+    
+    /**
+     * Toggle site theme background color
+     * 
+     * @return mixed
+     */
+    public function toggleThemeAction(): mixed
+    {
+        $this->view->disable();
+        $session = $this->session;
+        $response = $this->response;
+        
+        $userId = (int)$session->get('userId');
+        $isDark = !(bool)$session->get('isDark');
+        
+        (new UserStorage())->updateTheme($userId, $isDark);
+        $session->set('isDark', $isDark);
+         
+        return $response->setJsonContent([
+            'theme' => $isDark ? 'dark' : 'light'
+        ]);
+        
+        $response->send();
     }
 }

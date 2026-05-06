@@ -45,3 +45,17 @@ body {
 .page-link:focus {
     box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
 }
+
+/* Dark mode theme */
+[data-bs-theme="dark"] .sidebar-navigation {
+    background-color: #004d4d !important;                                                                                
+}  
+
+[data-bs-theme="dark"] body {
+    background-color: #212529;                                                                                           
+}
+
+[data-bs-theme="dark"] .setting-btn-label {
+    background-color: var(--bs-primary) !important;
+    color: #fff !important;
+}

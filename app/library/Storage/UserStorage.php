@@ -38,7 +38,8 @@ class UserStorage extends AbstractStorage
         'is_active'     => 'isActive',
         'last_login_at' => 'lastLoginAt',
         'created_at'    => 'createdAt',
-        'updated_at'    => 'updatedAt'
+        'updated_at'    => 'updatedAt',
+        'is_dark'       => 'isDark'
     );
  
     /**
@@ -79,6 +80,28 @@ class UserStorage extends AbstractStorage
         
         $sth = $pdo->prepare($sql);
         $sth->execute([
+            ':userId' => $userId
+        ]);
+    }
+    
+    /**
+     * Update site background theme color
+     * 
+     * @param int $userId
+     * @param bool $isDark
+     * @return void
+     */
+    public function updateTheme(int $userId, bool $isDark): void
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'UPDATE users
+                SET is_dark = :isDark
+                WHERE user_id = :userId';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':isDark' => (int)$isDark,
             ':userId' => $userId
         ]);
     }

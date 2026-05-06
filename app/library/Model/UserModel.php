@@ -14,6 +14,7 @@ class UserModel {
     public ?string $lastLoginAt = null;
     public string  $createdAt;
     public string  $updatedAt;
+    public int     $isDark;
     
     // User roles
     const ROLE_ADMIN = 'admin';

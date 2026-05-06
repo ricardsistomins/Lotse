@@ -29,6 +29,10 @@ $router->add('/auth/logout', [
     'action'     => 'logout'
 ]);
 
+$router->add('/auth/theme/toggle', [
+    'controller' => 'auth',
+    'action'     => 'toggleTheme',                                                                                       
+]);
 
 /******************************
  * Dashboard
