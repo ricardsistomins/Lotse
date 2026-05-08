@@ -34,6 +34,7 @@ class ResearchSourceStorage extends AbstractStorage
         'source_domain'    => 'sourceDomain',
         'source_title'     => 'sourceTitle',
         'source_type'      => 'sourceType',
+        'source_text'      => 'sourceText',
         'provider_name'    => 'providerName',
         'http_status'      => 'httpStatus',
         'content_hash'     => 'contentHash',
@@ -59,17 +60,17 @@ class ResearchSourceStorage extends AbstractStorage
      * @param bool $isOfficial
      * @return int
      */
-    public function save(int $runId, string $sourceUrl, string $sourceDomain, string $sourceType, string $retrievedAt, ?string $sourceTitle = null, ?string $providerName = null, ?string $capturedExcerpt = null, bool $isOfficial = false): int 
+    public function save(int $runId, string $sourceUrl, string $sourceDomain, string $sourceType, string $retrievedAt, ?string $sourceTitle = null, ?string $providerName = null, ?string $capturedExcerpt = null, bool $isOfficial = false, ?string $sourceText = null): int 
     {
         $pdo = $this->getPdo();
 
         $sql = 'INSERT INTO research_sources (
                     run_id, source_url, source_domain, source_title, source_type,
-                    provider_name, captured_excerpt, is_official, retrieved_at
+                    source_text, provider_name, captured_excerpt, is_official, retrieved_at
                 )
                 VALUES (
                     :runId, :sourceUrl, :sourceDomain, :sourceTitle, :sourceType,
-                    :providerName, :capturedExcerpt, :isOfficial, :retrievedAt
+                    :sourceText, :providerName, :capturedExcerpt, :isOfficial, :retrievedAt
                 )';
 
         $sth = $pdo->prepare($sql);
@@ -80,6 +81,7 @@ class ResearchSourceStorage extends AbstractStorage
             ':sourceDomain'    => $sourceDomain,
             ':sourceTitle'     => $sourceTitle,
             ':sourceType'      => $sourceType,
+            ':sourceText'      => $sourceText,
             ':providerName'    => $providerName,
             ':capturedExcerpt' => $capturedExcerpt,
             ':isOfficial'      => (int) $isOfficial,

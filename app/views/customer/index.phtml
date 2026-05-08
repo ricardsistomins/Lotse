@@ -78,7 +78,7 @@
             <h5 class="card-title mb-0"><?= $translate('Customers') ?></h5>
 
             <span class="text-muted small">
-                <?= $translate('%s customers', [$total]) ?>                                                                                                                              
+                <?= $translate('%s customers', [count($customers)]) ?>                                                                                                                              
 
                 <?php if ($filterStatus || $filterCountry) { ?>
                     · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             

@@ -99,9 +99,9 @@
 
             <table class="table table-sm mb-0">
                 <thead>
-                    <tr>                                                                                                                                                                 
-                        <th><?= $translate('Title') ?></th>
-                        <th><?= $translate('Type') ?></th>                                                                                                                               
+                    <tr>      
+                        <th></th>
+                        <th><?= $translate('Title') ?></th>                                                                                                                             
                         <th><?= $translate('Deadline') ?></th>
                         <th><?= $translate('Confidence') ?></th>
                         <?php if ($canAct) { ?>                                                                                                                                          
@@ -110,19 +110,22 @@
                     </tr>
                 </thead>                                                                                                                                                                 
 
-                <tbody>                                                                                                                                                                  
+                <tbody>      
+                    <?php $nr = 0; ?>
+                    
                     <?php foreach ($findings as $finding) { ?>
+                        <?php $nr++; ?>
                         <?php $edited = $finding->updatedAt > $finding->createdAt; ?>
                         <tr>                                                                                                                                                             
                             <?php if ($canAct) { ?>
                                 <form method="POST" action="/<?= $language ?>/finding/<?= $finding->id ?>/edit" class="d-contents">                                                      
                                     <input type="hidden" name="report_id" value="<?= $report->id ?>">                                                                                    
+                                    <td width="25">
+                                        <small><?= $nr ?>.</small>
+                                    </td>
                                     <td>
                                         <input type="text" name="title" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->title) ?>">                           
-                                    </td>                                                                                                                                                
-                                    <td>
-                                        <input type="text" name="finding_type" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->findingType) ?>">              
-                                    </td>                                                                                                                                                
+                                    </td>
                                     <td class="pe-3">
                                         <input type="date" name="deadline" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->deadline ?? '') ?>">               
                                     </td>
@@ -316,7 +319,5 @@
     function previewLoading() {
         $('#preview-btn').addClass('disabled');                                                
         $('#preview-spinner').removeClass('d-none');
-        
-        setTimeout(() => $('#preview-spinner').addClass('d-none'), 15000);
     }                                                                                                                                                                                    
 </script>       
