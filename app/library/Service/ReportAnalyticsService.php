@@ -112,12 +112,11 @@ class ReportAnalyticsService
 
             "report_de" must contain the full REPORT TEXT translated to German.
             findings_analysis must have one entry per finding in the same order.
-            "executive_summary" must contain 3-5 bullet points summarizing the most relevant findings.
+            "executive_summary" must contain exactly one bullet point per finding, one sentence summarizing its key value for the applicant.
             "recommendations" must state which 1-2 programs to prioritize and clearly explain why.       
             "risk_summary" must consolidate all risk flags across programs into one paragraph — use empty string if no risks exist.                                                                   
             "next_steps" per finding must describe concrete actions: when to apply, what to prepare, who to contact.  
             Return only valid JSON. No explanation text.   
-        
         
             FINDINGS:                                                                     
             {$findingsJson}

@@ -27,7 +27,7 @@
 
 <div class="badge ps-0 mb-1">
     <span class="border rounded-pill pe-3 small text-muted d-flex align-items-center">
-        <i class="bi bi-dot text-success fs-3"></i> <?= count($analytics['executive_summary'][$language] ?? $analytics['executive_summary']['en'] ?? []) ?> <?= $translate('matching programs') ?>
+        <i class="bi bi-dot text-success fs-3"></i> <?= count($structuredPayload) ?> <?= $translate('matching programs') ?>
     </span>
 </div>
 
@@ -48,10 +48,14 @@
             <div class="card-body">
                 <ol class="mb-0 list-group list-group-numbered">
                     <?php $x = 0; ?>
-                    
-                    <?php foreach ($analytics['executive_summary'][$language] ?? [] as $point) { ?>
+                
+                    <?php foreach($analytics['findings_analysis'] ?? [] as $finding) { ?>
                         <?php $x++; ?>
-                        <li class="mb-1 list-group-item"><a href="#program-nr-<?= $x ?>" class="link-fixed"><?= htmlspecialchars($point) ?></a></li>
+                        <?php $desc = $finding[$language]['description'] ?? $finding['en']['description'] ?? null; ?>
+                        
+                        <?php if ($desc) { ?>
+                            <li class="mb-1 list-group-item"><a href="#program-nr-<?= $x ?>" class="link-fixed"><?= htmlspecialchars($desc) ?></a></li>
+                        <?php } ?>
                     <?php } ?>
                 </ol>
             </div>
@@ -102,7 +106,7 @@
 
 <div class="pt-2 mb-2">
     <h5><?= $translate('All matching programs') ?></h5>
-    <span class="text-muted"><?= $translate('Side-by-side overview across %s programs', [count($analytics['executive_summary'][$language] ?? $analytics['executive_summary']['en'] ?? [])]) ?></span>
+    <span class="text-muted"><?= $translate('Side-by-side overview across %s programs', [count($structuredPayload)]) ?></span>
 </div>
 
 <div class="row">
@@ -206,7 +210,7 @@
                             <small class="text-muted d-block mb-1 fw-bold"><?= $translate('Source') ?></small>
                             <?php foreach ($n['source_urls'] as $url) { ?>
                                 <div>
-                                    <a href="<?= htmlspecialchars($url) ?>" target="_blank" class="small badge text-bg-secondary text-light opacity-50 link-fixed">
+                                    <a href="<?= htmlspecialchars($url) ?>" target="_blank" class="small badge text-bg-secondary text-light opacity-50 link-fixed text-wrap">
                                         <?= htmlspecialchars($url) ?>
                                         <i class="bi bi-box-arrow-up-right ms-1"></i>
                                     </a>

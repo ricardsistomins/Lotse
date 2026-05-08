@@ -96,7 +96,7 @@
             <h5 class="card-title mb-0"><?= $translate('Pending reviews') ?></h5>
 
             <span class="text-muted small">
-                <?= $translate('%s items', [$total]) ?>
+                <?= $translate('%s items', [count($queue)]) ?>
 
                 <?php if ($filterStatus || $filterGuardrail) { ?>
                     · <?= $translate('filtered by') ?>&nbsp;                                                                                                                             

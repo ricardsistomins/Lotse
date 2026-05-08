@@ -27,7 +27,9 @@ body {
     text-decoration: underline !important;
 }
 
+
 /* For pagination styling at /runs, /reports, /qa and /customers pages */
+
 .pagination .page-link {
     color: #198754;
 }
@@ -46,7 +48,9 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
 }
 
+
 /* Dark mode theme */
+
 [data-bs-theme="dark"] .sidebar-navigation {
     background-color: #004d4d !important;                                                                                
 }  
@@ -67,4 +71,8 @@ body {
 
 [data-bs-theme="dark"] .gray-background {
     background-color: var(--bs-secondary) !important;
+}
+
+[data-bs-theme="dark"] .text-bg-dark {
+    background-color: rgba(var(--bs-secondary-rgb), var(--bs-bg-opacity, 1)) !important;
 }
