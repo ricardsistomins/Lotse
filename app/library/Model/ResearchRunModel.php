@@ -42,7 +42,8 @@ class ResearchRunModel
     const STATUS_BLOCKED = 'blocked';
     
     // run_type possible meanings
-    const RUN_TYPE_SOURCE_SYNC = 'source_sync';
+    const RUN_TYPE_SOURCE_SYNC      = 'source_sync';
+    const RUN_TYPE_REPORT_RETRIGGER = 'report_retrigger';
     
     // trigger source values
     const TRIGGER_CRON            = 'cron';

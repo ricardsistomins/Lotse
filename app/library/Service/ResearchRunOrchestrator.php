@@ -48,12 +48,14 @@ class ResearchRunOrchestrator
     /**
      * Run the full research pipeline.
      *
-     * @param string        $triggerSource  Who triggered the run: 'dashboard_admin', 'cron', etc.
-     * @param string        $query          Search query to use for source collection
-     * @param int|null      $userId         ID of the user who triggered, null for cron
-     * @param Mysql|null    $db             DB connection, required for audit logging
+     * @param string     $triggerSource Who triggered the run: 'dashboard_admin', 'cron', etc.
+     * @param string     $query         Search query to use for source collection
+     * @param int|null   $userId        ID of the user who triggered, null for cron
+     * @param Mysql|null $db            DB connection, required for audit logging
+     * @param int|null   $existingRunId Resume an existing run row instead of creating a new one
+     * @param string     $runType       run_type value written to research_runs (default: source_sync)
      */
-    public function run(string $triggerSource, string $query, ?int $userId = null, ?Mysql $db = null, ?int $existingRunId = null): int
+    public function run(string $triggerSource, string $query, ?int $userId = null, ?Mysql $db = null, ?int $existingRunId = null, string $runType = ResearchRunModel::RUN_TYPE_SOURCE_SYNC): int
     {
         $settings = new SystemSettingsStorage();
         $profiles       = $settings->get('provider_profiles');
@@ -76,7 +78,7 @@ class ResearchRunOrchestrator
             }
 
             $runId = $runStorage->create(
-                runType:              ResearchRunModel::RUN_TYPE_SOURCE_SYNC,
+                runType:              $runType,
                 triggerSource:        $triggerSource,
                 idempotencyKey:       $idempotencyKey,
                 canonicalScopeKey:    $canonicalScopeKey,

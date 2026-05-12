@@ -29,4 +29,16 @@ class BaseController extends Controller
         $response->redirect('/' . $this->getLang() . $path);
         $response->send();
     }
+    
+    /**             
+     * Store a one-time flash message in the session.                                                             
+     *              
+     * @param string $type     Bootstrap alert type: success, warning, danger, info
+     * @param string $message                                                                                     
+     * @return void
+     */                                                                                                           
+    protected function setFlash(string $type, string $message): void
+    {                                                                                                             
+        $this->session->set('_flash', ['type' => $type, 'message' => $message]);
+    }
 }

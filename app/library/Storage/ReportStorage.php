@@ -277,7 +277,7 @@ class ReportStorage extends AbstractStorage
                 FROM reports
                 JOIN research_runs rr ON rr.id = reports.run_id
                 WHERE ' . implode(' AND ', $where) . '
-                ORDER BY reports.id ASC
+                ORDER BY reports.id DESC
                 LIMIT ' . self::PER_PAGE . ' OFFSET ' . (($page - 1) * self::PER_PAGE);
 
         $sth = $pdo->prepare($sql);
