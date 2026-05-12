@@ -2,7 +2,7 @@
     use app\Model\{                                                                                                                                                                      
         ReportModel,                                                                                                                                                                     
         ResearchRunModel,                                                                                                                                                                
-        QaReviewModel                                                                                                                                                                    
+        QaReviewModel
     };          
 ?>
 
@@ -11,6 +11,13 @@
         display: contents;                                                                                                                                                               
     }           
 </style>
+
+<?php if (!empty($flash)) { ?>
+    <div class="alert alert-<?= htmlspecialchars($flash['type']) ?> alert-dismissible mb-4" role="alert">     
+        <?= htmlspecialchars($flash['message']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>                             
+    </div>      
+<?php } ?> 
 
 <div class="row g-4">                                                                                                                                                                    
     <div class="col-md-8">
@@ -221,26 +228,46 @@
     </div>                                                                                                                                                                               
 </div>          
 
-<?php if ($canAct && !in_array($report->status, [ReportModel::STATUS_APPROVED, ReportModel::STATUS_REJECTED]) && ($run->guardrailStatus ?? '') !== ResearchRunModel::STATUS_BLOCKED) { ?>
-    <div class="card mb-4">                                                                                                                                                              
+<?php
+    $showActions   = $canAct && !in_array($report->status, [ReportModel::STATUS_APPROVED, ReportModel::STATUS_REJECTED]) && ($run->guardrailStatus ?? '') !== ResearchRunModel::STATUS_BLOCKED;
+    $showRetrigger = !in_array($run->status, [ResearchRunModel::STATUS_QUEUED, ResearchRunModel::STATUS_RUNNING]);
+?>
+
+<?php if ($showActions || $showRetrigger) { ?>
+    <div class="card mb-4">
         <div class="card-body">
-            <h6 class="card-title mb-3"><?= $translate('Actions') ?></h6>                                                                                                                
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <?php if ($showActions) { ?>
+                        <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/status" class="d-inline">
+                            <input type="hidden" name="status" value="approved">
+                            <button type="submit" class="btn btn-success me-2"><?= $translate('Approve') ?></button>
+                        </form>
 
-            <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/status" class="d-inline">
-                <input type="hidden" name="status" value="approved">                                                                                                                     
-                <button type="submit" class="btn btn-success me-2"><?= $translate('Approve') ?></button>
-            </form>                                                                                                                                                                      
+                        <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/status" class="d-inline">
+                            <input type="hidden" name="status" value="rejected">
+                            <button type="submit" class="btn btn-danger"><?= $translate('Reject') ?></button>
+                        </form>
+                    <?php } ?>
+                </div>
 
-            <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/status" class="d-inline">                                                                            
-                <input type="hidden" name="status" value="rejected">
-                <button type="submit" class="btn btn-danger"><?= $translate('Reject') ?></button>                                                                                        
-            </form>
-        </div>                                                                                                                                                                           
-    </div>      
+                <div>
+                    <?php if ($showRetrigger) { ?>                   
+                        <form method="POST" action="/<?= $language ?>/report/<?= $report->id ?>/retrigger">
+                            <button type="submit" class="btn btn-outline-warning retrigger-btn d-inline-flex align-items-center">
+                                <span class="spinner-border spinner-border-sm d-none me-1 retrigger-spinner"></span>
+                                <i class="bi bi-arrow-repeat"></i> <?= $translate('Re-trigger research') ?>
+                            </button>
+                        </form>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+    </div>
 <?php } ?>
 
 <div class="card">
-    <div class="card-body">                                                                                                                                                              
+    <div class="card-body">
         <h6 class="card-title mb-3"><?= $translate('Revision history') ?></h6>
 
         <?php if (empty($revisions)) { ?>
@@ -319,5 +346,12 @@
     function previewLoading() {
         $('#preview-btn').addClass('disabled');                                                
         $('#preview-spinner').removeClass('d-none');
-    }                                                                                                                                                                                    
+    }                
+    
+    $('form:has(.retrigger-btn)').on('submit', function() {
+        var btn = $(this).find('.retrigger-btn');
+        
+        btn.prop('disabled', true);
+        btn.find('.retrigger-spinner').removeClass('d-none');
+    });
 </script>       

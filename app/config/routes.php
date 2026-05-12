@@ -81,6 +81,11 @@ $router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/preview', [
     'action'     => 'preview'                                                 
 ]);             
 
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/retrigger', [                                              
+    'controller' => 'report',
+    'action'     => 'retrigger'
+]);    
+
 $router->add('/{lang:[a-z]{2}}/finding/{id:[0-9]+}/edit', [                   
     'controller' => 'report',
     'action'     => 'editFinding'                                             

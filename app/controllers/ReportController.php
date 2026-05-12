@@ -19,6 +19,7 @@ use app\Model\{
 };
 use app\Service\{
     AuditService,
+    DuplicateRunException,
     ReportAnalyticsService
 };
 
@@ -92,8 +93,11 @@ class ReportController extends BaseController
         $revisions    = $revisionStorage->getAllByReportId($id);
 
         $role   = $session->get('userRole', 'string');
-        $canAct = in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA]);
-
+        $canAct = in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_QA]);                                                                         
+        
+        $flash = $this->session->get('_flash');                                                                       
+        $this->session->remove('_flash');
+        
         $view->setVars([
             'report'            => $report,
             'revisions'         => $revisions,
@@ -107,7 +111,8 @@ class ReportController extends BaseController
             'customers'         => (new CustomerStorage())->getAll(),
             'customerId'        => $report->customerId,
             'auditLog'          => (new AuditLogStorage())->getAllByEntity('report', $id),
-            'findings'          => $findings
+            'findings'          => $findings,
+            'flash'             => $flash
         ]);
     }
 
@@ -206,6 +211,72 @@ class ReportController extends BaseController
             ]
         );
 
+        $this->langRedirect('/report/' . $id);
+    }
+    
+    /**
+     * Re-trigger research for this report. Admin, dev, and QA only.
+     * 
+     * @return void
+     */
+    public function retriggerAction(): void 
+    {     
+        $id = (int)$this->dispatcher->getParam('id');
+        $session = $this->session;
+        
+        if (!$this->request->isPost()) {
+            $this->langRedirect('/report/' . $id);
+            return;
+        }
+        
+        $role = $session->get('userRole', 'string');
+        $userId = $session->get('userId', 'int');
+        
+        if (!in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV, UserModel::ROLE_QA])) {
+            $this->setFlash('danger', 'You do not have permission to re-trigger reports.');
+            $this->langRedirect('/report/' . $id);
+            return;
+        }
+            
+        $report = (new ReportStorage())->getById($id);
+        
+        if (!$report) {
+            $this->langRedirect('/dashboard');
+            return;
+        }
+        
+        $run = (new ResearchRunStorage())->getById($report->runId);
+    
+        if (!$run || empty($run->query)) {
+            $this->setFlash('danger', 'Cannot re-trigger: original run data is missing.');
+            $this->langRedirect('/report/' . $id);
+            return;
+        }
+     
+        $triggerSource = match($role) {
+            UserModel::ROLE_ADMIN => ResearchRunModel::TRIGGER_DASHBOARD_ADMIN,                                  
+            UserModel::ROLE_DEV   => ResearchRunModel::TRIGGER_DASHBOARD_DEV,                                    
+            default               => ResearchRunModel::TRIGGER_DASHBOARD_QA
+        };
+      
+        try {
+            $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db, null, ResearchRunModel::RUN_TYPE_REPORT_RETRIGGER);
+        } catch (DuplicateRunException $ex) {
+            $this->setFlash('warning', 'A research run for this query is already in progress.');
+            $this->langRedirect('/report/' . $id);
+            return;
+        }
+        
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: $userId,                                                                                
+            action:      'report.retriggered',
+            entityType:  'report',                                                                               
+            entityId:    $id,
+            metadata:    ['new_run_id' => $newRunId]
+        );  
+        
+        $this->setFlash('success', 'Re-trigger started. A new research run has been queued.'); 
         $this->langRedirect('/report/' . $id);
     }
     
