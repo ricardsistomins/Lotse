@@ -41,6 +41,7 @@ class ResearchSourceStorage extends AbstractStorage
         'captured_excerpt' => 'capturedExcerpt',
         'raw_payload'      => 'rawPayload',
         'is_official'      => 'isOfficial',
+        'read_failed'      => 'readFailed',
         'retrieved_at'     => 'retrievedAt',
         'created_at'       => 'createdAt',
         'updated_at'       => 'updatedAt',
@@ -58,19 +59,23 @@ class ResearchSourceStorage extends AbstractStorage
      * @param string|null $providerName
      * @param string|null $capturedExcerpt
      * @param bool $isOfficial
+     * @param string|null $sourceText
+     * @param bool $readFailed
      * @return int
      */
-    public function save(int $runId, string $sourceUrl, string $sourceDomain, string $sourceType, string $retrievedAt, ?string $sourceTitle = null, ?string $providerName = null, ?string $capturedExcerpt = null, bool $isOfficial = false, ?string $sourceText = null): int 
+    public function save(int $runId, string $sourceUrl, string $sourceDomain, string $sourceType, string $retrievedAt, ?string $sourceTitle = null, ?string $providerName = null, ?string $capturedExcerpt = null, bool $isOfficial = false, ?string $sourceText = null, bool $readFailed = false): int 
     {
         $pdo = $this->getPdo();
 
         $sql = 'INSERT INTO research_sources (
                     run_id, source_url, source_domain, source_title, source_type,
-                    source_text, provider_name, captured_excerpt, is_official, retrieved_at
+                    source_text, provider_name, captured_excerpt, is_official,
+                    read_failed, retrieved_at
                 )
                 VALUES (
                     :runId, :sourceUrl, :sourceDomain, :sourceTitle, :sourceType,
-                    :sourceText, :providerName, :capturedExcerpt, :isOfficial, :retrievedAt
+                    :sourceText, :providerName, :capturedExcerpt, :isOfficial, 
+                    :readFailed, :retrievedAt
                 )';
 
         $sth = $pdo->prepare($sql);
@@ -84,7 +89,8 @@ class ResearchSourceStorage extends AbstractStorage
             ':sourceText'      => $sourceText,
             ':providerName'    => $providerName,
             ':capturedExcerpt' => $capturedExcerpt,
-            ':isOfficial'      => (int) $isOfficial,
+            ':isOfficial'      => (int)$isOfficial,
+            ':readFailed'      => (int)$readFailed,
             ':retrievedAt'     => $retrievedAt,
         ]);
 
@@ -134,5 +140,30 @@ class ResearchSourceStorage extends AbstractStorage
         ]);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ResearchSourceModel::class);
-    }                 
+    }   
+    
+    /**
+     * Set is_official flag on a source by run + url
+     * 
+     * @param int $runId
+     * @param string $sourceUrl
+     * @param bool $isOfficial
+     * @return void
+     */
+    public function setIsOfficial(int $runId, string $sourceUrl, bool $isOfficial): void
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'UPDATE research_sources
+                SET is_official = :isOfficial
+                WHERE run_id = :runId
+                AND source_url = :sourceUrl';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':isOfficial' => (int)$isOfficial,
+            ':runId'      => $runId,
+            ':sourceUrl'  => $sourceUrl
+        ]);
+    }
 }

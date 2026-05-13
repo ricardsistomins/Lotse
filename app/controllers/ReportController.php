@@ -344,7 +344,7 @@ class ReportController extends BaseController
         
         $reportId = $request->getPost('report_id', 'int');
         $title = $request->getPost('title', 'string');
-        $findingType = $request->getPost('finding_type', 'string');
+        $findingType = $request->getPost('finding_type', 'string') ?: $finding->findingType;
         $deadline = $request->getPost('deadline', 'string') ?: null;
         $userId = $session->get('userId', 'int');
         

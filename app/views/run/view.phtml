@@ -194,6 +194,7 @@
                         <th><?= $translate('Title') ?></th>
                         <th><?= $translate('Domain') ?></th>                                                                                                                             
                         <th><?= $translate('Type') ?></th>
+                        <th><?= $translate('Reliability') ?></th>
                     </tr>                                                                                                                                                                
                 </thead>
                 <tbody>
@@ -201,7 +202,16 @@
                         <tr>
                             <td><a href="<?= htmlspecialchars($source->sourceUrl) ?>" target="_blank"><?= htmlspecialchars($source->sourceTitle ?? $source->sourceUrl) ?></a></td>       
                             <td><?= htmlspecialchars($source->sourceDomain) ?></td>
-                            <td><?= htmlspecialchars($source->sourceType) ?></td>                                                                                                        
+                            <td><?= htmlspecialchars($source->sourceType) ?></td>
+                            <td>                                    
+                                <?php if ($source->readFailed) { ?>
+                                    <span class="badge bg-danger"><?= $translate('Could not be read') ?></span>     
+                                <?php } elseif (!$source->isOfficial) { ?>
+                                    <span class="badge bg-warning text-dark"><?= $translate('Secondary source') ?></span>                                                                               
+                                <?php } else { ?>
+                                    <span class="badge bg-success"><?= $translate('Official') ?></span>             
+                                <?php } ?>                          
+                            </td>    
                         </tr>
                     <?php } ?>                                                                                                                                                           
                 </tbody>
@@ -247,11 +257,13 @@
                             <td><?= htmlspecialchars($finding->findingType) ?></td>                                                                                                      
                             <td><?= number_format((float)$finding->confidenceScore, 2) ?></td>
                             <td><?= htmlspecialchars($finding->status) ?></td>                                                                                                           
-                            <td><?php                                                                                                                                                    
+                            <td class="d-flex align-items-center"><?php                                                                                                                                                    
                                 if ($finding->deadline) {
                                     $daysLeft = (strtotime($finding->deadline) - time()) / 86400;                                                                                        
-                                    $color = $daysLeft <= 30 ? 'text-danger' : '';
+                                    $color = $daysLeft <= 30 ? 'badge text-bg-danger' : '';
+            
                                     echo '<span class="' . $color . '">' . $finding->deadline . '</span>';                                                                               
+                                    echo '<span class="ms-2 badge text-bg-warning">' . (floor($daysLeft) > 0 ? floor($daysLeft) : 0)  . ' days left' . '</span>';                                                                               
                                 } else {
                                     echo '—';                                                                                                                                            
                                 }
@@ -264,8 +276,6 @@
     </div>
 </div>
 
-<script src="/assets/js/jquery.min.js"></script>
-<script src="/assets/js/bootstrap.bundle.min.js"></script>
 <script>                                                                                                                                                                                 
     $(function () {
         $("[data-bs-toggle='tooltip']").each(function () {                                                                                                                               

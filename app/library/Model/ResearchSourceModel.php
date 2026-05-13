@@ -16,6 +16,7 @@ class ResearchSourceModel
     public ?string $capturedExcerpt = null;
     public ?string $rawPayload = null;
     public bool    $isOfficial;
+    public bool    $readFailed = false;
     public string  $retrievedAt;
     public string  $createdAt;
     public string  $updatedAt;
