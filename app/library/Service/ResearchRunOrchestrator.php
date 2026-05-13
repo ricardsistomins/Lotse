@@ -129,7 +129,8 @@ class ResearchRunOrchestrator
                     sourceTitle:     $result->title,
                     providerName:    self::PROVIDER_NAME_SERPAPI,
                     capturedExcerpt: $result->snippet,
-                    sourceText: $sourceTexts[$result->url] ?? null
+                    sourceText:      $sourceTexts[$result->url] ?? null,
+                    readFailed:      isset($deadUrls[$result->url])
                 );
             }   
             
@@ -204,7 +205,7 @@ class ResearchRunOrchestrator
                     
                     $result[] = $finding;
                 }
-                
+                               
                 $findings = $result;
                 
                 foreach ($findings as $finding) {
@@ -220,6 +221,15 @@ class ResearchRunOrchestrator
                         confidenceScore:   (float)($finding['confidence_score'] ?? 0.0),
                         riskFlags:         $finding['risk_flags'] ?? null
                     );
+                }
+                
+                foreach ($findings as $finding) {
+                    $urls = $finding['source_urls'] ?? [];
+                    $isOfficials = $finding['source_is_official'] ?? [];
+                    
+                    foreach ($urls as $i => $url) {
+                        $sourceStorage->setIsOfficial($runId, $url, (bool)($isOfficials[$i] ?? false));
+                    }
                 }
                 
                 if (!empty($findings) && isset($llmAdapter)) {
@@ -379,6 +389,7 @@ For each active funding program found, return a JSON array with this exact struc
     "eligibility": "Who can apply",
     "description": "Short summary",
     "source_urls": [],
+    "source_is_official": [],
     "confidence_score": 0.0,
     "risk_flags": []
   }
@@ -386,7 +397,10 @@ For each active funding program found, return a JSON array with this exact struc
 
 deadline must be in YYYY-MM-DD format, or null if unknown.
 "application_status" must be one of: "open", "closed", "unknown".
-Set to "closed" if the source indicates the program has ended or is no longer accepting applications.                      
+Set to "closed" if the source indicates the program has ended or is no longer accepting applications.               
+"source_is_official" must be a parallel array to "source_urls" 
+- set true for official pages (goverment, foundation, university, or direct programme pages), 
+- false for secondary sources (blogs, new articles, aggregators).
 Return only valid JSON. No explanation text.
 Sources:
 {$sourcesText}
