@@ -10,6 +10,7 @@ class ResearchFindingModel
     public string  $findingType;
     public string  $title;
     public ?string $normalizedPayload = null;
+    public ?string $coFunders = null;
     public ?string $deadline = null; 
     public int     $sourceCount;
     public bool    $officialSourcePresent;

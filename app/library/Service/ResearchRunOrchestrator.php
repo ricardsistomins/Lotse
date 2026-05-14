@@ -208,6 +208,21 @@ class ResearchRunOrchestrator
                                
                 $findings = $result;
                 
+                foreach ($findings as &$finding) {
+                    $isOfficials = $finding['source_is_official'] ?? [];
+                    $hasOfficial = in_array(true, array_map('boolval', $isOfficials), true);
+                    
+                    if (!$hasOfficial) {
+                        $finding['risk_flags'][] = 'no_official_source';
+                    }
+                    
+                    if (!empty($finding['co_funders'])) {
+                        $finding['risk_flags'][] = 'co_funders_present';
+                    }
+                }
+                
+                unset($finding);
+                
                 foreach ($findings as $finding) {
                     $findingStorage->save(
                         runId:             $runId,
@@ -216,6 +231,7 @@ class ResearchRunOrchestrator
                         title:             $finding['title'] ?? '',
                         normalizedPayload: $finding,
                         dedupeHash:        md5(($finding['title'] ?? '') . $runId),
+                        coFunders:         $finding['co_funders'] ?? null,
                         deadline:          $finding['deadline'] ?? null,
                         sourceCount:       count($finding['source_urls'] ?? []),
                         confidenceScore:   (float)($finding['confidence_score'] ?? 0.0),
@@ -229,9 +245,9 @@ class ResearchRunOrchestrator
                     
                     foreach ($urls as $i => $url) {
                         $sourceStorage->setIsOfficial($runId, $url, (bool)($isOfficials[$i] ?? false));
-                    }
+                    }             
                 }
-                
+    
                 if (!empty($findings) && isset($llmAdapter)) {
                     $validationPrompt = $this->buildValidationPrompt($findings, $sourcesText); 
                     
@@ -382,6 +398,7 @@ For each active funding program found, return a JSON array with this exact struc
     "finding_type": "program",
     "title": "Program name",
     "funding_body": "Organization providing the funding",
+    "co_funders": [],
     "funding_amount_min": null,
     "funding_amount_max": null,
     "deadline": null,
@@ -401,6 +418,7 @@ Set to "closed" if the source indicates the program has ended or is no longer ac
 "source_is_official" must be a parallel array to "source_urls" 
 - set true for official pages (goverment, foundation, university, or direct programme pages), 
 - false for secondary sources (blogs, new articles, aggregators).
+"co_funders" must be an array of all additional organisations co-funding this programme alongside the main funding_body. Leave empty if there is only one funder.
 Return only valid JSON. No explanation text.
 Sources:
 {$sourcesText}

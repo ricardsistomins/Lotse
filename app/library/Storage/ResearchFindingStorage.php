@@ -34,6 +34,7 @@ class ResearchFindingStorage extends AbstractStorage
         'finding_type'            => 'findingType',
         'title'                   => 'title',
         'normalized_payload'      => 'normalizedPayload',
+        'co_funders'              => 'coFunders',
         'deadline'                => 'deadline',  
         'source_count'            => 'sourceCount',
         'official_source_present' => 'officialSourcePresent',
@@ -53,6 +54,7 @@ class ResearchFindingStorage extends AbstractStorage
      * @param string $findingType
      * @param string $title
      * @param array $normalizedPayload
+     * @param array|null $coFunders
      * @param string $dedupeHash
      * @param string|null $deadline
      * @param int $sourceCount
@@ -61,18 +63,18 @@ class ResearchFindingStorage extends AbstractStorage
      * @param array|null $riskFlags
      * @return int
      */
-    public function save(int $runId, string $findingKey, string $findingType, string $title, array $normalizedPayload, string $dedupeHash, ?string $deadline = null, int $sourceCount = 0, bool $officialSourcePresent = false, float $confidenceScore = 0.0, ?array $riskFlags = null): int 
+    public function save(int $runId, string $findingKey, string $findingType, string $title, array $normalizedPayload, string $dedupeHash, ?array $coFunders = null, ?string $deadline = null, int $sourceCount = 0, bool $officialSourcePresent = false, float $confidenceScore = 0.0, ?array $riskFlags = null): int 
     {
         $pdo = $this->getPdo();
 
         $sql = 'INSERT INTO research_findings (
                     run_id, finding_key, finding_type, title, normalized_payload,
-                    deadline, source_count, official_source_present, 
+                    co_funders, deadline, source_count, official_source_present, 
                     confidence_score, risk_flags, dedupe_hash, status
                 )
                 VALUES (
                     :runId, :findingKey, :findingType, :title, :normalizedPayload,
-                    :deadline, :sourceCount, :officialSourcePresent, 
+                    :coFunders, :deadline, :sourceCount, :officialSourcePresent, 
                     :confidenceScore, :riskFlags, :dedupeHash, :status
                 )';
 
@@ -84,6 +86,7 @@ class ResearchFindingStorage extends AbstractStorage
             ':findingType'            => $findingType,
             ':title'                  => $title,
             ':normalizedPayload'      => json_encode($normalizedPayload),
+            ':coFunders'              => $coFunders !== null ? json_encode($coFunders) : null,
             ':deadline'               => $deadline,
             ':sourceCount'            => $sourceCount,
             ':officialSourcePresent'  => (int)$officialSourcePresent,
