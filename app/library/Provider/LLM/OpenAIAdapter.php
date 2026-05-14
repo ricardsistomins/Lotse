@@ -29,7 +29,12 @@ class OpenAIAdapter implements LLMProviderAdapter
      * @param ProviderCallStorage $callStorage
      */
     public function __construct(private readonly string $apiKey, private readonly string $model, private readonly ProviderCallStorage $callStorage) {
-        $this->client = OpenAI::client($this->apiKey);
+        $this->client = OpenAI::factory()
+            ->withApiKey($this->apiKey)
+            ->withHttpClient(new \GuzzleHttp\Client([
+                'timeout' => 120, 
+                'connect_timeout' => 10
+            ]))->make();
     }
 
     /**

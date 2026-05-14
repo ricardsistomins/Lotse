@@ -131,40 +131,62 @@
                                         <small><?= $nr ?>.</small>
                                     </td>
                                     <td>
-                                        <input type="text" name="title" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->title) ?>">                           
+                                        <div class="d-flex align-items-center">
+                                            <input type="text" name="title" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->title) ?>">
+                                            <?php $coFunders = !empty($finding->coFunders) ? json_decode($finding->coFunders, true) : []; ?>
+                                            
+                                            <?php foreach ($coFunders as $coFunder) { ?>
+                                                <a href="https://www.google.com/search?q=<?= urlencode($coFunder . ' official website') ?>" target="_blank" class="badge bg-secondary text-decoration-none link-light ms-2 me-1">
+                                                    <?= htmlspecialchars($coFunder) ?>
+                                                </a>
+                                            <?php } ?>
+                                        </div>
                                     </td>
-                                    <td class="pe-3 d-flex align-items-center">
-                                        <input type="date" name="deadline" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->deadline ?? '') ?>">
-                                        
-                                        <?php if (empty($finding->deadline)) { ?>
-                                            <small class="badge text-bg-warning d-block ms-2"><?= $translate('Deadline not found — check manually') ?></small>                       
-                                        <?php } elseif ((int)((strtotime($finding->deadline) - time()) / 86400) <= 30) { ?> 
-                                            <?php $daysLeft = (int)((strtotime($finding->deadline) - time()) / 86400); ?>
-                                            <small class="badge text-bg-danger d-block ms-2"><?= $translate('Attention') ?> — <?= $daysLeft ?> <?= $translate('days left') ?></small>
-                                        <?php } ?>                                                                          
-                                    </td>  
-                                    <td><?= number_format($finding->confidenceScore, 2) ?></td>                                                                                          
-                                    <td class="d-flex">
-                                        <button type="submit" class="btn btn-sm btn-outline-success"><?= $translate('Save') ?></button>                                                  
-
-                                        <?php if ($edited) { ?>                                                                                                                          
-                                            <div class="text-end ms-auto">                                                                                                               
-                                                <span class="badge bg-warning text-dark ms-3"><?= $translate('Edited') ?></span>
-                                            </div>                                                                                                                                       
-                                        <?php } ?>
+                                    <td class="pe-3">
+                                        <div class="d-flex align-items-center">
+                                            <input type="date" name="deadline" class="form-control form-control-sm" value="<?= htmlspecialchars($finding->deadline ?? '') ?>">
+                                            
+                                            <?php if (empty($finding->deadline)) { ?>
+                                                <small class="badge text-bg-warning ms-2"><?= $translate('Deadline not found - check manually') ?></small>
+                                            <?php } elseif ((int)((strtotime($finding->deadline) - time()) / 86400) <= 30) { ?>
+                                                <?php $daysLeft = (int)((strtotime($finding->deadline) - time()) / 86400); ?>
+                                                <small class="badge text-bg-danger ms-2"><?= $translate('Attention') ?> — <?= ($daysLeft > 0 ? $daysLeft : 0) ?> <?= $translate('days left') ?></small>
+                                            <?php } ?>
+                                        </div>
+                                    </td>
+                                    <td><?= number_format($finding->confidenceScore, 2) ?></td>
+                                    <td>
+                                        <div class="d-flex">
+                                            <button type="submit" class="btn btn-sm btn-outline-success"><?= $translate('Save') ?></button>
+                                            
+                                            <?php if ($edited) { ?>
+                                                <div class="text-end ms-auto">
+                                                    <span class="badge bg-warning text-dark ms-3"><?= $translate('Edited') ?></span>
+                                                </div>
+                                            <?php } ?>
+                                        </div>
                                     </td>                                                                                                                                                
                                 </form>
                             <?php } else { ?>
-                                <td>                                                                                                                                                     
+                                <td>
                                     <?= htmlspecialchars($finding->title) ?>
-                                    <?php if ($edited) { ?>                                                                                                                              
+                                    
+                                    <?php if ($edited) { ?>
                                         <span class="badge bg-warning text-dark ms-1"><?= $translate('Edited') ?></span>
-                                    <?php } ?>                                                                                                                                           
+                                    <?php } ?>
+  
+                                    <?php $coFunders = !empty($finding->coFunders) ? json_decode($finding->coFunders, true) : []; ?>
+                                        
+                                    <?php foreach ($coFunders as $coFunder) { ?>
+                                        <a href="https://www.google.com/search?q=<?= urlencode($coFunder . ' official website') ?>" target="_blank" class="badge bg-secondary text-decoration-none link-light ms-1">
+                                            <?= htmlspecialchars($coFunder) ?>
+                                        </a>
+                                    <?php } ?>
                                 </td>
                                 <td><?= htmlspecialchars($finding->findingType) ?></td>                                                                                                  
                                 <td>            
                                     <?php if (empty($finding->deadline)) { ?>                                           
-                                        <span class="badge bg-warning text-dark"><?= $translate('Deadline not found — check manually') ?></span>                        
+                                        <span class="badge bg-warning text-dark"><?= $translate('Deadline not found - check manually') ?></span>                        
                                     <?php } else { ?>                   
                                         <?php $daysLeft = (int)((strtotime($finding->deadline) - time()) / 86400); ?>
                                         <?= htmlspecialchars($finding->deadline) ?>                                  
@@ -197,6 +219,7 @@
                 <td class="text-muted"><?= $translate('Findings extracted') ?></td>
                 <td><?= $findingCount ?></td>                                                                                                                                            
             </tr>
+            
             <?php if ($run) { ?>                                                                                                                                                         
                 <tr>
                     <td class="text-muted"><?= $translate('Guardrail') ?></td>
@@ -302,6 +325,7 @@
                         <th><?= $translate('Decided at') ?></th>
                     </tr>                                                                                                                                                                
                 </thead>
+                
                 <tbody>
                     <?php foreach ($revisions as $rev) { ?>
                         <tr>                                                                                                                                                             
@@ -344,7 +368,8 @@
                         <th><?= $translate('Details') ?></th>
                         <th><?= $translate('Date') ?></th>                                                                                                                               
                     </tr>
-                </thead>                                                                                                                                                                 
+                </thead> 
+                
                 <tbody>
                     <?php foreach ($auditLog as $entry) { ?>
                         <tr>
