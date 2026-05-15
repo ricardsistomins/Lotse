@@ -20,11 +20,13 @@ class SerpApiAdapter implements SearchProviderAdapter
     
     /**
      * Constructor
-     *
+     * 
      * @param string $apiKey
      * @param ProviderCallStorage $callStorage
+     * @param int|null $runId
+     * @param array $pricing
      */
-    public function __construct(private readonly string $apiKey, private readonly ProviderCallStorage $callStorage, private readonly ?int $runId = null) {}
+    public function __construct(private readonly string $apiKey, private readonly ProviderCallStorage $callStorage, private readonly ?int $runId = null, private readonly array $pricing = []) {}
 
     /**
      * Search query via SerpApi and return results.
@@ -65,7 +67,8 @@ class SerpApiAdapter implements SearchProviderAdapter
                 requestPurpose: 'search',
                 status:         'succeeded',
                 latencyMs:      $latencyMs,
-                runId:          $this->runId
+                runId:          $this->runId,
+                estimatedCostUsd: $this->calculateCost()
             );
 
             return $results;
@@ -84,5 +87,21 @@ class SerpApiAdapter implements SearchProviderAdapter
 
             return [];
         }
+    }
+    
+    /**
+     * Calculate estimated cost per search from monthly plan pricing.
+     * 
+     * @return float|null
+     */
+    private function calculateCost(): ?float
+    {
+        $rates = $this->pricing['serpapi'] ?? null;
+        
+        if (!$rates || empty($rates['monthly_price']) || empty($rates['monthly_searches'])) {
+            return null;
+        }
+        
+        return $rates['monthly_price'] / $rates['monthly_searches'];
     }
 }

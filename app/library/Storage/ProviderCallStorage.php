@@ -60,36 +60,38 @@ class ProviderCallStorage extends AbstractStorage
      * @param string|null $errorCode
      * @param string|null $errorMessage
      * @param bool $fallbackUsed
+     * @param float|null $estimatedCostUsd
      * @return void
      */
-    public function log(string $providerKind, string $providerName, string $requestPurpose, string $status, int $latencyMs, ?int $runId = null, ?int $inputTokens = null, ?int $outputTokens = null, ?string $errorCode = null, ?string $errorMessage = null, bool $fallbackUsed = false): void 
+    public function log(string $providerKind, string $providerName, string $requestPurpose, string $status, int $latencyMs, ?int $runId = null, ?int $inputTokens = null, ?int $outputTokens = null, ?string $errorCode = null, ?string $errorMessage = null, bool $fallbackUsed = false, ?float $estimatedCostUsd = null): void 
     {
         $pdo = $this->getPdo();
       
         $sql = 'INSERT INTO provider_calls
                     (run_id, provider_kind, provider_name, request_purpose, status,
                     latency_ms, input_tokens, output_tokens, error_code, error_message,
-                    fallback_used, finished_at)
+                    fallback_used, estimated_cost_usd, finished_at)
                 VALUES
                     (:runId, :providerKind, :providerName, :requestPurpose, :status,
                     :latencyMs, :inputTokens, :outputTokens, :errorCode, :errorMessage,
-                    :fallbackUsed, :finishedAt)';
+                    :fallbackUsed, :estimatedCostUsd, :finishedAt)';
 
         $sth = $pdo->prepare($sql);
 
         $sth->execute([
-            ':runId'          => $runId,
-            ':providerKind'   => $providerKind,
-            ':providerName'   => $providerName,
-            ':requestPurpose' => $requestPurpose,
-            ':status'         => $status,
-            ':latencyMs'      => $latencyMs,
-            ':inputTokens'    => $inputTokens,
-            ':outputTokens'   => $outputTokens,
-            ':errorCode'      => $errorCode,
-            ':errorMessage'   => $errorMessage,
-            ':fallbackUsed'   => (int)$fallbackUsed ?? 0,
-            ':finishedAt'     => date('Y-m-d H:i:s'),
+            ':runId'            => $runId,
+            ':providerKind'     => $providerKind,
+            ':providerName'     => $providerName,
+            ':requestPurpose'   => $requestPurpose,
+            ':status'           => $status,
+            ':latencyMs'        => $latencyMs,
+            ':inputTokens'      => $inputTokens,
+            ':outputTokens'     => $outputTokens,
+            ':errorCode'        => $errorCode,
+            ':errorMessage'     => $errorMessage,
+            ':fallbackUsed'     => (int)$fallbackUsed ?? 0,
+            ':estimatedCostUsd' => $estimatedCostUsd,
+            ':finishedAt'       => date('Y-m-d H:i:s'),
         ]);    
     }
     
@@ -114,5 +116,27 @@ class ProviderCallStorage extends AbstractStorage
         ]);
 
         return $sth->fetchAll($pdo::FETCH_CLASS, ProviderCallModel::class);
-    }              
+    }      
+    
+    /**
+     * Fetch most recent provider calls across all runs.
+     * 
+     * @param int $limit
+     * @return array
+     */
+    public function getRecentCallsCostData(int $limit = 25): array 
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM provider_calls
+                WHERE estimated_cost_usd IS NOT NULL
+                ORDER BY id DESC
+                LIMIT ' . $limit;
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+        
+        return $sth->fetchAll($pdo::FETCH_CLASS, ProviderCallModel::class);
+    }
 }

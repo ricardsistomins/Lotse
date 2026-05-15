@@ -27,8 +27,9 @@ class OpenAIAdapter implements LLMProviderAdapter
      * @param string $apiKey
      * @param string $model
      * @param ProviderCallStorage $callStorage
+     * @param array $pricing
      */
-    public function __construct(private readonly string $apiKey, private readonly string $model, private readonly ProviderCallStorage $callStorage) {
+    public function __construct(private readonly string $apiKey, private readonly string $model, private readonly ProviderCallStorage $callStorage, private readonly array $pricing = []) {
         $this->client = OpenAI::factory()
             ->withApiKey($this->apiKey)
             ->withHttpClient(new \GuzzleHttp\Client([
@@ -70,7 +71,8 @@ class OpenAIAdapter implements LLMProviderAdapter
                 inputTokens:    $response->usage->promptTokens,
                 outputTokens:   $response->usage->completionTokens,
                 runId:          $context['run_id'] ?? null,
-                fallbackUsed:   $context['fallback_used'] ?? false
+                fallbackUsed:   $context['fallback_used'] ?? false,
+                estimatedCostUsd: $this->calculateCost($response->model, $response->usage->promptTokens, $response->usage->completionTokens)    
             );
             
             return new LLMResponse(
@@ -94,7 +96,7 @@ class OpenAIAdapter implements LLMProviderAdapter
                 outputTokens:   0,
                 runId:          $context['run_id'] ?? null,
                 errorMessage:   $e->getMessage(),   
-                fallbackUsed:   $context['fallback_used'] ?? false    
+                fallbackUsed:   $context['fallback_used'] ?? false
             );
             
             return new LLMResponse(
@@ -107,6 +109,34 @@ class OpenAIAdapter implements LLMProviderAdapter
                 errorMessage: $e->getMessage()
             );
         }
+    }
+    
+    /**
+     * Calculate estimated cost of LLM call
+     * 
+     * @param string $model
+     * @param int $inputTokens
+     * @param int $outputTokens
+     * @return float|null
+     */
+    private function calculateCost(string $model, int $inputTokens, int $outputTokens): ?float
+    {
+        $rates = $this->pricing[$model] ?? null;
+        
+        if (!$rates) {
+            foreach ($this->pricing as $key => $r) {
+                if (str_starts_with($model, $key)) {
+                    $rates = $r;
+                    break;
+                }
+            }
+        }
+        
+        if (!$rates) {
+            return null;
+        }
+        
+        return ($inputTokens / 1_000_000 * $rates['input']) + ($outputTokens / 1_000_000 * $rates['output']);
     }
 }
 

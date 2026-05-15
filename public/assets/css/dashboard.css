@@ -59,11 +59,6 @@ body {
     background-color: #212529;                                                                                           
 }
 
-[data-bs-theme="dark"] .setting-btn-label {
-    background-color: var(--bs-primary) !important;
-    color: #fff !important;
-}
-
 [data-bs-theme="dark"] #report-preview-text {
     background-color: var(--bs-body-bg) !important;
     color: var(--bs-body-color) !important;
