@@ -2,7 +2,10 @@
 
 namespace app\controllers;                                                    
                   
-use app\Storage\SystemSettingsStorage;                                        
+use app\Storage\{
+    SystemSettingsStorage,
+    ProviderCallStorage
+};                                        
 use app\Service\AuditService;
 use app\Model\UserModel;
 
@@ -15,7 +18,10 @@ class SettingsController extends BaseController
      */
     public function indexAction(): void
     {
-        $this->view->setVar('settings', (new SystemSettingsStorage())->getAll());                                          
+        $this->view->setVars([
+            'settings' => (new SystemSettingsStorage())->getAll(),
+            'costData' => (new ProviderCallStorage())->getRecentCallsCostData()
+        ]);                                          
     }
 
     /**         

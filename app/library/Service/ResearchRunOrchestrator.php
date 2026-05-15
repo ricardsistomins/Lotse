@@ -101,7 +101,7 @@ class ResearchRunOrchestrator
             }
 
             $callStorage   = new ProviderCallStorage();
-            $searchAdapter = new SerpApiAdapter($firstProfile['search']['api_key'], $callStorage, $runId);
+            $searchAdapter = new SerpApiAdapter($firstProfile['search']['api_key'], $callStorage, $runId, $settings->get('search_pricing') ?? []);
             $searchResults = $searchAdapter->search($query);
 
             $sourceTexts = [];
@@ -164,6 +164,7 @@ class ResearchRunOrchestrator
                     $profileData['llm']['api_key'],
                     $profileData['llm']['model'],
                     $callStorage,
+                    $settings->get('llm_pricing') ?? []
                 );
 
                 $llmResponse = $llmAdapter->complete($prompt, [
