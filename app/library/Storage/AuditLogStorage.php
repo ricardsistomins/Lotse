@@ -66,4 +66,43 @@ class AuditLogStorage extends AbstractStorage
         
         return $sth->fetchAll($pdo::FETCH_CLASS, AuditLogModel::class);
     }
+    
+    /**
+     * Get all from audit_log table
+     * 
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     */
+    public function getAll(int $limit = 25, int $offset = 0): array
+    {
+        $pdo = $this->getPdo();
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM audit_log
+                ORDER BY id DESC
+                LIMIT ' . $limit . ' OFFSET ' . $offset;
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+      
+        return $sth->fetchAll($pdo::FETCH_CLASS, AuditLogModel::class);
+    }
+    
+    /**
+     * Count all rows in audit_log
+     * 
+     * @return int
+     */
+    public function countAll(): int
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT COUNT(*)
+                FROM audit_log';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+        
+        return (int)$sth->fetchColumn();
+    }
 }

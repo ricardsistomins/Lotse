@@ -142,6 +142,11 @@ $router->add('/{lang:[a-z]{2}}/settings', [
     'action'     => 'index'                                                   
 ]);
 
+$router->add('/{lang:[a-z]{2}}/settings/audit-log', [                
+    'controller' => 'settings',
+    'action'     => 'auditLog'
+]);
+
 $router->add('/{lang:[a-z]{2}}/settings/{key:[a-z_]+}', [
     'controller' => 'settings',
     'action'     => 'view'
@@ -150,7 +155,7 @@ $router->add('/{lang:[a-z]{2}}/settings/{key:[a-z_]+}', [
 $router->add('/{lang:[a-z]{2}}/settings/{key:[a-z_]+}/save', [                
     'controller' => 'settings',
     'action'     => 'save'
-]);                                                                           
+]);                                                                                                                                                     
 
 
 /******************************
