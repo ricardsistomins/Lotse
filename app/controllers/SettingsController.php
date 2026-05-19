@@ -4,7 +4,8 @@ namespace app\controllers;
                   
 use app\Storage\{
     SystemSettingsStorage,
-    ProviderCallStorage
+    ProviderCallStorage,
+    AuditLogStorage
 };                                        
 use app\Service\AuditService;
 use app\Model\UserModel;
@@ -159,5 +160,26 @@ class SettingsController extends BaseController
         }
 
         return $submitted;
+    }
+    
+    /**
+     * Audit log output
+     * 
+     * @return void
+     */
+    public function auditLogAction(): void
+    {
+        $page = max(1, (int)($this->request->getQuery('page') ?? 1));
+        $limit = 25;
+        $offset = ($page - 1) * $limit;
+      
+        $auditLogStorage = new AuditLogStorage();
+        
+        $this->view->setVars([
+            'auditLog' => $auditLogStorage->getAll($limit, $offset),
+            'total'    => $auditLogStorage->countAll(),
+            'page'     => $page,
+            'limit'    => $limit
+        ]);
     }
 }               

@@ -1,0 +1,110 @@
+<?php $section = 'audit-log'; ?>
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="text-success"><?= $translate('Settings') ?></h2>
+        <span class="text-muted fs-5"><?= $translate('Configure runtime knobs, provider profiles and guardrails powering the Lotse research engine.') ?></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-2">
+        <div class="card rounded-4">
+            <div class="card-body">
+                <div class="card rounded-4 border-0 shadow-sm">
+                    <div class="d-grid gap-2">
+                        <a href="/<?= $language ?>/settings" class="text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between bg-light text-dark rounded-4 px-3 py-3 fw-semibold">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-sliders2"></i>
+                                    <span><?= $translate('System') ?></span>
+                                </div>
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </a>
+                        
+                        <a href="/<?= $language ?>/settings?section=pricing" class="text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between bg-light text-dark rounded-4 px-3 py-3 fw-semibold">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-currency-dollar"></i>
+                                    <span><?= $translate('Costs') ?></span>
+                                </div>
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </a>
+                        
+                        <a href="/<?= $language ?>/settings/audit-log" class="text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between bg-primary text-white rounded-4 px-3 py-3 fw-semibold">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-clock-history"></i>
+                                    <span><?= $translate('Audit log') ?></span>
+                                </div>
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-10">
+        <div class="card rounded-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h5 class="card-title mb-0"><?= $translate('Audit log') ?></h5>
+                    <span class="text-muted"><?= $translate('All recorded system and user actions, newest first.') ?></span>
+                </div>
+
+                <?php if (empty($auditLog)) { ?>
+                    <p class="text-muted"><?= $translate('No audit entries found.') ?></p>
+                <?php } else { ?>
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th><?= $translate('Action') ?></th>
+                                <th><?= $translate('Entity') ?></th>
+                                <th><?= $translate('Actor') ?></th>
+                                <th><?= $translate('Details') ?></th>
+                                <th><?= $translate('Date') ?></th>
+                            </tr>
+                        </thead>
+                        
+                        <tbody>
+                            <?php foreach ($auditLog as $entry) { ?>
+                                <tr>
+                                    <td><code><?= htmlspecialchars($entry->action) ?></code></td>
+                                    <td><small class="text-muted"><?= htmlspecialchars($entry->entityType) ?> #<?= (int)$entry->entityId ?></small></td>
+                                    <td><?= $entry->actorUserId ? $translate('User #%s', [$entry->actorUserId]) : $translate('System') ?></td>
+                                    <td class="text-muted small"><?= htmlspecialchars($entry->metadataJson ?? '') ?></td>
+                                    <td><small><code><?= $entry->createdAt ?></code></small></td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+
+                    <?php $totalPages = (int)ceil($total / $limit); ?>
+                        <?php if ($totalPages > 1) { ?>
+                            <nav class="mt-4">
+                                <ul class="pagination justify-content-center mb-0">
+                                    <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $page - 1 ?>">‹</a>
+                                    </li>
+
+                                    <?php for ($p = 1; $p <= $totalPages; $p++) { ?>
+                                        <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                                            <a class="page-link" href="?page=<?= $p ?>"><?= $p ?></a>
+                                        </li>
+                                    <?php } ?>
+
+                                    <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $page + 1 ?>">›</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        <?php } ?>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</div>
