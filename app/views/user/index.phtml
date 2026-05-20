@@ -9,9 +9,16 @@
     </a>
 </div>
 
+<?php if (!empty($flash)) { ?>
+    <div class="alert alert-<?= htmlspecialchars($flash['type']); ?> alert-dismissible mb-4 rounded-3" role="alert">
+        <?= htmlspecialchars($flash['message']); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php } ?>
+
 <div class="card rounded-4">
     <div class="card-body">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover table-striped mb-0">
             <thead>
                 <tr>
                     <th><?= $translate('Name') ?></th>

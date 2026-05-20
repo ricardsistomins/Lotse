@@ -35,7 +35,14 @@ class UserController extends BaseController
             return;
         }
         
-        $this->view->setVar('users', (new UserStorage())->getAll());
+        $session = $this->session;
+        $flash = $session->get('_flash');
+        $session->remove('_flash');
+        
+        $this->view->setVars([
+            'users' => (new UserStorage())->getAll(),
+            'flash' => $flash
+        ]);
     }
     
     /**
@@ -60,8 +67,21 @@ class UserController extends BaseController
         $email = trim($request->getPost('email', 'email'));
         $role = $request->getPost('role', 'string');
         $password = $request->getPost('password', 'string');
+        $passwordConfirm = $request->getPost('password_confirm', 'string');
         
         $validRoles = [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV, UserModel::ROLE_QA];
+  
+        if ($password !== $passwordConfirm) {
+            $this->view->setVars([
+                'error'   => 'Passwords do not match',
+                'name'    => $name,
+                'surname' => $surname,
+                'email'   => $email,
+                'role'    => $role
+            ]);
+            
+            return;
+        }
         
         if (!$name || !$surname || !$email || !in_array($role, $validRoles) || strlen($password) < 8) {
             $this->view->setVars([
@@ -90,6 +110,7 @@ class UserController extends BaseController
             ]
         );
         
+        $this->setFlash('success', 'User created successfully.');
         $this->langRedirect('/users');
     }
     
@@ -184,6 +205,7 @@ class UserController extends BaseController
             ]
         );
 
+        $this->setFlash('success', 'User updated successfully.');
         $this->langRedirect('/users');
     }
 }
