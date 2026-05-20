@@ -1,0 +1,68 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="text-success"><?= $translate('Edit user') ?></h2>
+        <span class="text-muted fs-5"><?= htmlspecialchars($user->name . ' ' . $user->surname . ', ' . $user->role) ?></span>
+    </div>
+    
+    <a href="/<?= $language ?>/users" class="btn btn-outline-secondary rounded-3">
+        <i class="bi bi-arrow-left me-1"></i> <?= $translate('Back') ?>
+    </a>
+</div>
+
+<div class="card rounded-4">
+    <div class="card-body">
+        <?php if (!empty($error)) { ?>
+            <div class="alert alert-danger rounded-3"><?= $translate($error) ?></div>
+        <?php } ?>
+
+        <form method="POST" action="/<?= $language ?>/user/<?= $user->userId ?>/save">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label"><?= $translate('Name') ?></label>
+                    <input type="text" name="name" class="form-control rounded-3"
+                           value="<?= htmlspecialchars($user->name) ?>" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label"><?= $translate('Surname') ?></label>
+                    <input type="text" name="surname" class="form-control rounded-3"
+                           value="<?= htmlspecialchars($user->surname) ?>" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label"><?= $translate('Email') ?></label>
+                    <input type="email" name="email" class="form-control rounded-3"
+                           value="<?= htmlspecialchars($user->email) ?>" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label"><?= $translate('Role') ?></label>
+                    <select name="role" class="form-select rounded-3" required>
+                        <option value="admin" <?= $user->role === 'admin' ? 'selected' : '' ?>><?= $translate('Admin') ?></option>
+                        <option value="dev"   <?= $user->role === 'dev'   ? 'selected' : '' ?>><?= $translate('Developer') ?></option>
+                        <option value="qa"    <?= $user->role === 'qa'    ? 'selected' : '' ?>><?= $translate('QA') ?></option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label"><?= $translate('New password') ?> <small class="text-muted"><?= $translate('(leave blank to keep current)') ?></small></label>
+                    <input type="password" name="password" class="form-control rounded-3" minlength="8">
+                </div>
+                
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="isActive"
+                               <?= $user->isActive ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="isActive"><?= $translate('Active') ?></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success rounded-3">
+                    <i class="bi bi-check-lg me-1"></i> <?= $translate('Save') ?>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

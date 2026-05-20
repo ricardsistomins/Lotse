@@ -105,4 +105,115 @@ class UserStorage extends AbstractStorage
             ':userId' => $userId
         ]);
     }
+    
+    /**
+     * Get all users, newest first
+     * 
+     * @return array
+     */
+    public function getAll(): array
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM users
+                ORDER BY created_at DESC';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute();
+        
+        return $sth->fetchAll($pdo::FETCH_CLASS, UserModel::class);
+    }
+    
+    /**
+     * Get user by id
+     * 
+     * @param int $userId
+     * @return UserModel|false
+     */
+    public function getById(int $userId): UserModel|false
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT ' . $this->mapFields() . '
+                FROM users
+                WHERE user_id = :userId';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':userId' => $userId
+        ]);
+        
+        return $sth->fetchObject(UserModel::class) ?: false;
+    }
+    
+    /**
+     * Insert a new user and return last inserted id
+     * 
+     * @param string $name
+     * @param string $surname
+     * @param string $email
+     * @param string $role
+     * @param string $passwordHash
+     * @return int
+     */
+    public function create(string $name, string $surname, string $email, string $role, string $passwordHash): int
+    {
+        $pdo = $this->getPdo();
+        $username = strtolower($name . '.' . $surname);
+        
+        $sql = 'INSERT INTO users
+                    (name, surname, username, email, password_hash, role, is_active)
+                VALUES 
+                    (:name, :surname, :username, :email, :passwordHash, :role, 1)';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':name'         => $name,
+            ':surname'      => $surname,
+            ':username'     => $username,
+            ':email'        => $email,
+            ':passwordHash' => $passwordHash,
+            ':role'         => $role
+        ]);
+        
+        return (int)$pdo->lastInsertId();
+    }
+    
+    /**
+     * Update user data
+     * 
+     * @param int $userId
+     * @param string $name
+     * @param string $surname
+     * @param string $email
+     * @param string $role
+     * @param bool $isActive
+     * @param string|null $passwordHash
+     * @return void
+     */
+    public function update(int $userId, string $name, string $surname, string $email, string $role, bool $isActive, ?string $passwordHash = null): void
+    {
+        $pdo = $this->getPdo();
+        $username = strtolower($name . '.' . $surname);
+        
+        $sql = 'UPDATE users
+                    SET name = :name, surname = :surname, email = :email, username = :username,
+                        role = :role, is_active = :isActive, password_hash = COALESCE(:passwordHash, password_hash)
+                    WHERE user_id = :userId';
+
+        $params = [
+            ':name'         => $name,
+            ':surname'      => $surname,
+            ':email'        => $email,
+            ':username'     => $username,
+            ':role'         => $role,
+            ':isActive'     => (int)$isActive,
+            ':passwordHash' => $passwordHash,
+            ':userId'       => $userId
+        ];
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute($params);
+    }
 }
