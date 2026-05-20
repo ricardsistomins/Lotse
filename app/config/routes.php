@@ -159,6 +159,30 @@ $router->add('/{lang:[a-z]{2}}/settings/{key:[a-z_]+}/save', [
 
 
 /******************************
+ * Users
+ *****************************/
+$router->add('/{lang:[a-z]{2}}/users', [
+   'controller' => 'user',
+   'action'     => 'index',
+]);
+
+$router->add('/{lang:[a-z]{2}}/user/create', [
+   'controller' => 'user',
+   'action'     => 'create',
+]);
+
+$router->add('/{lang:[a-z]{2}}/user/{id:[0-9]+}/edit', [
+   'controller' => 'user',
+   'action'     => 'edit',
+]);
+
+$router->add('/{lang:[a-z]{2}}/user/{id:[0-9]+}/save', [
+   'controller' => 'user',
+   'action'     => 'save',
+]);
+
+
+/******************************
  * Customers
  *****************************/
 $router->add('/{lang:[a-z]{2}}/customers', [

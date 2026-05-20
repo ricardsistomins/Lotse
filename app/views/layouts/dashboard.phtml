@@ -47,6 +47,13 @@
                         <i class="bi bi-person-walking"></i>
                         <a href="/<?= $language ?>/customers" class="nav-link text-white"><?= $translate('Customers') ?></a>
                     </li>
+                    <!-- !!! Now open for all, but later ONLY FOR ADMIN !!! -->
+                    <?php if (1 || $this->session->get('userRole') === \app\Model\UserModel::ROLE_ADMIN) { ?>
+                        <li class="nav-item d-flex align-items-center <?= $activeController == 'user' ? 'selected' : '' ?>">
+                            <i class="bi bi-people"></i>
+                            <a href="/<?= $language ?>/users" class="nav-link text-white"><?= $translate('Users') ?></a>
+                        </li>
+                    <?php } ?>
                     <li class="nav-item d-flex align-items-center <?= $activeController == 'settings' ? 'selected' : '' ?>">
                         <i class="bi bi-gear"></i>
                         <a href="/<?= $language ?>/settings" class="nav-link text-white"><?= $translate('Settings') ?></a>
