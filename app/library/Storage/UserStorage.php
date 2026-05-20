@@ -160,8 +160,15 @@ class UserStorage extends AbstractStorage
     public function create(string $name, string $surname, string $email, string $role, string $passwordHash): int
     {
         $pdo = $this->getPdo();
-        $username = strtolower($name . '.' . $surname);
+   
+        $base = strtolower($name . '.' . $surname);
+        $username = $base;
+        $counter = 2;
         
+        while ($this->usernameExists($username)) {
+            $username = $base . $counter++;
+        }
+   
         $sql = 'INSERT INTO users
                     (name, surname, username, email, password_hash, role, is_active)
                 VALUES 
@@ -178,6 +185,29 @@ class UserStorage extends AbstractStorage
         ]);
         
         return (int)$pdo->lastInsertId();
+    }
+    
+    /**
+     * Checks if user exists by username
+     * 
+     * @param string $username
+     * @return bool
+     */
+    private function usernameExists(string $username): bool
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'SELECT user_id
+                FROM users
+                WHERE username = :username';
+
+        $sth = $pdo->prepare($sql);
+
+        $sth->execute([
+            ':username' => $username
+        ]);
+     
+        return (bool)$sth->fetchColumn();
     }
     
     /**
