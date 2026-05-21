@@ -50,15 +50,21 @@ class OpenAIAdapter implements LLMProviderAdapter
         $start = microtime(true);
 
         try {
-            $response = $this->client->chat()->create([
-                'model'    => $this->model,
+            $params = [
+                'model' => $this->model,
                 'messages' => [
                     [
-                        'role' => 'user', 
-                        'content' => $prompt
+                        'role'    => 'user',
+                        'content' => $prompt 
                     ]
                 ],
-            ]);
+            ];
+            
+            if (!empty($context['reasoning_effort'])) {
+                $params['reasoning_effort'] = $context['reasoning_effort'];
+            }
+            
+            $response = $this->client->chat()->create($params);
 
             $latencyMs = (int) ((microtime(true) - $start) * 1000);
 

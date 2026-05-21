@@ -290,6 +290,13 @@
                             <button type="submit" class="btn btn-danger"><?= $translate('Reject') ?></button>
                         </form>
                     <?php } ?>
+                    
+                    <?php if (in_array($report->status, [\app\Model\ReportModel::STATUS_APPROVED, \app\Model\ReportModel::STATUS_ARCHIVED])) { ?>
+                        <a href="/<?= $language ?>/report/<?= $report->id ?>/export"
+                           class="btn btn-outline-success rounded-3">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> <?= $translate('Export PDF') ?>
+                        </a>
+                    <?php } ?>
                 </div>
 
                 <div>

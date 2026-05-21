@@ -20,7 +20,8 @@ use app\Model\{
 use app\Service\{
     AuditService,
     DuplicateRunException,
-    ReportAnalyticsService
+    ReportAnalyticsService,
+    PdfService
 };
 
 class ReportController extends BaseController
@@ -418,5 +419,115 @@ class ReportController extends BaseController
             'analytics'         => $analyticsData,
             'structuredPayload' => json_decode($revision->structuredPayload ?? '[]', true)
         ]);
+    }
+    
+    /**
+     * Export approved report as a PDF download
+     * 
+     * @return void
+     */
+    public function exportAction(): void
+    {
+        $id = (int)$this->dispatcher->getParam('id');
+        $report = (new ReportStorage())->getById($id);
+        
+        $allowedStatuses = [ReportModel::STATUS_APPROVED, ReportModel::STATUS_ARCHIVED];
+        
+        if (!$report || !in_array($report->status, $allowedStatuses) || !$report->approvedRevisionId) {
+            $this->langRedirect('/reports');
+            return;
+        }
+        
+        $revision = (new ReportRevisionStorage())->getById($report->approvedRevisionId);
+        $run = (new ResearchRunStorage())->getById($report->runId);
+        $customer = $report->customerId ? (new CustomerStorage())->getById($report->customerId) : null;
+        $customerName = $customer?->companyName;
+        $parsedown = fn(string $md) => (new \Parsedown())->text($md);
+        
+        $html = $this->view->getRender('report', 'pdf/pdf', [
+            'report'       => $report,
+            'revision'     => $revision,
+            'customerName' => $customerName,
+            'parsedown'    => $parsedown,
+            'run'          => $run
+        ], function($view) {
+            $view->setRenderLevel(\Phalcon\Mvc\View::LEVEL_ACTION_VIEW);
+        });
+        
+        $filename = 'report-' . $id . '-' . date('Y-m-d') . '.pdf';
+        $pdf = (new PdfService())->render($html);
+        
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: (int)$this->session->get('userId'),
+            action:      'report.exported',
+            entityType:  'report',
+            entityId:    $id,
+            metadata:    ['filename' => $filename]
+        );
+        
+        $this->view->disable();
+        
+        $response = $this->response;
+        $response->setContentType('application/pdf');
+        $response->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->setContent($pdf);
+        $response->send();
+    }
+    
+    public function exportPreviewAction(): void
+    {
+        $id = (int)$this->dispatcher->getParam('id');
+        $report = (new ReportStorage())->getById($id);
+        
+        $allowedStatuses = [ReportModel::STATUS_APPROVED, ReportModel::STATUS_ARCHIVED];
+        
+        if (!$report || !in_array($report->status, $allowedStatuses) || !$report->approvedRevisionId) {
+            $this->langRedirect('/reports');
+            return;
+        }
+        
+        $revision = (new ReportRevisionStorage())->getById($report->approvedRevisionId);
+        $run = (new ResearchRunStorage())->getById($report->runId);
+        $customer = $report->customerId ? (new CustomerStorage())->getById($report->customerId) : null;
+        $customerName = $customer?->companyName;
+        $parsedown = fn(string $md) => (new \Parsedown())->text($md);
+        
+        $analyticsStorage = new ReportAnalyticsStorage;
+        $analytics = $analyticsStorage->getByRevisionId($revision->id);
+        $analyticsData = $analytics ? json_decode($analytics->analyticsPayload, true) : (new ReportAnalyticsService())->generate($id, $revision->id, json_decode($revision->structuredPayload ?? '[]', true), $revision->finalMarkdown ?? '');
+        
+        $html = $this->view->getRender('report', 'pdf/pdf-preview', [
+            'report'            => $report,
+            'revision'          => $revision,
+            'customerName'      => $customerName,
+            'parsedown'         => $parsedown,
+            'analytics'         => $analyticsData,
+            'structuredPayload' => json_decode($revision->structuredPayload ?? '[]', true),
+            'language'          => $this->session->get('language') ?? 'en',
+            'run'               => $run
+        ], function($view) {
+            $view->setRenderLevel(\Phalcon\Mvc\View::LEVEL_ACTION_VIEW);
+        });
+        
+        $filename = 'report-preview-' . $id . '-' . date('Y-m-d') . '.pdf';
+        $pdf = (new PdfService())->render($html);
+        
+        (new AuditService($this->db))->log(
+            actorType:   'user',
+            actorUserId: (int)$this->session->get('userId'),
+            action:      'report.exported',
+            entityType:  'report',
+            entityId:    $id,
+            metadata:    ['filename' => $filename]
+        );
+        
+        $this->view->disable();
+        
+        $response = $this->response;
+        $response->setContentType('application/pdf');
+        $response->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->setContent($pdf);
+        $response->send();
     }
 }
