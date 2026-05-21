@@ -1,0 +1,378 @@
+ <?php
+    $analyticsMap = [];
+    
+    foreach ($analytics['findings_analysis'] ?? [] as $item) {
+        $analyticsMap[$item['finding_key']] = $item;
+    }
+    
+    $reportMarkdown = $revision->finalMarkdown ?? '';
+?>
+
+<!DOCTYPE html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8">
+        
+        <style>
+            * { 
+                box-sizing: border-box; 
+                margin: 0; 
+                padding: 0; 
+            }
+
+            body {
+                font-family: 'DejaVu Sans', sans-serif;
+                font-size: 10pt;
+                line-height: 1.5;
+                color: #1a1a1a;
+                padding: 30px;
+            }
+
+            h2 {
+                font-size: 13pt;
+                color: #198754;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 4px;
+                margin: 20px 0 10px;
+            }
+
+            h3 { 
+                font-size: 11pt; 
+                color: #333; 
+                margin: 12px 0 6px; 
+            }
+
+            p { 
+                margin-bottom: 8px; 
+            }
+            
+            ul, ol { 
+                margin: 6px 0 8px 18px; 
+            }
+            
+            li { 
+                margin-bottom: 3px; 
+            }
+
+            .section { 
+                margin-bottom: 20px; 
+            }
+
+            .header-secondary-info {
+                border-top: 1px solid #ddd; 
+                padding-top: 8px; 
+                font-size: 9pt; 
+                color: #888;
+            }
+
+            .bold-and-green {
+                color: #198754; 
+                font-weight: bold;
+            }
+
+            .box {
+                border: 1px solid #ddd;
+                border-radius: 12px;
+                padding: 10px 12px;
+                margin-bottom: 12px;
+            }
+
+            .box-title {
+                font-size: 9pt;
+                font-weight: bold;
+                color: #555;
+                margin: -12px -12px 10px -12px;
+                padding: 8px 12px;
+                border-radius: 12px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .program-card {
+                border: 1px solid #ddd;
+                border-radius: 12px;
+                padding: 10px 12px;
+                margin-bottom: 14px;
+                page-break-inside: avoid;
+            }
+
+            .program-title { 
+                font-size: 11pt; 
+                font-weight: bold; 
+                margin-bottom: 6px; 
+            }
+
+            .tag {
+                display: inline-block;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                padding: 0 8px 3px 8px;
+                font-size: 8pt;
+                color: #555;
+                margin-right: 4px;
+                margin-bottom: 4px;
+            }
+
+            .meta-grid { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin-top: 8px; 
+            }
+            
+            .meta-grid td { 
+                width: 20%; 
+                vertical-align: top; 
+                padding: 4px 6px 0 0; 
+                font-size: 9pt; 
+            }
+            
+            .meta-label { 
+                color: #888; 
+                font-weight: bold; 
+                font-size: 8pt; 
+            }
+
+            table.compare {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9pt;
+                margin-top: 8px;
+            } 
+
+            table.compare th {
+                background: #f0f0f0;
+                padding: 6px 8px;
+                border: 1px solid #ccc;
+                text-align: left;
+                font-weight: bold;
+            }
+
+            table.compare td {
+                padding: 6px 8px;
+                border: 1px solid #ddd;
+                vertical-align: top;
+            }
+
+            table.compare tr:nth-child(even) td { 
+                background: #fafafa; 
+            }
+
+            .footer {
+                margin-top: 30px;
+                padding-top: 10px;
+                border-top: 1px solid #ddd;
+                font-size: 8pt;
+                color: #999;
+            }
+
+            .page-break { 
+                page-break-before: always; 
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div class="box">
+            <div class="bold-and-green">Research report</div>
+            
+            <p class="bold-and-green" style="font-size: 13pt; margin-bottom: 8px;">
+                &ldquo;<?= htmlspecialchars($run->query ?? '') ?>&rdquo;
+            </p>
+            
+            <div class="header-secondary-info">           
+                Report #<?= (int)$report->id ?>
+                &nbsp; <?= htmlspecialchars($customerName ?? '—') ?>
+                &nbsp; <?= date('d.m.Y') ?>
+                &nbsp;&bull;&nbsp; <?= count($structuredPayload) ?> programs
+            </div>
+        </div>
+
+
+        <!-- Executive Summary + Recommendations -->
+        <h2>Executive Summary</h2>
+
+        <table style="width: 100%">
+            <tr>
+                <td>
+                    <div class="box">
+                        <div class="box-title">Ranked Programs</div>
+
+                        <ol>
+                            <?php foreach ($analytics['findings_analysis'] ?? [] as $finding) { ?>
+                                <?php $desc = $finding[$language]['description'] ?? $finding['en']['description'] ?? null; ?>
+
+                                <?php if ($desc) { ?>
+                                    <li style="margin-bottom: 4px;"><?= htmlspecialchars($desc) ?></li>
+                                <?php } ?>
+                            <?php } ?>
+                        </ol>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="box">
+                        <div class="box-title">Recommendations</div>
+                        <p><?= htmlspecialchars($analytics['recommendations'][$language] ?? '') ?></p>
+                    </div>
+
+                    <?php if (!empty($analytics['risk_summary'][$language])) { ?>
+                        <div class="box" style="border-color: #f0ad4e; background: #fffbf0;">
+                            <div class="box-title">Risk Summary</div>
+                            <p><?= htmlspecialchars($analytics['risk_summary'][$language]) ?></p>
+                        </div>
+                    <?php } ?>   
+                </td>
+            </tr>
+        </table>
+
+        <!-- Report Text -->
+        <h2>Report</h2>
+        
+        <div class="section box">
+            <?= $parsedown($reportMarkdown) ?>
+        </div>
+
+        <!-- All Matching Programs -->
+        <div class="page-break"></div>
+        <h2>All Matching Programs</h2>
+
+        <?php foreach ($structuredPayload as $i => $item) { ?>
+            <?php 
+                $key     = $item['finding_key'] ?? '';
+                $fa      = $analyticsMap[$key] ?? null;
+                $fa_lang = $fa[$language] ?? $fa['en'] ?? [];
+                $n       = $item['normalized'] ?? [];
+                $min     = $n['funding_amount_min'] ?? null;
+                $max     = $n['funding_amount_max'] ?? null;
+                $fundingRange = ($min !== null || $max !== null) ? '€' . number_format((float)($min ?? 0)) . ' – €' . number_format((float)($max ?? 0)) : '—';
+            ?>
+
+            <div class="program-card">
+                <div class="program-title"><?= htmlspecialchars($item['title'] ?? '') ?></div>
+
+                <?php if (!empty($fa_lang['description'])): ?>
+                    <p><?= htmlspecialchars($fa_lang['description']) ?></p>
+                <?php endif; ?>
+
+                <?php if (!empty($fa_lang['strong_sides'])) { ?>
+                    <div style="margin-bottom: 6px; margin-top: 10px;">
+                        <?php foreach ($fa_lang['strong_sides'] as $side) { ?>
+                            <span class="tag"><?= htmlspecialchars($side) ?></span>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
+
+                <table style="width: 100%; margin-top: 6px;">
+                    <tr>
+                        <?php if (!empty($fa_lang['use_cases'])) { ?>
+                            <td>
+                                <div class="box">
+                                    <div class="box-title">Best suited for</div>
+                                    <p><?= htmlspecialchars($fa_lang['use_cases']) ?></p>
+                                </div>
+                            </td>
+                        <?php } ?>
+
+                        <?php if (!empty($fa_lang['next_steps'])) { ?>
+                            <td>
+                                <div class="box" style="margin: 0 13px 0 13px">
+                                    <div class="box-title">Next steps</div>
+                                    <p><?= htmlspecialchars($fa_lang['next_steps']) ?></p>
+                                </div>
+                            </td>
+                        <?php } ?>
+                            
+                        <?php if (!empty($fa_lang['eligibility'])) { ?>
+                            <td>
+                                <div class="box">
+                                    <div class="box-title">Eligibility</div>
+                                    <p><?= htmlspecialchars($fa_lang['eligibility']) ?></p>
+                                </div> 
+                            </td>
+                        <?php } ?>
+                    </tr>
+                </table>
+
+                <table class="meta-grid">
+                    <tr>
+                        <td>
+                            <div class="meta-label">Funding body</div>
+                            <div><?= htmlspecialchars($n['funding_body'] ?? '—') ?></div>
+                        </td>
+                        <td>
+                            <div class="meta-label">Amount</div>
+                            <div><?= htmlspecialchars($fundingRange) ?></div>
+                        </td>
+                        <td>
+                            <div class="meta-label">Type</div>
+                            <div><?= htmlspecialchars($item['finding_type'] ?? '—') ?></div>
+                        </td>
+                        <td>
+                            <div class="meta-label">Deadline</div>
+                            <div><?= htmlspecialchars($n['deadline'] ?? '—') ?></div>
+                        </td>
+                        <td>
+                            <div class="meta-label">Confidence</div>
+                            <div>
+                                <?= number_format(($item['confidence'] ?? 0) * 100) ?>%
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <?php if (!empty($n['risk_flags'])) { ?>
+                    <div style="margin-top: 10px;">
+                        <?php foreach ($n['risk_flags'] as $flag) { ?>
+                            <?php $flagLabels = ['co_funders_present' => 'Co-funded', 'no_official_source' => 'No official source']; ?>
+                            <?php $label = $flagLabels[$flag] ?? $flag; ?>
+
+                            <span class="tag" style="border-color: #f0ad4e; color: #856404;"><?= htmlspecialchars($label) ?></span>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
+            </div>
+        <?php } ?>
+
+        <!-- Comparison Table -->
+        <div class="page-break"></div>
+        <h2>Program Comparison</h2>
+
+        <table class="compare">
+            <thead>
+                <tr>
+                    <th>Program</th>
+                    <th>Funding body</th>
+                    <th>Amount</th>
+                    <th>Deadline</th>
+                    <th>Eligibility</th>
+                    <th>Confidence</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                <?php foreach ($structuredPayload as $item) { ?>
+                    <?php
+                        $n       = $item['normalized'] ?? [];
+                        $fa      = $analyticsMap[$item['finding_key'] ?? ''] ?? null;
+                        $fa_lang = $fa[$language] ?? $fa['en'] ?? [];
+                        $min     = $n['funding_amount_min'] ?? null;
+                        $max     = $n['funding_amount_max'] ?? null;
+                        $fundingRange = ($min !== null || $max !== null) ? '€' . number_format((float)($min ?? 0)) . ' – €' . number_format((float)($max ?? 0)) : '—';
+                    ?>
+                    <tr>
+                        <td><?= htmlspecialchars($item['title'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($n['funding_body'] ?? '—') ?></td>
+                        <td><?= htmlspecialchars($fundingRange) ?></td>
+                        <td><?= htmlspecialchars($n['deadline'] ?? '—') ?></td>
+                        <td><?= htmlspecialchars($fa_lang['eligibility'] ?? $n['eligibility'] ?? '—') ?></td>
+                        <td><?= number_format(($item['confidence'] ?? 0) * 100) ?>%</td>
+                    </tr>
+                <?php } ?>  
+            </tbody>
+        </table>
+
+        <div class="footer">
+            Generated by Lotse &bull; <?= date('d.m.Y H:i') ?> &bull; Report #<?= (int)$report->id ?>
+        </div>
+    </body>
+</html>

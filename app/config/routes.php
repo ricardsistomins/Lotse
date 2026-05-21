@@ -86,6 +86,17 @@ $router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/retrigger', [
     'action'     => 'retrigger'
 ]);    
 
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/export', [
+    'controller' => 'report',
+    'action'     => 'export',
+]);
+
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/export-preview', [
+    'controller' => 'report',
+    'action'     => 'exportPreview',
+ ]);
+
+
 $router->add('/{lang:[a-z]{2}}/finding/{id:[0-9]+}/edit', [                   
     'controller' => 'report',
     'action'     => 'editFinding'                                             

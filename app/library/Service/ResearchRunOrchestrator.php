@@ -298,7 +298,7 @@ class ResearchRunOrchestrator
             // Step 7 — generate report if guardrail allows
             if (isset($llmAdapter) && in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
                 $reportPrompt   = $this->buildReportPrompt($findings);
-                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation', 'run_id' => $runId, 'fallback_used' => $isFallback]);
+                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation', 'run_id' => $runId, 'fallback_used' => $isFallback, 'reasoning_effort' => 'high']);
 
                 if ($reportResponse->success) {
                     $savedFindings     = $findingStorage->getAllByRunId($runId);
