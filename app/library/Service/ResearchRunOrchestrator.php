@@ -298,7 +298,7 @@ class ResearchRunOrchestrator
             // Step 7 — generate report if guardrail allows
             if (isset($llmAdapter) && in_array($guardrailStatus, [GuardrailEvaluator::STATUS_PASSED, GuardrailEvaluator::STATUS_REVIEW])) {
                 $reportPrompt   = $this->buildReportPrompt($findings);
-                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation', 'run_id' => $runId, 'fallback_used' => $isFallback, 'reasoning_effort' => 'high']);
+                $reportResponse = $llmAdapter->complete($reportPrompt, ['purpose' => 'report_generation', 'run_id' => $runId, 'fallback_used' => $isFallback]);
 
                 if ($reportResponse->success) {
                     $savedFindings     = $findingStorage->getAllByRunId($runId);
@@ -519,6 +519,8 @@ Do not mention any programs that have ended or whose deadlines have passed.
 Based on the following extracted funding programs, write a clear and structured research report in plain text.
 Include a short introduction, then cover each program with its key details.
 Write in a professional tone. Use plain text only, no markdown.
+Write naturally, as a human expert would avoid repetitive phrasing, overly formal structures, and AI-sounding patterns. 
+    The report should read as if written by an experienced funding consultant.
 
 Findings:
 {$findingsText}
