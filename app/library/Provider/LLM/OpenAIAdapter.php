@@ -64,8 +64,30 @@ class OpenAIAdapter implements LLMProviderAdapter
                 $params['reasoning_effort'] = $context['reasoning_effort'];
             }
             
-            $response = $this->client->chat()->create($params);
-
+            if (!empty($params['reasoning_effort'])) {
+                $raw = (new \GuzzleHttp\Client(['timeout' => 300, 'connect_timeout' => 10]))->post('https://api.openai.com/v1/chat/completions', [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->apiKey,
+                        'Content-Type'  => 'application/json',
+                    ],
+                    'json' => $params,
+                ]);
+                
+                $body = json_decode($raw->getBody()->getContents(), true);
+                
+                $content = $body['choices'][0]['message']['content'] ?? '';
+                $model = $body['model'] ?? $this->model;
+                $inputTokens = $body['usage']['prompt_tokens'] ?? 0;
+                $outputTokens = $body['usage']['completion_tokens'] ?? 0;
+            } else {
+                $response = $this->client->chat()->create($params);
+                
+                $content = $response->choices[0]->message->content;
+                $model = $response->model;
+                $inputTokens = $response->usage->promptTokens;
+                $outputTokens = $response->usage->completionTokens;
+            }
+            
             $latencyMs = (int) ((microtime(true) - $start) * 1000);
 
             $this->callStorage->log(
@@ -74,18 +96,18 @@ class OpenAIAdapter implements LLMProviderAdapter
                 requestPurpose: $context['purpose'] ?? 'completion',
                 status:         self::STATUS_SUCCESS,
                 latencyMs:      $latencyMs,
-                inputTokens:    $response->usage->promptTokens,
-                outputTokens:   $response->usage->completionTokens,
+                inputTokens:    $inputTokens,
+                outputTokens:   $outputTokens,
                 runId:          $context['run_id'] ?? null,
                 fallbackUsed:   $context['fallback_used'] ?? false,
-                estimatedCostUsd: $this->calculateCost($response->model, $response->usage->promptTokens, $response->usage->completionTokens)    
+                estimatedCostUsd: $this->calculateCost($model, $inputTokens, $outputTokens)    
             );
             
             return new LLMResponse(
-                content:      $response->choices[0]->message->content,
-                model:        $response->model,
-                inputTokens:  $response->usage->promptTokens,
-                outputTokens: $response->usage->completionTokens,
+                content:      $content,
+                model:        $model,
+                inputTokens:  $inputTokens,
+                outputTokens: $outputTokens,
                 latencyMs:    $latencyMs,
                 success:      true
             );
