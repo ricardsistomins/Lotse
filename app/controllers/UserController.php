@@ -110,7 +110,7 @@ class UserController extends BaseController
             ]
         );
         
-        $this->setFlash('success', 'User created successfully.');
+        $this->setFlash('success', $this->translate('User created successfully.'));
         $this->langRedirect('/users');
     }
     
@@ -205,7 +205,7 @@ class UserController extends BaseController
             ]
         );
 
-        $this->setFlash('success', 'User updated successfully.');
+        $this->setFlash('success', $this->translate('User updated successfully.'));
         $this->langRedirect('/users');
     }
 }

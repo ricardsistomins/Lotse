@@ -234,7 +234,7 @@ class ReportController extends BaseController
         $userId = $session->get('userId', 'int');
         
         if (!in_array($role, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV, UserModel::ROLE_QA])) {
-            $this->setFlash('danger', 'You do not have permission to re-trigger reports.');
+            $this->setFlash('danger', $this->translate('You do not have permission to re-trigger reports.'));
             $this->langRedirect('/report/' . $id);
             return;
         }
@@ -249,7 +249,7 @@ class ReportController extends BaseController
         $run = (new ResearchRunStorage())->getById($report->runId);
     
         if (!$run || empty($run->query)) {
-            $this->setFlash('danger', 'Cannot re-trigger: original run data is missing.');
+            $this->setFlash('danger', $this->translate('Cannot re-trigger: original run data is missing.'));
             $this->langRedirect('/report/' . $id);
             return;
         }
@@ -263,7 +263,7 @@ class ReportController extends BaseController
         try {
             $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db, null, ResearchRunModel::RUN_TYPE_REPORT_RETRIGGER);
         } catch (DuplicateRunException $ex) {
-            $this->setFlash('warning', 'A research run for this query is already in progress.');
+            $this->setFlash('warning', $this->translate('A research run for this query is already in progress.'));
             $this->langRedirect('/report/' . $id);
             return;
         }
@@ -277,7 +277,7 @@ class ReportController extends BaseController
             metadata:    ['new_run_id' => $newRunId]
         );  
         
-        $this->setFlash('success', 'Re-trigger started. A new research run has been queued.'); 
+        $this->setFlash('success', $this->translate('Re-trigger started. A new research run has been queued.')); 
         $this->langRedirect('/report/' . $id);
     }
     
