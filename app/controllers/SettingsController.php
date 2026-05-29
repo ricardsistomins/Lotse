@@ -182,4 +182,61 @@ class SettingsController extends BaseController
             'limit'    => $limit
         ]);
     }
+    
+    public function trustedSourcesAction(): void
+    {
+        $domains = (new SystemSettingsStorage())->get('trusted_sources') ?? [];
+        
+        $flash = $this->session->get('_flash');
+        $this->session->remove('_flash');
+        
+        $this->view->setVars([
+            'domains' => $domains,
+            'flash'   => $flash
+        ]);
+    }
+    
+    public function trustedSourcesAddAction(): void
+    {
+        $userRole = $this->session->get('userRole');
+        
+        if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {
+            $this->langRedirect('/settings/trusted-sources');
+            return;
+        }
+        
+        $domain = trim($this->request->getPost('domain'));
+        $systemSettingsStorage = new SystemSettingsStorage();
+        $domains = $systemSettingsStorage->get('trusted_sources') ?? [];
+        
+        if ($domain !== '' && !in_array($domain, $domains)) {
+            $domains[] = $domain;
+            $systemSettingsStorage->set('trusted_sources', $domains, (int)$this->session->get('userId'));
+            
+            $this->setFlash('success', $this->translate('Domain added successfully.'));  
+        } else {
+            $this->setFlash('warning', $this->translate('Domain already exists.'));  
+        }
+          
+        $this->langRedirect('/settings/trusted-sources');
+    }
+    
+    public function trustedSourcesRemoveAction(): void 
+    {
+        $userRole = $this->session->get('userRole');
+        
+        if (!in_array($userRole, [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV])) {
+            $this->langRedirect('/settings/trusted-sources');
+            return;
+        }
+        
+        $domain = trim($this->request->getPost('domain'));
+        $systemSettingsStorage = new SystemSettingsStorage();
+        $domains = $systemSettingsStorage->get('trusted_sources') ?? [];
+        $domains = array_values(array_diff($domains, [$domain]));
+        $systemSettingsStorage->set('trusted_sources', $domains, (int)$this->session->get('userId'));
+
+        $this->setFlash('success', $this->translate('Domain removed successfully.'));
+        $this->langRedirect('/settings/trusted-sources');
+    }
 }               

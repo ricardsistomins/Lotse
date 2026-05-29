@@ -102,8 +102,27 @@ class ResearchRunOrchestrator
 
             $callStorage   = new ProviderCallStorage();
             $searchAdapter = new SerpApiAdapter($firstProfile['search']['api_key'], $callStorage, $runId, $settings->get('search_pricing') ?? []);
-            $searchResults = $searchAdapter->search($query);
+            $trustedDomains = $settings->getTrustedSources('trusted_sources') ?? [];
+            $trustedUrls = [];
+            $searchResults = [];
 
+            if (!empty($trustedDomains)) {
+                $trustedResults = $searchAdapter->searchByDomains($query, $trustedDomains);
+                
+                foreach ($trustedResults as $result) {
+                    $trustedUrls[$result->url] = true;
+                    $searchResults[] = $result;
+                }
+            }
+            
+            $generalResults = $searchAdapter->search($query);
+            
+            foreach ($generalResults as $result) {
+                if (!isset($trustedUrls[$result->url])) {
+                    $searchResults[] = $result;
+                }
+            }
+            
             $sourceTexts = [];
             $deadUrls = [];
             
@@ -124,7 +143,7 @@ class ResearchRunOrchestrator
                     runId:           $runId,
                     sourceUrl:       $result->url,
                     sourceDomain:    parse_url($result->url, PHP_URL_HOST) ?? '',
-                    sourceType:      'search_result',
+                    sourceType:      isset($trustedUrls[$result->url]) ? 'official' : 'search_result',
                     retrievedAt:     $result->retrievedAt ?? date('Y-m-d H:i:s'),
                     sourceTitle:     $result->title,
                     providerName:    self::PROVIDER_NAME_SERPAPI,
@@ -142,7 +161,9 @@ class ResearchRunOrchestrator
                     continue;
                 }
                 
-                $parts[] = 'Title: '   . $result->title . "\n" .
+                $officialTag = isset($trustedUrls[$result->url]) ? '[OFFICIAL SOURCE] ' : '';
+                
+                $parts[] = 'Title: '   . $officialTag . $result->title . "\n" .
                            'URL: '     . $result->url   . "\n" .
                            'Content: ' . $sourceTexts[$result->url];
             }
@@ -245,7 +266,8 @@ class ResearchRunOrchestrator
                     $isOfficials = $finding['source_is_official'] ?? [];
                     
                     foreach ($urls as $i => $url) {
-                        $sourceStorage->setIsOfficial($runId, $url, (bool)($isOfficials[$i] ?? false));
+                        $isOfficial = isset($trustedUrls[$url]) ? true : (bool)($isOfficials[$i] ?? false);
+                        $sourceStorage->setIsOfficial($runId, $url, $isOfficial);
                     }             
                 }
     
@@ -416,9 +438,10 @@ For each active funding program found, return a JSON array with this exact struc
 deadline must be in YYYY-MM-DD format, or null if unknown.
 "application_status" must be one of: "open", "closed", "unknown".
 Set to "closed" if the source indicates the program has ended or is no longer accepting applications.               
-"source_is_official" must be a parallel array to "source_urls" 
-- set true for official pages (goverment, foundation, university, or direct programme pages), 
-- false for secondary sources (blogs, new articles, aggregators).
+"source_is_official" must be a parallel array to "source_urls"
+- if a source title is prefixed with [OFFICIAL SOURCE], always set true for that source
+- otherwise set true for official pages (government, foundation, university, or direct programme pages),
+- false for secondary sources (blogs, news articles, aggregators).
 "co_funders" must be an array of all additional organisations co-funding this programme alongside the main funding_body. Leave empty if there is only one funder.
 Return only valid JSON. No explanation text.
 Sources:

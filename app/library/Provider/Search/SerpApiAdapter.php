@@ -33,9 +33,10 @@ class SerpApiAdapter implements SearchProviderAdapter
      *
      * @param string $query
      * @param int $limit
+     * @param string $purpose
      * @return array
      */
-    public function search(string $query, int $limit = self::MAX_RESULTS): array
+    public function search(string $query, int $limit = self::MAX_RESULTS, string $purpose = 'search'): array
     {
         $start = microtime(true);
 
@@ -64,7 +65,7 @@ class SerpApiAdapter implements SearchProviderAdapter
             $this->callStorage->log(
                 providerKind:   'search',
                 providerName:   'serpapi',
-                requestPurpose: 'search',
+                requestPurpose: $purpose,
                 status:         'succeeded',
                 latencyMs:      $latencyMs,
                 runId:          $this->runId,
@@ -78,7 +79,7 @@ class SerpApiAdapter implements SearchProviderAdapter
             $this->callStorage->log(
                 providerKind:   'search',
                 providerName:   'serpapi',
-                requestPurpose: 'search',
+                requestPurpose: $purpose,
                 status:         'failed',
                 latencyMs:      $latencyMs,
                 errorMessage:   $e->getMessage(),
@@ -87,6 +88,31 @@ class SerpApiAdapter implements SearchProviderAdapter
 
             return [];
         }
+    }
+    
+    /**
+     * Search within trusted domains using a single site:OR query.
+     * 
+     * @param string $query
+     * @param array $domains
+     * @param int $limit
+     * @return array
+     */
+    public function searchByDomains(string $query, array $domains, int $limit = self::MAX_RESULTS): array
+    {
+        if (empty($domains)) {
+            return [];
+        }
+        
+        $siteParts = [];
+        
+        foreach ($domains as $domain) {
+            $siteParts[] = 'site:' . $domain;
+        }
+        
+        $combinedQuery = implode(' OR ', $siteParts) . ' ' . $query;
+        
+        return $this->search($combinedQuery, $limit, 'trusted_sources_search');
     }
     
     /**

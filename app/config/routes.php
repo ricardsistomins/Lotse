@@ -168,6 +168,20 @@ $router->add('/{lang:[a-z]{2}}/settings/{key:[a-z_]+}/save', [
     'action'     => 'save'
 ]);                                                                                                                                                     
 
+$router->add('/{lang:[a-z]{2}}/settings/trusted-sources', [
+    'controller' => 'settings',
+    'action'     => 'trustedSources'
+]);
+
+$router->add('/{lang:[a-z]{2}}/settings/trusted-sources/add', [
+    'controller' => 'settings',
+    'action'     => 'trustedSourcesAdd'
+]);
+
+$router->add('/{lang:[a-z]{2}}/settings/trusted-sources/remove', [
+    'controller' => 'settings',
+    'action'     => 'trustedSourcesRemove'
+]);
 
 /******************************
  * Users

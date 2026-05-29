@@ -1,5 +1,6 @@
 <?php 
     use app\Model\UserModel; 
+    
     $section = $_GET['section'] ?? 'system';
 ?>                                                                                                                                                        
 
@@ -11,58 +12,25 @@
 </div>                                                                                                                                                                                   
 
 <div class="row">                                                                                                                                                                      
-    <div class="col-2">
-        <div class="card rounded-4">
-            <div class="card-body">
-                <div class="card rounded-4 border-0 shadow-sm">
-                    <div class="d-grid gap-2">                                                                                                                                           
-                        <a href="/<?= $language ?>/settings" class="text-decoration-none">
-                            <div class="d-flex align-items-center justify-content-between <?= $section === 'system' ? 'bg-primary text-white' : 'bg-light text-dark' ?> rounded-4 px-3 py-3 text-dark fw-semibold">                                           
-                                <div class="d-flex align-items-center gap-2">                                                                                                            
-                                    <i class="bi bi-sliders2"></i>
-                                    <span><?= $translate('System') ?></span>                                                                                                             
-                                </div>   
-                                
-                                <i class="bi bi-chevron-right"></i>
-                            </div>      
-                        </a>                                                                                                                                                           
-                        <a href="/<?= $language ?>/settings?section=pricing" class="text-decoration-none">
-                            <div class="d-flex align-items-center justify-content-between <?= $section === 'pricing' ? 'bg-primary text-white' : 'bg-light text-dark' ?> rounded-4 px-3 py-3 text-dark fw-semibold">                                           
-                                <div class="d-flex align-items-center gap-2">                                                                                                            
-                                    <i class="bi bi-currency-dollar"></i>
-                                    <span><?= $translate('Costs') ?></span>                                                                                                             
-                                </div>           
-                                
-                                <i class="bi bi-chevron-right"></i>
-                            </div>      
-                        </a>                                                                                                                                                           
-                        <a href="/<?= $language ?>/settings/audit-log" class="text-decoration-none">
-                            <div class="d-flex align-items-center justify-content-between bg-light text-dark rounded-4 px-3 py-3 fw-semibold">                                           
-                                <div class="d-flex align-items-center gap-2">                                                                                                            
-                                    <i class="bi bi-clock-history"></i>
-                                    <span><?= $translate('Audit log') ?></span>                                                                                                             
-                                </div>           
-                                
-                                <i class="bi bi-chevron-right"></i>
-                            </div>      
-                        </a>                                                                                                                                                           
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>                                                                                                                                                                               
+    <?php $this->partial('partials/settings/settingsNavigation'); ?>                                                                                                             
 
+    <?php 
+        $pricingKeys = ['llm_pricing', 'search_pricing'];
+        $show = [];
+
+        foreach ($settings as $setting) {
+            $inPricing = in_array($setting['setting_key'], $pricingKeys);
+
+            if (($section === 'pricing') === $inPricing) {
+                $show[] = $setting;
+            }
+        }
+    ?>
+    
     <div class="col-10">                                                                                                                                                                 
         <div class="card rounded-4">                                                                                                                                                   
             <div class="card-body">
-                <div class="mb-3">
-                    <?php 
-                        $pricingKeys = ['llm_pricing', 'search_pricing'];
-                        $show = $section === 'pricing' 
-                            ? array_filter($settings, fn($s) => in_array($s['setting_key'], $pricingKeys))
-                            : array_filter($settings, fn($s) => !in_array($s['setting_key'], $pricingKeys));
-                    ?>
-                    
+                <div class="mb-3">  
                     <h5 class="card-title mb-0">
                         <?= $translate($section === 'pricing' ? 'Cost & pricing' : 'System configuration'); ?>
                     </h5>
@@ -79,7 +47,7 @@
                         </tr>
                     </thead>
 
-                    <tbody>   
+                    <tbody>                   
                         <?php foreach ($show as $setting) { ?>                                                                                                                       
                             <tr>
                                 <td>

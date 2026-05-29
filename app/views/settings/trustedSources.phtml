@@ -1,0 +1,69 @@
+<?php 
+    use app\Model\UserModel;
+    
+    $canEdit = in_array($this->session->get('userRole'), [UserModel::ROLE_ADMIN, UserModel::ROLE_DEV]);
+    $section = 'trusted-sources';
+?>
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="text-success"><?= $translate('Settings') ?></h2>
+        <span class="text-muted fs-5"><?= $translate('Configure runtime knobs, provider profiles and guardrails powering the Lotse research engine.') ?></span>
+    </div>
+</div>
+
+<div class="row">
+    <?php if (!empty($flash)) { ?>
+        <div class="alert alert-<?= htmlspecialchars($flash['type']) ?> alert-dismissible mb-4 rounded-3" role="alert">
+            <?= htmlspecialchars($flash['message']) ?>
+        </div>
+    <?php } ?>
+    
+    <?php $this->partial('partials/settings/settingsNavigation'); ?> 
+
+    <div class="col-10">
+        <div class="card rounded-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5 class="card-title mb-0"><?= $translate('Trusted Sources') ?></h5>
+                    <span class="text-muted"><?= $translate('Domains searched first and automatically marked as official.') ?></span>
+                </div>
+
+                <?php if ($canEdit) { ?>
+                    <form method="POST" action="/<?= $language ?>/settings/trusted-sources/add" class="d-flex gap-2 mb-4">
+                        <input type="text" name="domain" class="form-control w-auto" placeholder="e.g. bundesfoerderung.de" required>
+                        <button type="submit" class="btn btn-outline-success rounded-3"><?= $translate('Add') ?></button>
+                    </form>
+                <?php } ?>
+
+                <?php if (empty($domains)) { ?>
+                    <p class="text-muted"><?= $translate('No trusted domains configured yet.') ?></p>
+                <?php } else { ?>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><?= $translate('Domain') ?></th>
+                                <?php if ($canEdit) { ?><th></th><?php } ?>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach (array_reverse($domains) as $domain) { ?>
+                                <tr>
+                                    <td><code><?= htmlspecialchars($domain) ?></code></td>
+                                    <?php if ($canEdit) { ?>
+                                        <td>
+                                            <form method="POST" action="/<?= $language ?>/settings/trusted-sources/remove">
+                                                <input type="hidden" name="domain" value="<?= htmlspecialchars($domain) ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-3"><?= $translate('Remove') ?></button>
+                                            </form>
+                                        </td>
+                                    <?php } ?>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</div>
