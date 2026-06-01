@@ -2,7 +2,6 @@
     $request = $this->request;
 
     $runId = $request->getQuery('runId', 'int');                                                                                                                                         
-    $reportId = $request->getQuery('reportId', 'int');
  ?>                                                                                                                                                                                      
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -90,16 +89,14 @@
 <?php } ?>      
 
 <?php if ($runId) { ?>
-    <div class="alert alert-success d-flex justify-content-between align-items-center">
-        <span><?= $translate('Run #%s completed successfully.', [$runId]) ?></span>
-
-        <?php if ($reportId) { ?>
-            <a href="/<?= $language ?>/report/<?= $reportId ?>" class="btn btn-sm btn-outline-success"><?= $translate('View report') ?></a>                                              
-        <?php } else { ?>                                                                                                                                                                
-            <span class="text-muted small"><?= $translate('No report generated (guardrail blocked)') ?></span>
-        <?php } ?>                                                                                                                                                                       
-    </div>      
-<?php } ?>                                                                                                                                                                               
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span><?= $translate('Run #%s started. It is processing in the background, this usually takes 1–2 minutes. Please check the run page for the result.', [$runId]) ?></span>
+        
+        <a href="/<?= $language ?>/runs" class="btn btn-sm btn-outline-primary rounded-4">
+            <?= $translate('Check run status') ?>
+        </a>
+    </div>
+<?php } ?>
 
 <div class="row">                                                                                                                                                                        
     <div class="col-6 pe-2">

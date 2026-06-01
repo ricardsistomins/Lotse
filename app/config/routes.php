@@ -102,6 +102,11 @@ $router->add('/{lang:[a-z]{2}}/finding/{id:[0-9]+}/edit', [
     'action'     => 'editFinding'                                             
 ]);             
 
+$router->add('/{lang:[a-z]{2}}/report/{id:[0-9]+}/analytics-status', [
+    'controller' => 'report',
+    'action'     => 'analyticsStatus'
+ ]);
+
 
 /******************************
  * Runs

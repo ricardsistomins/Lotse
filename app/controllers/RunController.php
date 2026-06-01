@@ -104,7 +104,7 @@ class RunController extends BaseController
         };
         
         try {
-            $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db);
+            $newRunId = $this->orchestrator->dispatch($triggerSource, $run->query, $userId);
         } catch (DuplicateRunException $e) {
             $this->langRedirect('/run/' . $e->existingRunId . '?duplicate=1');
             return;

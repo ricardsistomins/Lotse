@@ -102,7 +102,7 @@ class ResearchRunOrchestrator
 
             $callStorage   = new ProviderCallStorage();
             $searchAdapter = new SerpApiAdapter($firstProfile['search']['api_key'], $callStorage, $runId, $settings->get('search_pricing') ?? []);
-            $trustedDomains = $settings->getTrustedSources('trusted_sources') ?? [];
+            $trustedDomains = $settings->get('trusted_sources') ?? [];
             $trustedUrls = [];
             $searchResults = [];
 
@@ -393,6 +393,46 @@ class ResearchRunOrchestrator
         return $runId;
     }
 
+    /**
+     * Create a run row and dispatch execution to a background CLI process.
+     * Returns the run ID immediately without waiting for the run to complete.
+     * 
+     * @param string $triggerSource
+     * @param string $query
+     * @param int|null $userId
+     * @return int
+     * @throws DuplicateRunException
+     */
+    public function dispatch(string $triggerSource, string $query, ?int $userId = null, string $runType = ResearchRunModel::RUN_TYPE_SOURCE_SYNC): int
+    {
+        $idempotencyKey = md5($triggerSource . $query . date('YmdHi'));
+        $canonicalScopeKey = md5($query);
+        
+        $researchRunStorage = new ResearchRunStorage();
+        $existingRun = $researchRunStorage->getRunningByCanonicalScopeKey($canonicalScopeKey);
+        
+        if ($existingRun) {
+            throw new DuplicateRunException($existingRun->id);
+        }
+        
+        $runId = $researchRunStorage->create(
+          runType:             $runType,
+          triggerSource:       $triggerSource,
+          idempotencyKey:      $idempotencyKey,
+          canonicalScopeKey:   $canonicalScopeKey,
+          query:               $query,
+          providerProfileName: 'default',
+          llmProviderName:     self::PROVIDER_NAME_OPENAI,
+          searchProviderName:  self::PROVIDER_NAME_SERPAPI,
+          createdByUserId:     $userId
+      );    
+
+      $cmd = 'php ' . BASE_PATH . '/cli.php run execute ' . $runId . ' > /dev/null 2>&1 &';
+      exec($cmd);
+      
+      return $runId;
+    }
+    
     /**
      * Build the extraction prompt from collected source text.
      * 
