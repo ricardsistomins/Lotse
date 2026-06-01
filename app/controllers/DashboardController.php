@@ -56,21 +56,12 @@ class DashboardController extends BaseController
         };
         
         try {                                                                                    
-            $runId = $this->orchestrator->run($triggerSource, $query, $userId, $this->db);
+            $runId = $this->orchestrator->dispatch($triggerSource, $query, $userId);
         } catch (DuplicateRunException $e) {                                                     
             $this->langRedirect('/run/' . $e->existingRunId . '?retrigger=1');
             return;                                                                              
         }        
-                       
-        $report = (new ReportStorage())->getByRunId($runId);
-        $reportId = $report ? $report->id : null;                                                  
-
-        $url = '/dashboard?runId=' . $runId;                                                         
         
-        if ($reportId) {                                                                             
-            $url .= '&reportId=' . $reportId;                                                        
-        }  
-        
-        $this->langRedirect($url);
+        $this->langRedirect('/dashboard?runId=' . $runId . '&started=1');
     }
 }

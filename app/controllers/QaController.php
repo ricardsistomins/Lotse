@@ -108,7 +108,7 @@ class QaController extends BaseController
         };
         
         try {
-            $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db);
+            $newRunId = $this->orchestrator->dispatch($triggerSource, $run->query, $userId);
         } catch (DuplicateRunException $ex) {
             $this->langRedirect('/qa?duplicate=1');
             return;

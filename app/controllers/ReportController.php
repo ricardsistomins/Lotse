@@ -261,7 +261,7 @@ class ReportController extends BaseController
         };
       
         try {
-            $newRunId = $this->orchestrator->run($triggerSource, $run->query, $userId, $this->db, null, ResearchRunModel::RUN_TYPE_REPORT_RETRIGGER);
+            $newRunId = $this->orchestrator->dispatch($triggerSource, $run->query, $userId, ResearchRunModel::RUN_TYPE_REPORT_RETRIGGER);
         } catch (DuplicateRunException $ex) {
             $this->setFlash('warning', $this->translate('A research run for this query is already in progress.'));
             $this->langRedirect('/report/' . $id);
@@ -407,8 +407,15 @@ class ReportController extends BaseController
         $analytics = $analyticsStorage->getByRevisionId($revision->id);
  
         if (!$analytics) {
-            $structuredPayload = json_decode($revision->structuredPayload ?? '[]', true);
-            $analyticsData = (new ReportAnalyticsService())->generate($id, $revision->id, $structuredPayload, $revision->finalMarkdown ?? '');
+            $cmd = 'php ' . BASE_PATH . '/cli.php analytics generate ' . $id . ' ' . $revision->id . ' > /dev/null 2>&1 &'; 
+            exec($cmd);
+            
+            $view->setVars([
+                'report' => $report,
+                'generating' => true
+            ]);
+            
+            return;
         } else {
             $analyticsData = json_decode($analytics->analyticsPayload, true);
         }
@@ -419,6 +426,34 @@ class ReportController extends BaseController
             'analytics'         => $analyticsData,
             'structuredPayload' => json_decode($revision->structuredPayload ?? '[]', true)
         ]);
+    }
+    
+    /**
+     * Return JSON indicating whether analytics are ready for the given report.
+     * Used by the preview page to poll for background generation completion.
+     * 
+     * @return void
+     */
+    public function analyticsStatusAction(): void
+    {
+        $id = (int)$this->dispatcher->getParam('id');
+        $report = (new ReportStorage())->getById($id);
+        $ready = false;
+        
+        if ($report) {
+            $revision = (new ReportRevisionStorage())->getById($report->currentRevisionId ?? 0);
+            
+            if ($revision) {
+                $ready = (new ReportAnalyticsStorage())->getByRevisionId($revision->id) !== null;
+            }
+        }
+        
+        $response = $this->response;
+        
+        $response->setContentType('application/json');
+        $response->setContent(json_encode(['ready' => $ready]));
+        $response->send();
+        $this->view->disable();
     }
     
     /**
