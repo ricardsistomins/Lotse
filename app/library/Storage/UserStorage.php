@@ -39,7 +39,8 @@ class UserStorage extends AbstractStorage
         'last_login_at' => 'lastLoginAt',
         'created_at'    => 'createdAt',
         'updated_at'    => 'updatedAt',
-        'is_dark'       => 'isDark'
+        'is_dark'       => 'isDark',
+        'site_language' => 'language'
     );
  
     /**
@@ -103,6 +104,28 @@ class UserStorage extends AbstractStorage
         $sth->execute([
             ':isDark' => (int)$isDark,
             ':userId' => $userId
+        ]);
+    }
+    
+    /**
+     * Update user site language choice
+     * 
+     * @param int $userId
+     * @param string $language
+     * @return void
+     */
+    public function updateLanguage(int $userId, string $language): void
+    {
+        $pdo = $this->getPdo();
+        
+        $sql = 'UPDATE users
+                SET site_language = :language
+                WHERE user_id = :userId';
+        
+        $sth = $pdo->prepare($sql);
+        $sth->execute([
+            ':language' => $language,
+            ':userId'   => $userId
         ]);
     }
     

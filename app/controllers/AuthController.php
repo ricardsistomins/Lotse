@@ -21,8 +21,7 @@ class AuthController extends BaseController
         $request = $this->request;
         $view = $this->view;
         
-        $activeLanguage = $this->session->get('language') ?? 'de';
-        
+        $activeLanguage = $this->session->get('language') ?? 'de';       
         $sessionExpired = $session->get('sessionExpired', false);
         
         if ($sessionExpired) {
@@ -69,6 +68,7 @@ class AuthController extends BaseController
         $session->set('userRole', $user->role);
         $session->set('userName', $user->name);
         $session->set('isDark', (bool)$user->isDark);
+        $session->set('language', $user->language);
         
         (new AuditService($this->db))->log(
             actorType:   'user',
@@ -79,7 +79,7 @@ class AuthController extends BaseController
             metadata:    []
         );
 
-        $response->redirect('/' . $activeLanguage . '/dashboard');
+        $response->redirect('/' . $user->language . '/dashboard');
         $response->send();
         
         return;
@@ -130,5 +130,31 @@ class AuthController extends BaseController
         ]);
         
         $response->send();
+    }
+    
+    /**
+     * Save user language choice
+     * 
+     * @return mixed
+     */
+    public function saveLanguageChoiceAction(): mixed
+    {
+        $this->view->disable();
+        $session = $this->session;
+        $response = $this->response;
+        
+        $userId = (int)$session->get('userId');
+        $language = $this->request->getPost('language', 'string');
+     
+        if (!in_array($language, ['en', 'de'])) {
+            $language = 'de';
+        }
+        
+        (new UserStorage())->updateLanguage($userId, $language);
+        $session->set('language', $language);
+         
+        return $response->setJsonContent([
+            'language' => $language
+        ]);
     }
 }

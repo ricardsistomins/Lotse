@@ -34,6 +34,11 @@ $router->add('/auth/theme/toggle', [
     'action'     => 'toggleTheme',                                                                                       
 ]);
 
+$router->add('/auth/language/toggle', [
+    'controller' => 'auth',
+    'action'     => 'saveLanguageChoice',                                                                                       
+]);
+
 /******************************
  * Dashboard
  *****************************/                                               

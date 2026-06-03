@@ -78,13 +78,13 @@
                     <button class="btn btn-sm btn-outline-dark me-2" id="theme-toggle" style="border: none" title="<?= $translate('Toggle dark mode'); ?>">
                         <i class="bi bi-moon-fill" id="theme-icon"></i>
                     </button>
-                    
+
                     <div class="dropdown me-2">
                         <button class="btn btn-sm btn-outline-dark" id="lang-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none">
                             <i class="bi bi-globe-americas me-1"></i> <?= strtoupper($language) ?>
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end text-center rounded-3" style="min-width: unset;">
+                        <ul class="dropdown-menu dropdown-menu-end text-center rounded-3" id="lang-dropdown" style="min-width: unset;">
                             <li><a class="dropdown-item <?= $language === 'en' ? 'active' : '' ?>" href="/en<?= preg_replace('#^/[a-z]{2}#', '', $_SERVER['REQUEST_URI']) ?: '/dashboard' ?>">EN</a></li>
                             <li><a class="dropdown-item <?= $language === 'de' ? 'active' : '' ?>" href="/de<?= preg_replace('#^/[a-z]{2}#', '', $_SERVER['REQUEST_URI']) ?: '/dashboard' ?>">DE</a></li>
                         </ul>
@@ -111,10 +111,22 @@
                 applyTheme($('html').attr('data-bs-theme'));                                                                         
 
                 $('#theme-toggle').on('click', function () {
-                    $.post('/auth/theme/toggle', function (res) {
+                    $.post('/auth/theme/toggle', function (res) {                
                         applyTheme(res.theme);                                                                                       
                     }, 'json').fail(function (xhr) {
                         console.error('Theme toggle failed', xhr.status, xhr.responseText);                                          
+                    });                                                                                                              
+                });                                                                                
+                
+                $('#lang-dropdown .dropdown-item').on('click', function (e) {
+                    e.preventDefault();
+                    var href = $(this).attr('href');
+                    var language = $(this).text().trim().toLowerCase();
+                    
+                    $.post('/auth/language/toggle', {language: language}, function () {
+                        window.location.href = href;                           
+                    }, 'json').fail(function (xhr) {
+                        console.error('Language toggle failed', xhr.status, xhr.responseText);                                          
                     });                                                                                                              
                 });                                                                                
             });                                                                                                                               
