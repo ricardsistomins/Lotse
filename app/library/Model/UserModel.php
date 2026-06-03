@@ -15,6 +15,7 @@ class UserModel {
     public string  $createdAt;
     public string  $updatedAt;
     public int     $isDark;
+    public string  $language;
     
     // User roles
     const ROLE_ADMIN = 'admin';
